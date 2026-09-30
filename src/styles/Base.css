@@ -1,0 +1,54 @@
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  --oscuro: #171717;
+  --gris: #1e1e1e;
+  --amarillo: #f5b800;
+  --naranja: #ff6b00;
+  --verde: #456b3c;
+  --crema: #f5f3ee;
+  --texto: #202020;
+  --texto-secundario: #6b6b6b;
+  --borde: #e0ddd6;
+  --blanco: #ffffff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background: var(--crema);
+  color: var(--texto);
+}
+
+img {
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+.contenedor {
+  width: min(100% - 48px, 1344px);
+  margin-inline: auto;
+}
+
+.fuente-destacada,
+.titulo-seccion {
+  font-family: 'Anton', sans-serif;
+  letter-spacing: 0.04em;
+}
