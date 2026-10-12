@@ -1,0 +1,421 @@
+.productos-admin {
+    width: 100%;
+}
+
+
+/* ENCABEZADO */
+
+.encabezado-productos {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.encabezado-productos h1 {
+    margin: 0;
+    font-size: 38px;
+    font-weight: 800;
+}
+
+.encabezado-productos p {
+    margin-top: 8px;
+    color: #888;
+    font-size: 16px;
+}
+
+
+/* FILTROS */
+
+.filtros-productos {
+    margin-top: 30px;
+    background-color: white;
+    padding: 18px;
+    border-radius: 14px;
+
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.filtros-productos input {
+    width: 270px;
+    padding: 14px 16px;
+
+    border: 1px solid #dedbd5;
+    border-radius: 8px;
+
+    font-size: 15px;
+    outline: none;
+}
+
+.filtros-productos input:focus {
+    border-color: #ff6500;
+}
+
+.filtros-productos select {
+    width: 220px;
+    padding: 14px 16px;
+
+    border: 1px solid #dedbd5;
+    border-radius: 8px;
+
+    background-color: white;
+
+    font-size: 15px;
+    cursor: pointer;
+    outline: none;
+}
+
+.filtros-productos select:focus {
+    border-color: #ff6500;
+}
+
+
+/* TABLA */
+
+.tabla-productos {
+    margin-top: 18px;
+
+    background-color: white;
+
+    border-radius: 14px;
+    overflow-x: auto;
+
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.tabla-productos table {
+    width: 100%;
+    min-width: 950px;
+
+    border-collapse: collapse;
+}
+
+.tabla-productos thead {
+    background-color: #171717;
+}
+
+.tabla-productos th {
+    padding: 17px 18px;
+
+    color: #ffc400;
+
+    font-size: 12px;
+    font-weight: bold;
+    text-align: left;
+}
+
+.tabla-productos td {
+    padding: 15px 18px;
+
+    border-bottom: 1px solid #eeeeee;
+
+    font-size: 14px;
+    vertical-align: middle;
+}
+
+.tabla-productos tbody tr:hover {
+    background-color: #fafafa;
+}
+
+
+/* IMAGEN PRODUCTO */
+
+.tabla-productos img {
+    width: 60px;
+    height: 60px;
+
+    object-fit: cover;
+
+    border-radius: 8px;
+}
+
+
+/* BOTÓN AGREGAR */
+
+.contenedor-btn-agregar {
+    display: flex;
+    justify-content: flex-start;
+
+    margin-top: 25px;
+}
+
+.contenedor-btn-agregar .btn-agregar {
+    width: auto;
+    height: auto;
+
+    background-color: #ff6500;
+    color: white;
+
+    border: none;
+    border-radius: 8px;
+
+    padding: 13px 20px;
+
+    font-size: 14px;
+    font-weight: bold;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+.contenedor-btn-agregar .btn-agregar:hover {
+    background-color: #e95c00;
+}
+
+
+/* ACCIONES PRODUCTO */
+
+.acciones-producto {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+
+/* BOTÓN EDITAR */
+
+.acciones-producto .btn-editar {
+    width: auto;
+    min-width: 72px;
+    height: auto;
+
+    background-color: #ffc107;
+    color: #222222;
+
+    border: none;
+    border-radius: 8px;
+
+    padding: 8px 12px;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+.acciones-producto .btn-editar:hover {
+    background-color: #e0a800;
+}
+
+
+/* BOTÓN ELIMINAR */
+
+.acciones-producto .btn-eliminar {
+    width: auto;
+    min-width: 78px;
+    height: auto;
+
+    background-color: #dc3545;
+    color: white;
+
+    border: none;
+    border-radius: 8px;
+
+    padding: 8px 12px;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+.acciones-producto .btn-eliminar:hover {
+    background-color: #bb2d3b;
+}
+
+
+/* ESTADO */
+
+.estado-producto {
+    display: inline-block;
+
+    padding: 6px 10px;
+
+    border-radius: 20px;
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.estado-disponible {
+    background-color: #d8f3dc;
+    color: #198754;
+}
+
+.estado-sin-stock {
+    background-color: #f8d7da;
+    color: #dc3545;
+}
+
+.estado-oculto {
+    background-color: #e2e3e5;
+    color: #555555;
+}
+
+
+/* FORMULARIO */
+
+.formulario-producto {
+    margin-top: 20px;
+
+    padding: 28px;
+
+    background-color: white;
+
+    border-radius: 14px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+
+    max-width: 450px;
+
+    box-shadow: 0 3px 14px rgba(0, 0, 0, 0.08);
+}
+
+.formulario-producto h2 {
+    margin: 0 0 8px 0;
+
+    font-size: 28px;
+    font-weight: 800;
+
+    color: #171717;
+}
+
+
+/* INPUTS FORMULARIO */
+
+.formulario-producto input,
+.formulario-producto select {
+    width: 100%;
+
+    box-sizing: border-box;
+
+    padding: 13px 14px;
+
+    border: 1px solid #dedbd5;
+    border-radius: 8px;
+
+    background-color: white;
+
+    font-size: 15px;
+
+    outline: none;
+}
+
+.formulario-producto input:focus,
+.formulario-producto select:focus {
+    border-color: #ff6500;
+}
+
+
+/* BOTÓN GUARDAR */
+
+.formulario-producto .btn-guardar {
+    width: 100%;
+
+    background-color: #ff6500;
+    color: white;
+
+    border: none;
+    border-radius: 8px;
+
+    padding: 13px;
+
+    font-size: 14px;
+    font-weight: bold;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+.formulario-producto .btn-guardar:hover {
+    background-color: #e95c00;
+}
+
+
+/* BOTÓN CERRAR */
+
+.formulario-producto .btn-cerrar {
+    width: 100%;
+
+    background-color: #eeeeee;
+    color: #333333;
+
+    border: none;
+    border-radius: 8px;
+
+    padding: 13px;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+.formulario-producto .btn-cerrar:hover {
+    background-color: #dddddd;
+}
+
+
+/* MENSAJE SIN PRODUCTOS */
+
+.tabla-productos td[colspan="7"] {
+    padding: 35px;
+    text-align: center;
+    color: #888888;
+}
+
+
+/* RESPONSIVE */
+
+@media (max-width: 768px) {
+
+    .encabezado-productos h1 {
+        font-size: 30px;
+    }
+
+    .filtros-productos {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filtros-productos input,
+    .filtros-productos select {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .formulario-producto {
+        max-width: 100%;
+    }
+}
+
+.modal-producto-fondo {
+    position: fixed;
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 100%;
+
+    background-color: rgba(0, 0, 0, 0.55);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    z-index: 1000;
+}
