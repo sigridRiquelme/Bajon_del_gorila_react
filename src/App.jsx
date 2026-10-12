@@ -1,17 +1,24 @@
-import Header from "./components/Header.jsx";
-import Footer from "./components/Footer.jsx";
+import { Routes, Route } from "react-router-dom";
+
+import AdminLayout from "./layouts/AdminLayout.jsx";
+
+import Dashboard from "./pages/admin/Dashboard.jsx";
+import Productos from "./pages/admin/Productos.jsx";
+import Pedidos from "./pages/admin/Pedidos.jsx";
+import Usuarios from "./pages/admin/Usuarios.jsx";
 
 function App() {
     return (
-        <>
-            <Header />
+        <Routes>
 
-            <main>
-                <h1>El Bajón del Gorila</h1>
-            </main>
+            <Route path="/admin" element={<AdminLayout />}>
+                <Route index element={<Dashboard />} />
+                <Route path="productos" element={<Productos />} />
+                <Route path="pedidos" element={<Pedidos />} />
+                <Route path="usuarios" element={<Usuarios />} />
+            </Route>
 
-            <Footer />
-        </>
+        </Routes>
     );
 }
 
