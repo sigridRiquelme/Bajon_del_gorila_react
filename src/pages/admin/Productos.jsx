@@ -1,13 +1,20 @@
 import { useState } from "react";
 import "../../styles/productos.css";
-import productos from "../../data/productos.js";
 import ProductoFila from "../../components/admin/ProductoFila.jsx";
+import {
+    obtenerProductos,
+    agregarProducto as agregarProductoData,
+    actualizarProducto,
+    eliminarProducto as eliminarProductoData,
+    reiniciarProductos
+} from "../../data/productos.js";
+
 
 function Productos() {
 
     const [busqueda, setBusqueda] = useState("");
     const [categoria, setCategoria] = useState("Todas");
-    const [listaProductos, setListaProductos] = useState(productos);
+    const [listaProductos, setListaProductos] = useState(obtenerProductos());
     const [mostrarFormulario, setMostrarFormulario] = useState(false);
     const [productoEditando, setProductoEditando] = useState(null);
     const [errores, setErrores] = useState({});
@@ -46,21 +53,23 @@ function Productos() {
         const archivo = e.target.files[0];
 
         if (archivo) {
-            const imagenURL = URL.createObjectURL(archivo);
+            const lector = new FileReader();
 
-            setNuevoProducto({
-                ...nuevoProducto,
-                imagen: imagenURL
-            });
+            lector.onload = () => {
+                setNuevoProducto({
+                    ...nuevoProducto,
+                    imagen: lector.result
+                });
 
-            // Borra el error de imagen al seleccionar una
-            setErrores({
-                ...errores,
-                imagen: ""
-            });
+                setErrores({
+                    ...errores,
+                    imagen: ""
+                });
+            };
+
+            lector.readAsDataURL(archivo);
         }
     };
-
 
     // GUARDAR O EDITAR PRODUCTO
 
@@ -135,44 +144,25 @@ function Productos() {
 
         if (productoEditando) {
 
-            const listaActualizada = listaProductos.map((producto) =>
-                producto.codigo === productoEditando.codigo
-                    ? {
-                        ...nuevoProducto,
-                        codigo: productoEditando.codigo,
-                        precio: Number(nuevoProducto.precio),
-                        stock: Number(nuevoProducto.stock)
-                    }
-                    : producto
+            actualizarProducto(
+                productoEditando.codigo,
+                {
+                    ...nuevoProducto,
+                    precio: Number(nuevoProducto.precio),
+                    stock: Number(nuevoProducto.stock)
+                }
             );
-
-            setListaProductos(listaActualizada);
 
         } else {
 
-            // AGREGAR PRODUCTO
-
-            const productoNuevo = {
+            agregarProductoData({
                 ...nuevoProducto,
-
-                codigo:
-                    Math.max(
-                        ...listaProductos.map(
-                            (producto) => producto.codigo
-                        ),
-                        0
-                    ) + 1,
-
                 precio: Number(nuevoProducto.precio),
                 stock: Number(nuevoProducto.stock)
-            };
-
-
-            setListaProductos([
-                ...listaProductos,
-                productoNuevo
-            ]);
+            });
         }
+
+        setListaProductos(obtenerProductos());
 
 
         // LIMPIAR FORMULARIO
@@ -211,12 +201,8 @@ function Productos() {
     // ELIMINAR PRODUCTO
 
     const eliminarProducto = (codigo) => {
-
-        const nuevaLista = listaProductos.filter(
-            (producto) => producto.codigo !== codigo
-        );
-
-        setListaProductos(nuevaLista);
+        eliminarProductoData(codigo);
+        setListaProductos(obtenerProductos());
     };
 
 
@@ -228,6 +214,12 @@ function Productos() {
         setNuevoProducto(producto);
         setErrores({});
         setMostrarFormulario(true);
+    };
+
+    //temporal
+    const restaurarProductos = () => {
+        reiniciarProductos();
+        setListaProductos(obtenerProductos());
     };
 
 
@@ -410,6 +402,13 @@ function Productos() {
                 </button>
 
             </div>
+
+            <button
+                className="btn-reiniciar"
+                onClick={restaurarProductos}
+            >
+                RESTAURAR PRODUCTOS DE PRUEBA
+            </button>
 
 
 
