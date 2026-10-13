@@ -419,3 +419,25 @@
 
     z-index: 1000;
 }
+
+.campo-formulario {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.campo-formulario label {
+    font-size: 13px;
+    font-weight: 700;
+    color: #333333;
+}
+
+.mensaje-error {
+    color: #dc3545;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.formulario-producto .campo-error {
+    border-color: #dc3545;
+}
