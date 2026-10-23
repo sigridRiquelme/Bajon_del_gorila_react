@@ -152,6 +152,14 @@ function AdminSidebar() {
 
                     )}
 
+                    <NavLink
+                        to="/admin/perfil"
+                        className="nav-link"
+                    >
+                        <i className="bi bi-person-circle"></i>
+                        Perfil
+                    </NavLink>
+
                 </div>
 
 

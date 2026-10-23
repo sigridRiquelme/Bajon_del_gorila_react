@@ -13,6 +13,7 @@ import Reportes from "./pages/admin/Reportes.jsx";
 import ReporteUsuarios from "./pages/admin/ReporteUsuarios.jsx";
 import ReportePedidos from "./pages/admin/ReporteVentas.jsx";
 import ReporteProductosVendidos from "./pages/admin/ReporteProductosVendidos.jsx";
+import PerfilAdmin from "./pages/admin/PerfilAdmin.jsx";
 
 function App() {
     return (
@@ -37,6 +38,7 @@ function App() {
                     path="reportes/productos-vendidos"
                     element={<ReporteProductosVendidos />}
                 />
+                <Route path="perfil" element={<PerfilAdmin />} />
 
             </Route>
 
