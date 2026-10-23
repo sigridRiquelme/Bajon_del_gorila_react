@@ -5,6 +5,7 @@ import "../../styles/admin.css";
 function AdminSidebar() {
 
     const [menuProductosAbierto, setMenuProductosAbierto] = useState(false);
+    const [menuReportesAbierto, setMenuReportesAbierto] = useState(false);
 
     return (
         <aside className="admin-sidebar">
@@ -22,8 +23,6 @@ function AdminSidebar() {
                     Dashboard
                 </NavLink>
 
-
-                {/* PRODUCTOS */}
 
                 <div className="nav-productos">
 
@@ -98,6 +97,62 @@ function AdminSidebar() {
                     <i className="bi bi-people"></i>
                     Usuarios
                 </NavLink>
+
+
+                <div className="nav-reportes">
+
+                    <button
+                        type="button"
+                        className="nav-link nav-reportes-btn"
+                        onClick={() =>
+                            setMenuReportesAbierto(!menuReportesAbierto)
+                        }
+                    >
+                        <span className="nav-reportes-texto">
+                            <i className="bi bi-bar-chart"></i>
+                            Reportes
+                        </span>
+
+                        <i
+                            className={
+                                menuReportesAbierto
+                                    ? "bi bi-chevron-up"
+                                    : "bi bi-chevron-down"
+                            }
+                        ></i>
+                    </button>
+
+
+                    {menuReportesAbierto && (
+
+                        <div className="submenu-reportes">
+
+                            <NavLink
+                                to="/admin/reportes/usuarios"
+                                className="submenu-link"
+                            >
+                                Reporte de usuarios
+                            </NavLink>
+
+                            <NavLink
+                                to="/admin/reportes/pedidos"
+                                className="submenu-link"
+                            >
+                                Reporte de ventas
+                            </NavLink>
+
+                            <NavLink
+                                to="/admin/reportes/productos-vendidos"
+                                className="submenu-link"
+                            >
+                                Productos vendidos
+                            </NavLink>
+
+                        </div>
+
+                    )}
+
+                </div>
 
 
                 <hr />

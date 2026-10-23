@@ -1,0 +1,143 @@
+.reporte-admin {
+    width: 100%;
+}
+
+.reporte-admin h1 {
+    font-weight: 800;
+}
+
+
+/* tarjetas */
+
+.reporte-card-bootstrap {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.reporte-card-bootstrap .card-body {
+    padding: 20px;
+}
+
+.reporte-icono {
+    width: 42px;
+    height: 42px;
+    margin-bottom: 15px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background-color: #fff1e8;
+    color: #ff6500;
+
+    border-radius: 9px;
+
+    font-size: 20px;
+}
+
+
+/* tablas */
+
+.reporte-admin .table {
+    margin-bottom: 0;
+}
+
+.reporte-admin .table th {
+    font-size: 12px;
+}
+
+.reporte-admin .table td {
+    font-size: 14px;
+}
+
+
+/* titulo productos vendidos */
+
+.reporte-titulo {
+    margin-bottom: 25px;
+}
+
+.reporte-titulo h1 {
+    margin: 0;
+
+    color: #171717;
+
+    font-size: 38px;
+    font-weight: 800;
+}
+
+.reporte-titulo p {
+    margin-top: 8px;
+    margin-bottom: 0;
+
+    color: #888888;
+
+    font-size: 15px;
+}
+
+
+/* lista productos vendidos */
+
+.lista-productos-vendidos {
+    display: flex;
+    flex-direction: column;
+}
+
+.fila-producto-vendido {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    gap: 20px;
+
+    padding: 15px 0;
+
+    border-bottom: 1px solid #eeeeee;
+}
+
+.fila-producto-vendido:last-child {
+    border-bottom: none;
+}
+
+.fila-producto-vendido div {
+    display: flex;
+    flex-direction: column;
+
+    gap: 4px;
+}
+
+.fila-producto-vendido div strong {
+    color: #222222;
+
+    font-size: 15px;
+}
+
+.fila-producto-vendido div span {
+    color: #888888;
+
+    font-size: 13px;
+}
+
+.fila-producto-vendido > strong {
+    color: #171717;
+
+    font-size: 15px;
+
+    white-space: nowrap;
+}
+
+
+/* responsive */
+
+@media (max-width: 600px) {
+
+    .reporte-titulo h1 {
+        font-size: 30px;
+    }
+
+    .fila-producto-vendido {
+        gap: 12px;
+    }
+
+}
