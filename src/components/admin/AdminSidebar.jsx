@@ -1,23 +1,66 @@
-import { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { NavLink, useLocation } from "react-router-dom";
 import "../../styles/admin.css";
+
 
 function AdminSidebar() {
 
-    const [menuProductosAbierto, setMenuProductosAbierto] = useState(false);
-    const [menuReportesAbierto, setMenuReportesAbierto] = useState(false);
+    const location = useLocation();
+
+    const estaEnProductos =
+        location.pathname.startsWith("/admin/productos");
+
+    const estaEnReportes =
+        location.pathname.startsWith("/admin/reportes");
+
+
+    const [menuProductosAbierto, setMenuProductosAbierto] = useState(
+        estaEnProductos
+    );
+
+    const [menuReportesAbierto, setMenuReportesAbierto] = useState(
+        estaEnReportes
+    );
+
+
+    useEffect(() => {
+
+        if (estaEnProductos) {
+            setMenuProductosAbierto(true);
+        }
+
+        if (estaEnReportes) {
+            setMenuReportesAbierto(true);
+        }
+
+    }, [location.pathname]);
+
+
+    const claseNav = ({ isActive }) =>
+        isActive
+            ? "nav-link nav-link-activo"
+            : "nav-link";
+
+
+    const claseSubmenu = ({ isActive }) =>
+        isActive
+            ? "submenu-link submenu-link-activo"
+            : "submenu-link";
+
 
     return (
+
         <aside className="admin-sidebar">
 
             <h2>ADMINISTRACIÓN</h2>
+
 
             <nav className="nav flex-column">
 
                 <NavLink
                     to="/admin"
                     end
-                    className="nav-link"
+                    className={claseNav}
                 >
                     <i className="bi bi-speedometer2"></i>
                     Dashboard
@@ -28,11 +71,18 @@ function AdminSidebar() {
 
                     <button
                         type="button"
-                        className="nav-link nav-productos-btn"
+                        className={`nav-link nav-productos-btn ${
+                            estaEnProductos || menuProductosAbierto
+                                ? "menu-abierto"
+                                : ""
+                        }`}
                         onClick={() =>
-                            setMenuProductosAbierto(!menuProductosAbierto)
+                            setMenuProductosAbierto(
+                                !menuProductosAbierto
+                            )
                         }
                     >
+
                         <span className="nav-productos-texto">
                             <i className="bi bi-box-seam"></i>
                             Productos
@@ -45,6 +95,7 @@ function AdminSidebar() {
                                     : "bi bi-chevron-down"
                             }
                         ></i>
+
                     </button>
 
 
@@ -55,21 +106,21 @@ function AdminSidebar() {
                             <NavLink
                                 to="/admin/productos"
                                 end
-                                className="submenu-link"
+                                className={claseSubmenu}
                             >
                                 Productos
                             </NavLink>
 
                             <NavLink
                                 to="/admin/productos/criticos"
-                                className="submenu-link"
+                                className={claseSubmenu}
                             >
                                 Productos críticos
                             </NavLink>
 
                             <NavLink
                                 to="/admin/productos/reporte"
-                                className="submenu-link"
+                                className={claseSubmenu}
                             >
                                 Reporte inventario
                             </NavLink>
@@ -83,7 +134,7 @@ function AdminSidebar() {
 
                 <NavLink
                     to="/admin/pedidos"
-                    className="nav-link"
+                    className={claseNav}
                 >
                     <i className="bi bi-receipt"></i>
                     Pedidos
@@ -92,7 +143,7 @@ function AdminSidebar() {
 
                 <NavLink
                     to="/admin/usuarios"
-                    className="nav-link"
+                    className={claseNav}
                 >
                     <i className="bi bi-people"></i>
                     Usuarios
@@ -103,11 +154,18 @@ function AdminSidebar() {
 
                     <button
                         type="button"
-                        className="nav-link nav-reportes-btn"
+                        className={`nav-link nav-reportes-btn ${
+                            estaEnReportes || menuReportesAbierto
+                                ? "menu-abierto"
+                                : ""
+                        }`}
                         onClick={() =>
-                            setMenuReportesAbierto(!menuReportesAbierto)
+                            setMenuReportesAbierto(
+                                !menuReportesAbierto
+                            )
                         }
                     >
+
                         <span className="nav-reportes-texto">
                             <i className="bi bi-bar-chart"></i>
                             Reportes
@@ -120,6 +178,7 @@ function AdminSidebar() {
                                     : "bi bi-chevron-down"
                             }
                         ></i>
+
                     </button>
 
 
@@ -129,21 +188,21 @@ function AdminSidebar() {
 
                             <NavLink
                                 to="/admin/reportes/usuarios"
-                                className="submenu-link"
+                                className={claseSubmenu}
                             >
                                 Reporte de usuarios
                             </NavLink>
 
                             <NavLink
-                                to="/admin/reportes/pedidos"
-                                className="submenu-link"
+                                to="/admin/reportes/ventas"
+                                className={claseSubmenu}
                             >
                                 Reporte de ventas
                             </NavLink>
 
                             <NavLink
                                 to="/admin/reportes/productos-vendidos"
-                                className="submenu-link"
+                                className={claseSubmenu}
                             >
                                 Productos vendidos
                             </NavLink>
@@ -152,15 +211,16 @@ function AdminSidebar() {
 
                     )}
 
-                    <NavLink
-                        to="/admin/perfil"
-                        className="nav-link"
-                    >
-                        <i className="bi bi-person-circle"></i>
-                        Perfil
-                    </NavLink>
-
                 </div>
+
+
+                <NavLink
+                    to="/admin/perfil"
+                    className={claseNav}
+                >
+                    <i className="bi bi-person-circle"></i>
+                    Perfil
+                </NavLink>
 
 
                 <hr />
@@ -177,7 +237,9 @@ function AdminSidebar() {
             </nav>
 
         </aside>
+
     );
 }
+
 
 export default AdminSidebar;

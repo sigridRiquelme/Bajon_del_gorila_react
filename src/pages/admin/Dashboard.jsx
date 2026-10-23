@@ -72,7 +72,7 @@ function Dashboard() {
 
 
                 <NavLink
-                    to="/admin/reportes"
+                    to="/admin/reportes/ventas"
                     className="dashboard-card"
                 >
                     <i className="bi bi-bar-chart"></i>

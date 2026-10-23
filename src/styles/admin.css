@@ -1,25 +1,41 @@
 .admin-sidebar {
     width: 250px;
     min-height: 100vh;
+
     background-color: #171717;
+
     padding: 25px 20px;
 }
 
+
 .admin-sidebar h2 {
     color: white;
+
     font-size: 18px;
+
     margin-bottom: 30px;
 }
 
+
+/* opciones principales */
+
 .admin-sidebar .nav-link {
     color: #cfcfcf;
+
     display: flex;
     align-items: center;
+
     gap: 12px;
+
     padding: 12px;
+
     border-radius: 6px;
+
     margin-bottom: 5px;
+
     text-decoration: none;
+
+    transition: 0.2s;
 }
 
 .admin-sidebar .nav-link:hover {
@@ -27,105 +43,156 @@
     color: white;
 }
 
-.admin-sidebar .nav-link.active {
-    background-color: #ff6b00;
+
+/* opcion principal seleccionada */
+
+.admin-sidebar .nav-link-activo {
+    background-color: #ff6500;
     color: white;
 }
 
+.admin-sidebar .nav-link-activo:hover {
+    background-color: #ff6500;
+    color: white;
+}
+
+
+/* productos y reportes */
+
+.nav-productos,
+.nav-reportes {
+    width: 100%;
+}
+
+.nav-productos-btn,
+.nav-reportes-btn {
+    width: 100%;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    border: none;
+
+    background: transparent;
+
+    cursor: pointer;
+
+    color: #cfcfcf !important;
+}
+
+.nav-productos-btn:hover,
+.nav-reportes-btn:hover {
+    color: white !important;
+}
+
+.nav-productos-btn:focus,
+.nav-reportes-btn:focus,
+.nav-productos-btn:active,
+.nav-reportes-btn:active {
+    color: #cfcfcf !important;
+
+    box-shadow: none !important;
+}
+
+
+/* productos o reportes abiertos */
+
+.nav-productos-btn.menu-abierto,
+.nav-reportes-btn.menu-abierto {
+    color: #ff6500 !important;
+}
+
+.nav-productos-btn.menu-abierto:hover,
+.nav-reportes-btn.menu-abierto:hover,
+.nav-productos-btn.menu-abierto:focus,
+.nav-reportes-btn.menu-abierto:focus,
+.nav-productos-btn.menu-abierto:active,
+.nav-reportes-btn.menu-abierto:active {
+    color: #ff6500 !important;
+}
+
+
+/* texto del desplegable */
+
+.nav-productos-texto,
+.nav-reportes-texto {
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+}
+
+
+/* submenus */
+
+.submenu-productos,
+.submenu-reportes {
+    display: flex;
+    flex-direction: column;
+
+    gap: 4px;
+
+    margin-top: 4px;
+    margin-left: 28px;
+    margin-bottom: 6px;
+}
+
+.submenu-link {
+    padding: 10px 12px;
+
+    border-radius: 6px;
+
+    color: #cfcfcf;
+
+    font-size: 13px;
+
+    text-decoration: none;
+
+    transition: 0.2s;
+}
+
+.submenu-link:hover {
+    background-color: #292929;
+    color: white;
+}
+
+
+/* opcion seleccionada del submenu */
+
+.submenu-link-activo {
+    background-color: #ff6500;
+    color: white;
+    font-weight: 600;
+}
+
+.submenu-link-activo:hover {
+    background-color: #ff6500;
+    color: white;
+}
+
+
+/* separador */
+
+.admin-sidebar hr {
+    border-color: #444444;
+
+    margin: 15px 0;
+}
+
+
+/* layout admin */
+
 .admin-layout {
     display: flex;
+
     min-height: 100vh;
 }
 
 .admin-contenido {
     flex: 1;
+
     padding: 30px;
+
     background-color: #f5f3ee;
-}
-
-
-/* submenu productos */
-
-.nav-productos {
-    width: 100%;
-}
-
-.nav-productos-btn {
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border: none;
-    background: transparent;
-    cursor: pointer;
-}
-
-.nav-productos-texto {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.submenu-productos {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    margin-top: 4px;
-    margin-left: 28px;
-    margin-bottom: 6px;
-}
-
-
-/* submenu reportes */
-
-.nav-reportes {
-    width: 100%;
-}
-
-.nav-reportes-btn {
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border: none;
-    background: transparent;
-    cursor: pointer;
-}
-
-.nav-reportes-texto {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.submenu-reportes {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    margin-top: 4px;
-    margin-left: 28px;
-    margin-bottom: 6px;
-}
-
-
-/* enlaces submenu */
-
-.submenu-link {
-    padding: 8px 12px;
-    border-radius: 6px;
-    color: #aaaaaa;
-    font-size: 13px;
-    text-decoration: none;
-    transition: 0.2s;
-}
-
-.submenu-link:hover {
-    background-color: #252525;
-    color: white;
-}
-
-.submenu-link.active {
-    background-color: #2a2a2a;
-    color: #ff6500;
-    font-weight: 600;
 }
