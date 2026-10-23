@@ -46,16 +46,21 @@
 
 /* opcion principal seleccionada */
 
-.admin-sidebar .nav-link-activo {
-    background-color: #ff6500;
-    color: white;
+.admin-sidebar .nav-link-activo,
+.admin-sidebar .nav-link.active {
+    background-color: #ff6500 !important;
+    color: white !important;
 }
 
-.admin-sidebar .nav-link-activo:hover {
-    background-color: #ff6500;
-    color: white;
+.admin-sidebar .nav-link-activo:hover,
+.admin-sidebar .nav-link.active:hover,
+.admin-sidebar .nav-link-activo:focus,
+.admin-sidebar .nav-link.active:focus,
+.admin-sidebar .nav-link-activo:active,
+.admin-sidebar .nav-link.active:active {
+    background-color: #ff6500 !important;
+    color: white !important;
 }
-
 
 /* productos y reportes */
 

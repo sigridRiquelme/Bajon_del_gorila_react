@@ -25,13 +25,8 @@ function AdminSidebar() {
 
     useEffect(() => {
 
-        if (estaEnProductos) {
-            setMenuProductosAbierto(true);
-        }
-
-        if (estaEnReportes) {
-            setMenuReportesAbierto(true);
-        }
+        setMenuProductosAbierto(estaEnProductos);
+        setMenuReportesAbierto(estaEnReportes);
 
     }, [location.pathname]);
 
@@ -71,11 +66,10 @@ function AdminSidebar() {
 
                     <button
                         type="button"
-                        className={`nav-link nav-productos-btn ${
-                            estaEnProductos || menuProductosAbierto
+                        className={`nav-link nav-productos-btn ${estaEnProductos || menuProductosAbierto
                                 ? "menu-abierto"
                                 : ""
-                        }`}
+                            }`}
                         onClick={() =>
                             setMenuProductosAbierto(
                                 !menuProductosAbierto
@@ -154,11 +148,10 @@ function AdminSidebar() {
 
                     <button
                         type="button"
-                        className={`nav-link nav-reportes-btn ${
-                            estaEnReportes || menuReportesAbierto
+                        className={`nav-link nav-reportes-btn ${estaEnReportes || menuReportesAbierto
                                 ? "menu-abierto"
                                 : ""
-                        }`}
+                            }`}
                         onClick={() =>
                             setMenuReportesAbierto(
                                 !menuReportesAbierto
