@@ -139,6 +139,13 @@ function Productos() {
             return;
         }
 
+        let estadoFinal = nuevoProducto.estado;
+
+        if (Number(nuevoProducto.stock) === 0) {
+            estadoFinal = "Sin stock";
+        } else if (nuevoProducto.estado === "Sin stock") {
+            estadoFinal = "Disponible";
+        }
 
         // EDITAR PRODUCTO
 
@@ -149,7 +156,8 @@ function Productos() {
                 {
                     ...nuevoProducto,
                     precio: Number(nuevoProducto.precio),
-                    stock: Number(nuevoProducto.stock)
+                    stock: Number(nuevoProducto.stock),
+                    estado: estadoFinal
                 }
             );
 
@@ -158,7 +166,8 @@ function Productos() {
             agregarProductoData({
                 ...nuevoProducto,
                 precio: Number(nuevoProducto.precio),
-                stock: Number(nuevoProducto.stock)
+                stock: Number(nuevoProducto.stock),
+                estado: estadoFinal
             });
         }
 
@@ -623,10 +632,6 @@ function Productos() {
 
                                 <option value="Disponible">
                                     Disponible
-                                </option>
-
-                                <option value="Sin stock">
-                                    Sin stock
                                 </option>
 
                                 <option value="Oculto">

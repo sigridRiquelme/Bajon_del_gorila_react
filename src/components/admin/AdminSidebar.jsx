@@ -1,7 +1,11 @@
+import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import "../../styles/admin.css";
 
 function AdminSidebar() {
+
+    const [menuProductosAbierto, setMenuProductosAbierto] = useState(false);
+
     return (
         <aside className="admin-sidebar">
 
@@ -18,13 +22,65 @@ function AdminSidebar() {
                     Dashboard
                 </NavLink>
 
-                <NavLink
-                    to="/admin/productos"
-                    className="nav-link"
-                >
-                    <i className="bi bi-box-seam"></i>
-                    Productos
-                </NavLink>
+
+                {/* PRODUCTOS */}
+
+                <div className="nav-productos">
+
+                    <button
+                        type="button"
+                        className="nav-link nav-productos-btn"
+                        onClick={() =>
+                            setMenuProductosAbierto(!menuProductosAbierto)
+                        }
+                    >
+                        <span className="nav-productos-texto">
+                            <i className="bi bi-box-seam"></i>
+                            Productos
+                        </span>
+
+                        <i
+                            className={
+                                menuProductosAbierto
+                                    ? "bi bi-chevron-up"
+                                    : "bi bi-chevron-down"
+                            }
+                        ></i>
+                    </button>
+
+
+                    {menuProductosAbierto && (
+
+                        <div className="submenu-productos">
+
+                            <NavLink
+                                to="/admin/productos"
+                                end
+                                className="submenu-link"
+                            >
+                                Productos
+                            </NavLink>
+
+                            <NavLink
+                                to="/admin/productos/criticos"
+                                className="submenu-link"
+                            >
+                                Productos críticos
+                            </NavLink>
+
+                            <NavLink
+                                to="/admin/productos/reporte"
+                                className="submenu-link"
+                            >
+                                Reporte inventario
+                            </NavLink>
+
+                        </div>
+
+                    )}
+
+                </div>
+
 
                 <NavLink
                     to="/admin/pedidos"
@@ -34,6 +90,7 @@ function AdminSidebar() {
                     Pedidos
                 </NavLink>
 
+
                 <NavLink
                     to="/admin/usuarios"
                     className="nav-link"
@@ -42,7 +99,9 @@ function AdminSidebar() {
                     Usuarios
                 </NavLink>
 
+
                 <hr />
+
 
                 <NavLink
                     to="/"

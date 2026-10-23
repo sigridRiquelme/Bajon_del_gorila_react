@@ -441,3 +441,187 @@
 .formulario-producto .campo-error {
     border-color: #dc3545;
 }
+
+/* PRODUCTOS CRÍTICOS */
+
+.estado.critico {
+    display: inline-block;
+
+    padding: 6px 10px;
+
+    background-color: #fff3cd;
+    color: #856404;
+
+    border-radius: 6px;
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.estado.sin-stock {
+    display: inline-block;
+
+    padding: 6px 10px;
+
+    background-color: #f8d7da;
+    color: #842029;
+
+    border-radius: 6px;
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.tabla-productos td[colspan="4"] {
+    padding: 30px;
+
+    text-align: center;
+
+    color: #888888;
+}
+
+/* REPORTE DE INVENTARIO */
+
+.resumen-inventario {
+    margin-top: 30px;
+
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+
+    gap: 16px;
+}
+
+.resumen-inventario-card {
+    background-color: white;
+
+    padding: 20px;
+
+    border-radius: 12px;
+
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 10px;
+}
+
+.resumen-inventario-card span {
+    color: #777777;
+
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.resumen-inventario-card strong {
+    color: #171717;
+
+    font-size: 28px;
+    font-weight: 800;
+}
+
+
+/* CATEGORÍAS */
+
+.inventario-categorias {
+    margin-top: 30px;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 20px;
+}
+
+.inventario-categoria {
+    background-color: white;
+
+    padding: 22px;
+
+    border-radius: 12px;
+
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.inventario-categoria h2 {
+    margin-top: 0;
+    margin-bottom: 18px;
+
+    font-size: 20px;
+    font-weight: 800;
+
+    color: #171717;
+}
+
+
+/* LISTADO */
+
+.inventario-lista {
+    display: flex;
+    flex-direction: column;
+}
+
+.inventario-producto {
+    display: flex;
+
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 12px 0;
+
+    border-bottom: 1px solid #eeeeee;
+}
+
+.inventario-producto:last-child {
+    border-bottom: none;
+}
+
+.inventario-producto-nombre {
+    font-size: 14px;
+    font-weight: 600;
+
+    color: #333333;
+}
+
+
+/* STOCK */
+
+.stock-normal {
+    color: #198754;
+}
+
+.stock-critico {
+    color: #b77900;
+}
+
+.stock-sin {
+    color: #dc3545;
+}
+
+
+/* RESPONSIVE */
+
+@media (max-width: 1000px) {
+
+    .resumen-inventario {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+}
+
+@media (max-width: 600px) {
+
+    .resumen-inventario {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+.titulo-stock-categoria {
+    margin-top: 35px;
+    margin-bottom: 15px;
+
+    font-size: 22px;
+    font-weight: 800;
+
+    color: #171717;
+}
