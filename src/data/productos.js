@@ -15,7 +15,7 @@ const productosIniciales = [
         precio: 3500,
         stock: 20,
         estado: "Disponible",
-        imagen: "/img/papas.png"
+        imagen: "/img/PAPAS GORILA.jpeg"
     },
     {
         codigo: 3,

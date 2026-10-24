@@ -1,0 +1,260 @@
+/* =========================
+   BOTONES Y ELEMENTOS COMUNES
+   ========================= */
+.boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 12px 28px;
+  border-radius: 8px;
+  border: 0;
+  cursor: pointer;
+  font-family: 'Anton', sans-serif;
+  letter-spacing: 0.05em;
+  text-decoration: none;
+  transition: transform 0.15s, background-color 0.2s, color 0.2s;
+}
+
+.boton:activo {
+  transform: scale(0.98);
+}
+
+.boton-principal {
+  background: var(--naranja);
+  color: var(--blanco);
+}
+
+.boton-principal:hover {
+  background: #e55a00;
+}
+
+.boton-borde {
+  color: var(--naranja);
+  background: transparent;
+  border: 2px solid var(--naranja);
+}
+
+.boton-borde:hover {
+  background: var(--naranja);
+  color: var(--blanco);
+}
+
+.boton-borde-amarillo {
+  color: var(--amarillo);
+  border-color: var(--amarillo);
+}
+
+.boton-borde-amarillo:hover {
+  background: var(--amarillo);
+  color: var(--oscuro);
+}
+
+.boton-amarillo {
+  background: var(--amarillo);
+  color: var(--oscuro);
+}
+
+.boton-amarillo:hover {
+  background: #e0a800;
+}
+
+.etiqueta {
+  display: inline-block;
+  padding: 4px 9px;
+  border-radius: 4px;
+  font-family: 'Anton', sans-serif;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+}
+
+.etiqueta-naranja {
+  background: var(--naranja);
+  color: white;
+}
+
+.etiqueta-amarilla {
+  background: var(--amarillo);
+  color: var(--oscuro);
+}
+
+.etiqueta-verde {
+  background: var(--verde);
+  color: white;
+}
+
+
+/* =========================
+   SECCIONES GENERALES
+   ========================= */
+.seccion-clara {
+  padding: 80px 0;
+  background: var(--crema);
+}
+
+.fila-encabezado-seccion {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 40px;
+}
+
+.antetitulo {
+  margin: 0 0 8px;
+  color: var(--naranja);
+  font-family: 'Anton', sans-serif;
+  font-size: 0.9rem;
+  letter-spacing: 0.15em;
+}
+
+.fila-encabezado-seccion h2,
+.encabezado-razones h2 {
+  margin: 0;
+  color: var(--oscuro);
+  font-size: 2.8rem;
+}
+
+.grilla-productos {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.tarjeta-producto {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 12px;
+  background: white;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.tarjeta-producto:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.contenedor-imagen-producto {
+  height: 200px;
+  position: relative;
+  overflow: hidden;
+  background: #e8e4dc;
+}
+
+.imagen-producto {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s;
+}
+
+.tarjeta-producto:hover .imagen-producto {
+  transform: scale(1.05);
+}
+
+.etiqueta-producto {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+}
+
+.boton-favorito {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  cursor: pointer;
+}
+
+.cuerpo-producto {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+}
+
+.categoria-producto {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--verde);
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.titulo-producto {
+  margin: 0 0 6px;
+  color: var(--oscuro);
+  font-family: 'Anton', sans-serif;
+  font-size: 1.15rem;
+  letter-spacing: 0.03em;
+  line-height: 1.2;
+}
+
+.valoracion {
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.8rem;
+}
+
+.estrellas {
+  color: var(--amarillo);
+  letter-spacing: 1px;
+}
+
+.numero-valoracion {
+  color: #666;
+  font-weight: 500;
+}
+
+.descripcion-producto {
+  flex: 1;
+  margin: 0 0 16px;
+  color: #666;
+  font-size: 0.875rem;
+  line-height: 1.55;
+}
+
+.pie-producto {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.precio-producto {
+  color: var(--naranja);
+  font-family: 'Anton', sans-serif;
+  font-size: 1.25rem;
+}
+
+.boton-agregar {
+  padding: 8px 16px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--naranja);
+  color: white;
+  font-family: 'Anton', sans-serif;
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+
+.boton-agregar.agregado {
+  background: var(--verde);
+}

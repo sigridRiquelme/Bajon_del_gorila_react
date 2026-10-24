@@ -3,6 +3,7 @@ const usuariosIniciales = [
         id: 0,
         nombre: "Administrador",
         correo: "admin@gmail.com",
+        password: "admin123",
         telefono: "+569 11112222",
         rol: "Administrador"
     },
@@ -10,6 +11,7 @@ const usuariosIniciales = [
         id: 1,
         nombre: "Juan Pérez",
         correo: "juan@gmail.com",
+        password: "1234",
         telefono: "+569 12345678",
         rol: "Cliente"
     },
@@ -17,6 +19,7 @@ const usuariosIniciales = [
         id: 2,
         nombre: "María González",
         correo: "maria@gmail.com",
+        password: "1234",
         telefono: "+569 87654321",
         rol: "Cliente"
     }

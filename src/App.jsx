@@ -1,6 +1,13 @@
 import { Routes, Route } from "react-router-dom";
 
+import PublicLayout from "./layouts/PublicLayout.jsx";
 import AdminLayout from "./layouts/AdminLayout.jsx";
+
+import Login from "./components/Login.jsx";
+import Registro from "./components/Registro.jsx";
+
+import Menu from "./pages/Menu.jsx";
+import Promociones from "./pages/Promociones.jsx";
 
 import Dashboard from "./pages/admin/Dashboard.jsx";
 import Productos from "./pages/admin/Productos.jsx";
@@ -18,7 +25,22 @@ import ReporteProductosVendidos from "./pages/admin/ReporteProductosVendidos.jsx
 function App() {
 
     return (
+
         <Routes>
+
+            {/* PAGINAS PUBLICAS */}
+
+            <Route element={<PublicLayout />}>
+
+                <Route path="/login" element={<Login />} />
+                <Route path="/registro" element={<Registro />} />
+                <Route path="/menu" element={<Menu />} />
+                <Route path="/promociones" element={<Promociones />} />
+
+            </Route>
+
+
+            {/* PANEL ADMIN */}
 
             <Route path="/admin" element={<AdminLayout />}>
 
