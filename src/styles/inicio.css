@@ -1,0 +1,328 @@
+/* =========================
+   INICIO: PORTADA
+   ========================= */
+.portada {
+  min-height: 600px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  background: var(--oscuro);
+}
+
+.portada::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 70% 50%, rgba(245, 184, 0, 0.08) 0%, transparent 60%);
+}
+
+.imagen-portada {
+  position: absolute;
+  inset: 0 0 0 auto;
+  width: 52%;
+  background-image:
+    linear-gradient(to right, var(--oscuro) 0%, rgba(23, 23, 23, 0.6) 40%, rgba(23, 23, 23, 0.15) 100%),
+    url('https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=900&h=700&fit=crop&auto=format');
+  background-size: cover;
+  background-position: center;
+}
+
+.contenido-portada {
+  position: relative;
+  z-index: 2;
+  padding-block: 80px;
+}
+
+.texto-portada {
+  max-width: 580px;
+}
+
+.antetitulo-portada {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.circulo-gorila {
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: 0 0 0 4px rgba(245, 184, 0, 0.2);
+}
+
+.circulo-gorila img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.texto-antetitulo {
+  font-family: 'Anton', sans-serif;
+  color: var(--amarillo);
+  font-size: 0.9rem;
+  letter-spacing: 0.15em;
+}
+
+.portada h1 {
+  margin: 0 0 16px;
+  color: var(--amarillo);
+  font-family: 'Anton', sans-serif;
+  font-size: clamp(3.5rem, 6vw, 5.5rem);
+  line-height: 1;
+  letter-spacing: 0.03em;
+}
+
+.descripcion-portada {
+  margin: 0 0 36px;
+  color: #ddd;
+  font-size: 1.2rem;
+  line-height: 1.6;
+}
+
+.descripcion-portada strong {
+  color: var(--naranja);
+  font-weight: 600;
+}
+
+.botones-portada {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.estadisticas-portada {
+  margin-top: 48px;
+  display: flex;
+  gap: 32px;
+}
+
+.numero-estadistica {
+  color: var(--amarillo);
+  font-family: 'Anton', sans-serif;
+  font-size: 1.6rem;
+}
+
+.etiqueta-estadistica {
+  color: #888;
+  font-size: 0.8rem;
+}
+
+/* =========================
+   INICIO: CATEGORÍAS
+   ========================= */
+.franja-categorias {
+  padding: 40px 0;
+  background: var(--gris);
+}
+
+.lista-categorias {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.opcion-categoria {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border: 1.5px solid #333;
+  border-radius: 999px;
+  background: #2a2a2a;
+  color: white;
+  font-family: 'Anton', sans-serif;
+  font-size: 0.9rem;
+  letter-spacing: 0.05em;
+  text-decoration: none;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.opcion-categoria:hover {
+  background: var(--naranja);
+  border-color: var(--naranja);
+}
+
+.opcion-categoria:nth-child(2):hover,
+.opcion-categoria:nth-child(5):hover {
+  background: var(--amarillo);
+  border-color: var(--amarillo);
+  color: var(--oscuro);
+}
+
+.opcion-categoria:nth-child(3):hover,
+.opcion-categoria:nth-child(6):hover {
+  background: var(--verde);
+  border-color: var(--verde);
+}
+
+
+/* =========================
+   INICIO: PROMO SEMANAL
+   ========================= */
+.promocion-semanal {
+  position: relative;
+  overflow: hidden;
+  padding: 80px 0;
+  background: linear-gradient(135deg, var(--oscuro) 0%, var(--gris) 50%, #2a1800 100%);
+}
+
+.promocion-semanal::after {
+  content: '🦍';
+  position: absolute;
+  right: 5%;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 200px;
+  opacity: 0.05;
+}
+
+.grilla-promocion-semanal {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
+}
+
+.promocion-semanal h2 {
+  margin: 20px 0 12px;
+  color: white;
+  font-size: 3rem;
+}
+
+.texto-principal-promocion {
+  margin: 0 0 8px;
+  color: #ccc;
+  font-size: 1.15rem;
+}
+
+.texto-secundario-promocion {
+  margin: 0 0 28px;
+  color: #888;
+  font-size: 0.9rem;
+}
+
+.fila-precio {
+  margin-bottom: 32px;
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.precio-grande {
+  color: var(--amarillo);
+  font-family: 'Anton', sans-serif;
+  font-size: 3.5rem;
+}
+
+.precio-anterior {
+  color: #666;
+  text-decoration: line-through;
+}
+
+.contenedor-imagen-promocion-semanal {
+  position: relative;
+}
+
+.imagen-promocion-semanal {
+  width: 100%;
+  display: block;
+  border: 3px solid rgba(245, 184, 0, 0.3);
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.caja-ahorro {
+  position: absolute;
+  bottom: -16px;
+  left: -16px;
+  padding: 12px 20px;
+  border-radius: 12px;
+  background: var(--naranja);
+  color: white;
+  font-family: 'Anton', sans-serif;
+}
+
+.caja-ahorro small {
+  display: block;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+}
+
+.caja-ahorro strong {
+  font-size: 1.4rem;
+}
+
+/* =========================
+   INICIO: POR QUÉ ELEGIRNOS
+   ========================= */
+.encabezado-razones {
+  margin-bottom: 56px;
+  text-align: center;
+}
+
+.encabezado-razones h2 {
+  font-size: 2.5rem;
+}
+
+.grilla-razones {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+
+.tarjeta-razon {
+  padding: 32px 24px;
+  text-align: center;
+  border-top: 3px solid var(--amarillo);
+  border-radius: 16px;
+  background: white;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+}
+
+.icono-razon {
+  margin-bottom: 16px;
+  font-size: 2.5rem;
+}
+
+.tarjeta-razon h3 {
+  margin: 0 0 10px;
+  color: var(--oscuro);
+  font-family: 'Anton', sans-serif;
+  font-size: 1.1rem;
+  letter-spacing: 0.03em;
+}
+
+.tarjeta-razon p {
+  margin: 0;
+  color: #666;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.banner-accion {
+  padding: 64px 0;
+  background: var(--naranja);
+  text-align: center;
+}
+
+.banner-accion h2 {
+  margin: 0 0 16px;
+  color: white;
+  font-size: 2.8rem;
+}
+
+.banner-accion p {
+  margin: 0 0 32px;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 1.15rem;
+}

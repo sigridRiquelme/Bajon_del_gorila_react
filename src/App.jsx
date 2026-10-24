@@ -1,18 +1,23 @@
+import { Routes, Route } from "react-router-dom";
+
 import Header from "./components/Header.jsx";
 import Footer from "./components/Footer.jsx";
+import Inicio from "./pages/Inicio.jsx";
 
 function App() {
-    return (
-        <>
-            <Header />
+  return (
+    <>
+      <Header />
 
-            <main>
-                <h1>El Bajón del Gorila</h1>
-            </main>
+      <main>
+        <Routes>
+          <Route path="/" element={<Inicio />} />
+        </Routes>
+      </main>
 
-            <Footer />
-        </>
-    );
+      <Footer />
+    </>
+  );
 }
 
 export default App;
