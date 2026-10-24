@@ -266,7 +266,7 @@ function Contacto() {
                                     </strong>
 
                                     <p>
-                                        Contáctanos para consultas y pedidos.
+                                        +569 56647274
                                     </p>
 
                                 </div>

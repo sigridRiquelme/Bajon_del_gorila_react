@@ -1,149 +1,356 @@
-import { useState } from "react";
+import {
+    useState
+} from "react";
+
 import "../../styles/reportes.css";
 
-import { obtenerPedidos } from "../../data/pedidos.js";
-import { obtenerProductos } from "../../data/productos.js";
+import {
+    obtenerPedidos
+} from "../../data/pedidos.js";
+
+import {
+    obtenerProductos
+} from "../../data/productos.js";
 
 
 function ReporteProductosVendidos() {
 
-    const pedidos = obtenerPedidos();
-    const productos = obtenerProductos();
-
-    const [tipoFiltro, setTipoFiltro] = useState("todo");
-    const [fechaFiltro, setFechaFiltro] = useState("");
+    const pedidos =
+        obtenerPedidos();
 
 
-    const pedidosFiltrados = pedidos.filter((pedido) => {
+    const productos =
+        obtenerProductos();
 
-        if (tipoFiltro === "todo") {
-            return true;
+
+    const [
+        tipoFiltro,
+        setTipoFiltro
+    ] = useState("todo");
+
+
+    const [
+        fechaFiltro,
+        setFechaFiltro
+    ] = useState("");
+
+
+    // SEPARO LA FECHA DEL PEDIDO
+
+    const obtenerPartesFecha = (
+        fecha
+    ) => {
+
+        const partes =
+            fecha.split("/");
+
+
+        if (
+            partes.length !==
+            3
+        ) {
+
+            return {
+                dia: "",
+                mes: "",
+                anio: ""
+            };
         }
 
-        if (fechaFiltro === "") {
-            return false;
-        }
 
-        if (tipoFiltro === "dia") {
-            return pedido.fecha === fechaFiltro;
-        }
+        return {
 
-        if (tipoFiltro === "mes") {
-            return pedido.fecha.startsWith(fechaFiltro);
-        }
+            dia:
+                partes[0],
 
-        if (tipoFiltro === "anio") {
+            mes:
+                partes[1],
 
-            if (!/^\d{4}$/.test(fechaFiltro)) {
-                return false;
+            anio:
+                partes[2]
+        };
+    };
+
+
+    // FILTRO LOS PEDIDOS POR FECHA
+
+    const pedidosFiltrados =
+        pedidos.filter(
+            (pedido) => {
+
+                if (
+                    tipoFiltro ===
+                    "todo"
+                ) {
+
+                    return true;
+                }
+
+
+                if (
+                    fechaFiltro ===
+                    ""
+                ) {
+
+                    return false;
+                }
+
+
+                const {
+                    dia,
+                    mes,
+                    anio
+                } = obtenerPartesFecha(
+                    pedido.fecha
+                );
+
+
+                if (
+                    tipoFiltro ===
+                    "dia"
+                ) {
+
+                    const [
+                        anioFiltro,
+                        mesFiltro,
+                        diaFiltro
+                    ] =
+                        fechaFiltro.split(
+                            "-"
+                        );
+
+
+                    return (
+                        dia ===
+                            diaFiltro &&
+                        mes ===
+                            mesFiltro &&
+                        anio ===
+                            anioFiltro
+                    );
+                }
+
+
+                if (
+                    tipoFiltro ===
+                    "mes"
+                ) {
+
+                    const [
+                        anioFiltro,
+                        mesFiltro
+                    ] =
+                        fechaFiltro.split(
+                            "-"
+                        );
+
+
+                    return (
+                        mes ===
+                            mesFiltro &&
+                        anio ===
+                            anioFiltro
+                    );
+                }
+
+
+                if (
+                    tipoFiltro ===
+                    "anio"
+                ) {
+
+                    if (
+                        !/^\d{4}$/.test(
+                            fechaFiltro
+                        )
+                    ) {
+
+                        return false;
+                    }
+
+
+                    return (
+                        anio ===
+                        fechaFiltro
+                    );
+                }
+
+
+                return true;
             }
-
-            return pedido.fecha.startsWith(fechaFiltro);
-        }
-
-        return true;
-    });
+        );
 
 
     const productosVendidos = {};
+
     const categoriasVendidas = {};
 
 
-    pedidosFiltrados.forEach((pedido) => {
+    // AGRUPO LOS PRODUCTOS VENDIDOS
 
-        pedido.productos.forEach((productoPedido) => {
+    pedidosFiltrados.forEach(
+        (pedido) => {
 
-            const productoBase = productos.find(
-                (producto) =>
-                    producto.codigo === productoPedido.codigoProducto
+            pedido.productos.forEach(
+                (productoPedido) => {
+
+                    const productoBase =
+                        productos.find(
+                            (producto) =>
+                                producto.codigo ===
+                                productoPedido.codigoProducto
+                        );
+
+
+                    const categoria =
+                        productoBase?.categoria ||
+                        "Sin categoría";
+
+
+                    if (
+                        !productosVendidos[
+                            productoPedido.codigoProducto
+                        ]
+                    ) {
+
+                        productosVendidos[
+                            productoPedido.codigoProducto
+                        ] = {
+
+                            codigo:
+                                productoPedido.codigoProducto,
+
+                            nombre:
+                                productoPedido.nombre,
+
+                            cantidad:
+                                0,
+
+                            ingresos:
+                                0
+                        };
+                    }
+
+
+                    productosVendidos[
+                        productoPedido.codigoProducto
+                    ].cantidad +=
+                        productoPedido.cantidad;
+
+
+                    productosVendidos[
+                        productoPedido.codigoProducto
+                    ].ingresos +=
+                        productoPedido.precio *
+                        productoPedido.cantidad;
+
+
+                    if (
+                        !categoriasVendidas[
+                            categoria
+                        ]
+                    ) {
+
+                        categoriasVendidas[
+                            categoria
+                        ] = {
+
+                            nombre:
+                                categoria,
+
+                            cantidad:
+                                0,
+
+                            ingresos:
+                                0
+                        };
+                    }
+
+
+                    categoriasVendidas[
+                        categoria
+                    ].cantidad +=
+                        productoPedido.cantidad;
+
+
+                    categoriasVendidas[
+                        categoria
+                    ].ingresos +=
+                        productoPedido.precio *
+                        productoPedido.cantidad;
+                }
             );
-
-            const categoria =
-                productoBase?.categoria || "Sin categoría";
-
-
-            if (!productosVendidos[productoPedido.codigoProducto]) {
-
-                productosVendidos[productoPedido.codigoProducto] = {
-                    codigo: productoPedido.codigoProducto,
-                    nombre: productoPedido.nombre,
-                    cantidad: 0,
-                    ingresos: 0
-                };
-            }
-
-
-            productosVendidos[
-                productoPedido.codigoProducto
-            ].cantidad += productoPedido.cantidad;
-
-
-            productosVendidos[
-                productoPedido.codigoProducto
-            ].ingresos +=
-                productoPedido.precio *
-                productoPedido.cantidad;
-
-
-            if (!categoriasVendidas[categoria]) {
-
-                categoriasVendidas[categoria] = {
-                    nombre: categoria,
-                    cantidad: 0,
-                    ingresos: 0
-                };
-            }
-
-
-            categoriasVendidas[categoria].cantidad +=
-                productoPedido.cantidad;
-
-
-            categoriasVendidas[categoria].ingresos +=
-                productoPedido.precio *
-                productoPedido.cantidad;
-        });
-    });
-
-
-    const listaProductos = Object.values(
-        productosVendidos
-    ).sort(
-        (a, b) => b.cantidad - a.cantidad
+        }
     );
 
 
-    const listaCategorias = Object.values(
-        categoriasVendidas
-    ).sort(
-        (a, b) => b.cantidad - a.cantidad
-    );
+    const listaProductos =
+        Object.values(
+            productosVendidos
+        ).sort(
+            (a, b) =>
+                b.cantidad -
+                a.cantidad
+        );
 
 
-    const totalUnidades = listaProductos.reduce(
-        (total, producto) =>
-            total + producto.cantidad,
-        0
-    );
+    const listaCategorias =
+        Object.values(
+            categoriasVendidas
+        ).sort(
+            (a, b) =>
+                b.cantidad -
+                a.cantidad
+        );
 
 
-    const totalIngresos = listaProductos.reduce(
-        (total, producto) =>
-            total + producto.ingresos,
-        0
-    );
+    // CALCULO LOS TOTALES
+
+    const totalUnidades =
+        listaProductos.reduce(
+            (
+                total,
+                producto
+            ) =>
+                total +
+                producto.cantidad,
+            0
+        );
+
+
+    const totalIngresos =
+        listaProductos.reduce(
+            (
+                total,
+                producto
+            ) =>
+                total +
+                producto.ingresos,
+            0
+        );
 
 
     const productoMasVendido =
-        listaProductos.length > 0
+        listaProductos.length >
+        0
             ? listaProductos[0]
             : null;
 
 
-    const cambiarTipoFiltro = (e) => {
+    // CAMBIO EL TIPO DE FILTRO
 
-        setTipoFiltro(e.target.value);
-        setFechaFiltro("");
+    const cambiarTipoFiltro = (
+        e
+    ) => {
+
+        setTipoFiltro(
+            e.target.value
+        );
+
+
+        setFechaFiltro(
+            ""
+        );
     };
 
 
@@ -151,24 +358,15 @@ function ReporteProductosVendidos() {
 
         <main className="reporte-admin">
 
-            <div
-                className="
-                    d-flex
-                    justify-content-between
-                    flex-wrap
-                    flex-md-nowrap
-                    align-items-center
-                    pb-2
-                    mb-4
-                    border-bottom
-                "
-            >
+
+            <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-4 border-bottom">
 
                 <div>
 
                     <h1 className="h2">
                         Reporte de productos vendidos
                     </h1>
+
 
                     <p className="text-secondary mb-0">
                         Resumen de artículos y categorías vendidas
@@ -190,6 +388,7 @@ function ReporteProductosVendidos() {
 
                     <div className="row g-3">
 
+
                         <div className="col-12 col-md-4">
 
                             <label
@@ -199,11 +398,16 @@ function ReporteProductosVendidos() {
                                 Mostrar por
                             </label>
 
+
                             <select
                                 id="tipoFiltroProductos"
                                 className="form-select"
-                                value={tipoFiltro}
-                                onChange={cambiarTipoFiltro}
+                                value={
+                                    tipoFiltro
+                                }
+                                onChange={
+                                    cambiarTipoFiltro
+                                }
                             >
 
                                 <option value="todo">
@@ -227,20 +431,30 @@ function ReporteProductosVendidos() {
                         </div>
 
 
-                        {tipoFiltro === "dia" && (
+                        {tipoFiltro ===
+                        "dia" && (
 
                             <div className="col-12 col-md-4">
 
-                                <label className="form-label">
+                                <label
+                                    htmlFor="fechaDiaProductos"
+                                    className="form-label"
+                                >
                                     Seleccionar día
                                 </label>
 
+
                                 <input
+                                    id="fechaDiaProductos"
                                     type="date"
                                     className="form-control"
-                                    value={fechaFiltro}
+                                    value={
+                                        fechaFiltro
+                                    }
                                     onChange={(e) =>
-                                        setFechaFiltro(e.target.value)
+                                        setFechaFiltro(
+                                            e.target.value
+                                        )
                                     }
                                 />
 
@@ -249,20 +463,30 @@ function ReporteProductosVendidos() {
                         )}
 
 
-                        {tipoFiltro === "mes" && (
+                        {tipoFiltro ===
+                        "mes" && (
 
                             <div className="col-12 col-md-4">
 
-                                <label className="form-label">
+                                <label
+                                    htmlFor="fechaMesProductos"
+                                    className="form-label"
+                                >
                                     Seleccionar mes
                                 </label>
 
+
                                 <input
+                                    id="fechaMesProductos"
                                     type="month"
                                     className="form-control"
-                                    value={fechaFiltro}
+                                    value={
+                                        fechaFiltro
+                                    }
                                     onChange={(e) =>
-                                        setFechaFiltro(e.target.value)
+                                        setFechaFiltro(
+                                            e.target.value
+                                        )
                                     }
                                 />
 
@@ -271,35 +495,53 @@ function ReporteProductosVendidos() {
                         )}
 
 
-                        {tipoFiltro === "anio" && (
+                        {tipoFiltro ===
+                        "anio" && (
 
                             <div className="col-12 col-md-4">
 
-                                <label className="form-label">
+                                <label
+                                    htmlFor="fechaAnioProductos"
+                                    className="form-label"
+                                >
                                     Seleccionar año
                                 </label>
 
+
                                 <input
+                                    id="fechaAnioProductos"
                                     type="text"
                                     inputMode="numeric"
                                     className="form-control"
                                     placeholder="Ej: 2026"
                                     maxLength="4"
-                                    value={fechaFiltro}
+                                    value={
+                                        fechaFiltro
+                                    }
                                     onChange={(e) => {
 
                                         const soloNumeros =
                                             e.target.value
-                                                .replace(/\D/g, "")
-                                                .slice(0, 4);
+                                                .replace(
+                                                    /\D/g,
+                                                    ""
+                                                )
+                                                .slice(
+                                                    0,
+                                                    4
+                                                );
 
-                                        setFechaFiltro(soloNumeros);
+
+                                        setFechaFiltro(
+                                            soloNumeros
+                                        );
                                     }}
                                 />
 
                             </div>
 
                         )}
+
 
                     </div>
 
@@ -310,6 +552,7 @@ function ReporteProductosVendidos() {
 
             <div className="row g-3 mb-4">
 
+
                 <div className="col-12 col-md-4">
 
                     <div className="card reporte-card-bootstrap h-100">
@@ -317,17 +560,55 @@ function ReporteProductosVendidos() {
                         <div className="card-body">
 
                             <div className="reporte-icono">
+
                                 <i className="bi bi-trophy"></i>
+
                             </div>
+
 
                             <p className="card-text text-secondary">
                                 Producto más vendido
                             </p>
 
+
                             <h3 className="fw-bold mb-0 fs-5">
-                                {productoMasVendido
-                                    ? productoMasVendido.nombre
-                                    : "Sin ventas"
+
+                                {
+                                    productoMasVendido
+                                        ? productoMasVendido.nombre
+                                        : "Sin ventas"
+                                }
+
+                            </h3>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div className="col-12 col-md-4">
+
+                    <div className="card reporte-card-bootstrap h-100">
+
+                        <div className="card-body">
+
+                            <div className="reporte-icono">
+
+                                <i className="bi bi-box-seam"></i>
+
+                            </div>
+
+
+                            <p className="card-text text-secondary">
+                                Unidades vendidas
+                            </p>
+
+
+                            <h3 className="fw-bold mb-0">
+                                {
+                                    totalUnidades
                                 }
                             </h3>
 
@@ -345,44 +626,26 @@ function ReporteProductosVendidos() {
                         <div className="card-body">
 
                             <div className="reporte-icono">
-                                <i className="bi bi-box-seam"></i>
-                            </div>
 
-                            <p className="card-text text-secondary">
-                                Unidades vendidas
-                            </p>
-
-                            <h3 className="fw-bold mb-0">
-                                {totalUnidades}
-                            </h3>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <div className="col-12 col-md-4">
-
-                    <div className="card reporte-card-bootstrap h-100">
-
-                        <div className="card-body">
-
-                            <div className="reporte-icono">
                                 <i className="bi bi-cash-stack"></i>
+
                             </div>
+
 
                             <p className="card-text text-secondary">
                                 Ingresos generados
                             </p>
 
+
                             <h3 className="fw-bold mb-0">
 
                                 $
-                                {totalIngresos.toLocaleString(
-                                    "es-CL"
-                                )}
+
+                                {
+                                    totalIngresos.toLocaleString(
+                                        "es-CL"
+                                    )
+                                }
 
                             </h3>
 
@@ -391,6 +654,7 @@ function ReporteProductosVendidos() {
                     </div>
 
                 </div>
+
 
             </div>
 
@@ -408,12 +672,23 @@ function ReporteProductosVendidos() {
 
                         <table className="table table-striped table-hover align-middle">
 
+
                             <thead className="table-dark">
 
                                 <tr>
-                                    <th>PRODUCTO</th>
-                                    <th>CANTIDAD VENDIDA</th>
-                                    <th>INGRESOS GENERADOS</th>
+
+                                    <th>
+                                        PRODUCTO
+                                    </th>
+
+                                    <th>
+                                        CANTIDAD VENDIDA
+                                    </th>
+
+                                    <th>
+                                        INGRESOS GENERADOS
+                                    </th>
+
                                 </tr>
 
                             </thead>
@@ -421,32 +696,48 @@ function ReporteProductosVendidos() {
 
                             <tbody>
 
-                                {listaProductos.length > 0 ? (
+                                {listaProductos.length >
+                                0 ? (
 
-                                    listaProductos.map((producto) => (
+                                    listaProductos.map(
+                                        (producto) => (
 
-                                        <tr key={producto.codigo}>
+                                            <tr
+                                                key={
+                                                    producto.codigo
+                                                }
+                                            >
 
-                                            <td className="fw-semibold">
-                                                {producto.nombre}
-                                            </td>
+                                                <td className="fw-semibold">
+                                                    {
+                                                        producto.nombre
+                                                    }
+                                                </td>
 
-                                            <td>
-                                                {producto.cantidad}
-                                            </td>
 
-                                            <td className="fw-semibold">
+                                                <td>
+                                                    {
+                                                        producto.cantidad
+                                                    }
+                                                </td>
 
-                                                $
-                                                {producto.ingresos.toLocaleString(
-                                                    "es-CL"
-                                                )}
 
-                                            </td>
+                                                <td className="fw-semibold">
 
-                                        </tr>
+                                                    $
 
-                                    ))
+                                                    {
+                                                        producto.ingresos.toLocaleString(
+                                                            "es-CL"
+                                                        )
+                                                    }
+
+                                                </td>
+
+                                            </tr>
+
+                                        )
+                                    )
 
                                 ) : (
 
@@ -487,12 +778,23 @@ function ReporteProductosVendidos() {
 
                         <table className="table table-striped table-hover align-middle">
 
+
                             <thead className="table-dark">
 
                                 <tr>
-                                    <th>CATEGORÍA</th>
-                                    <th>CANTIDAD VENDIDA</th>
-                                    <th>INGRESOS GENERADOS</th>
+
+                                    <th>
+                                        CATEGORÍA
+                                    </th>
+
+                                    <th>
+                                        CANTIDAD VENDIDA
+                                    </th>
+
+                                    <th>
+                                        INGRESOS GENERADOS
+                                    </th>
+
                                 </tr>
 
                             </thead>
@@ -500,32 +802,48 @@ function ReporteProductosVendidos() {
 
                             <tbody>
 
-                                {listaCategorias.length > 0 ? (
+                                {listaCategorias.length >
+                                0 ? (
 
-                                    listaCategorias.map((categoria) => (
+                                    listaCategorias.map(
+                                        (categoria) => (
 
-                                        <tr key={categoria.nombre}>
+                                            <tr
+                                                key={
+                                                    categoria.nombre
+                                                }
+                                            >
 
-                                            <td className="fw-semibold">
-                                                {categoria.nombre}
-                                            </td>
+                                                <td className="fw-semibold">
+                                                    {
+                                                        categoria.nombre
+                                                    }
+                                                </td>
 
-                                            <td>
-                                                {categoria.cantidad}
-                                            </td>
 
-                                            <td className="fw-semibold">
+                                                <td>
+                                                    {
+                                                        categoria.cantidad
+                                                    }
+                                                </td>
 
-                                                $
-                                                {categoria.ingresos.toLocaleString(
-                                                    "es-CL"
-                                                )}
 
-                                            </td>
+                                                <td className="fw-semibold">
 
-                                        </tr>
+                                                    $
 
-                                    ))
+                                                    {
+                                                        categoria.ingresos.toLocaleString(
+                                                            "es-CL"
+                                                        )
+                                                    }
+
+                                                </td>
+
+                                            </tr>
+
+                                        )
+                                    )
 
                                 ) : (
 
@@ -551,6 +869,7 @@ function ReporteProductosVendidos() {
                 </div>
 
             </section>
+
 
         </main>
     );
