@@ -25,6 +25,8 @@ function PerfilCliente() {
         useNavigate();
 
 
+    // OBTENGO EL USUARIO ACTUAL
+
     const usuarioActualId =
         localStorage.getItem(
             "usuarioActualId"
@@ -34,7 +36,9 @@ function PerfilCliente() {
     const usuarioActual =
         usuarioActualId !== null
             ? obtenerUsuarioPorId(
-                Number(usuarioActualId)
+                Number(
+                    usuarioActualId
+                )
             )
             : null;
 
@@ -103,7 +107,11 @@ function PerfilCliente() {
     ] = useState(null);
 
 
-    if (!usuarioActual) {
+    // SI NO HAY SESION VUELVO AL LOGIN
+
+    if (
+        !usuarioActual
+    ) {
 
         return (
             <Navigate
@@ -113,6 +121,8 @@ function PerfilCliente() {
         );
     }
 
+
+    // EL ADMIN TIENE SU PROPIO PERFIL
 
     if (
         usuarioActual.rol ===
@@ -128,6 +138,8 @@ function PerfilCliente() {
     }
 
 
+    // MUESTRO SOLO LOS PEDIDOS DEL CLIENTE
+
     const pedidosUsuario =
         obtenerPedidos()
             .filter(
@@ -142,20 +154,24 @@ function PerfilCliente() {
             );
 
 
+    // VALIDO LOS DATOS DEL PERFIL
+
     const validarDatos = () => {
 
         const nuevosErrores = {};
 
 
         if (
-            nombre.trim().length < 3
+            nombre.trim().length <
+            3
         ) {
 
             nuevosErrores.nombre =
                 "El nombre debe tener al menos 3 caracteres.";
 
         } else if (
-            nombre.trim().length > 50
+            nombre.trim().length >
+            50
         ) {
 
             nuevosErrores.nombre =
@@ -195,7 +211,8 @@ function PerfilCliente() {
 
         if (
             direccion.trim() !== "" &&
-            direccion.trim().length < 10
+            direccion.trim().length <
+            10
         ) {
 
             nuevosErrores.direccion =
@@ -204,7 +221,8 @@ function PerfilCliente() {
 
 
         if (
-            direccion.trim().length > 100
+            direccion.trim().length >
+            100
         ) {
 
             nuevosErrores.direccion =
@@ -225,12 +243,17 @@ function PerfilCliente() {
     };
 
 
+    // GUARDO LOS CAMBIOS DEL PERFIL
+
     const guardarCambios = () => {
 
         setMensaje("");
 
 
-        if (!validarDatos()) {
+        if (
+            !validarDatos()
+        ) {
+
             return;
         }
 
@@ -274,6 +297,8 @@ function PerfilCliente() {
     };
 
 
+    // CANCELO LA EDICION
+
     const cancelarEdicion = () => {
 
         setNombre(
@@ -298,6 +323,8 @@ function PerfilCliente() {
     };
 
 
+    // CIERRO LA SESION
+
     const cerrarSesion = () => {
 
         localStorage.removeItem(
@@ -311,15 +338,20 @@ function PerfilCliente() {
     };
 
 
+    // ABRO O CIERRO EL DETALLE DE LA BOLETA
+
     const mostrarPedido = (
         codigo
     ) => {
 
         if (
-            pedidoAbierto === codigo
+            pedidoAbierto ===
+            codigo
         ) {
 
-            setPedidoAbierto(null);
+            setPedidoAbierto(
+                null
+            );
 
         } else {
 
@@ -372,7 +404,9 @@ function PerfilCliente() {
                 {mensaje && (
 
                     <div className="perfil-mensaje-exito">
-                        {mensaje}
+                        {
+                            mensaje
+                        }
                     </div>
 
                 )}
@@ -392,7 +426,9 @@ function PerfilCliente() {
                                 </p>
 
                                 <h2>
-                                    {usuario.nombre}
+                                    {
+                                        usuario.nombre
+                                    }
                                 </h2>
 
                             </div>
@@ -405,8 +441,13 @@ function PerfilCliente() {
                                     className="btn-editar-perfil"
                                     onClick={() => {
 
-                                        setEditando(true);
-                                        setMensaje("");
+                                        setEditando(
+                                            true
+                                        );
+
+                                        setMensaje(
+                                            ""
+                                        );
                                     }}
                                 >
                                     EDITAR
@@ -429,7 +470,9 @@ function PerfilCliente() {
                                     </span>
 
                                     <strong>
-                                        {usuario.nombre}
+                                        {
+                                            usuario.nombre
+                                        }
                                     </strong>
 
                                 </div>
@@ -442,7 +485,9 @@ function PerfilCliente() {
                                     </span>
 
                                     <strong>
-                                        {usuario.correo}
+                                        {
+                                            usuario.correo
+                                        }
                                     </strong>
 
                                 </div>
@@ -455,7 +500,9 @@ function PerfilCliente() {
                                     </span>
 
                                     <strong>
-                                        {usuario.telefono}
+                                        {
+                                            usuario.telefono
+                                        }
                                     </strong>
 
                                 </div>
@@ -468,8 +515,10 @@ function PerfilCliente() {
                                     </span>
 
                                     <strong>
-                                        {usuario.direccion ||
-                                            "Sin dirección registrada"}
+                                        {
+                                            usuario.direccion ||
+                                            "Sin dirección registrada"
+                                        }
                                     </strong>
 
                                 </div>
@@ -482,7 +531,9 @@ function PerfilCliente() {
                                     </span>
 
                                     <strong>
-                                        {usuario.rol}
+                                        {
+                                            usuario.rol
+                                        }
                                     </strong>
 
                                 </div>
@@ -500,10 +551,13 @@ function PerfilCliente() {
                                         Nombre
                                     </label>
 
+
                                     <input
                                         id="nombre"
                                         type="text"
-                                        value={nombre}
+                                        value={
+                                            nombre
+                                        }
                                         onChange={(e) => {
 
                                             setNombre(
@@ -517,10 +571,13 @@ function PerfilCliente() {
                                         }}
                                     />
 
+
                                     {errores.nombre && (
 
                                         <small className="perfil-error">
-                                            {errores.nombre}
+                                            {
+                                                errores.nombre
+                                            }
                                         </small>
 
                                     )}
@@ -534,10 +591,13 @@ function PerfilCliente() {
                                         Correo
                                     </label>
 
+
                                     <input
                                         id="correo"
                                         type="email"
-                                        value={correo}
+                                        value={
+                                            correo
+                                        }
                                         onChange={(e) => {
 
                                             setCorreo(
@@ -551,10 +611,13 @@ function PerfilCliente() {
                                         }}
                                     />
 
+
                                     {errores.correo && (
 
                                         <small className="perfil-error">
-                                            {errores.correo}
+                                            {
+                                                errores.correo
+                                            }
                                         </small>
 
                                     )}
@@ -568,10 +631,13 @@ function PerfilCliente() {
                                         Teléfono
                                     </label>
 
+
                                     <input
                                         id="telefono"
                                         type="text"
-                                        value={telefono}
+                                        value={
+                                            telefono
+                                        }
                                         onChange={(e) => {
 
                                             setTelefono(
@@ -585,10 +651,13 @@ function PerfilCliente() {
                                         }}
                                     />
 
+
                                     {errores.telefono && (
 
                                         <small className="perfil-error">
-                                            {errores.telefono}
+                                            {
+                                                errores.telefono
+                                            }
                                         </small>
 
                                     )}
@@ -602,10 +671,13 @@ function PerfilCliente() {
                                         Dirección
                                     </label>
 
+
                                     <input
                                         id="direccion"
                                         type="text"
-                                        value={direccion}
+                                        value={
+                                            direccion
+                                        }
                                         onChange={(e) => {
 
                                             setDireccion(
@@ -619,10 +691,13 @@ function PerfilCliente() {
                                         }}
                                     />
 
+
                                     {errores.direccion && (
 
                                         <small className="perfil-error">
-                                            {errores.direccion}
+                                            {
+                                                errores.direccion
+                                            }
                                         </small>
 
                                     )}
@@ -681,7 +756,8 @@ function PerfilCliente() {
                         </div>
 
 
-                        {pedidosUsuario.length === 0 ? (
+                        {pedidosUsuario.length ===
+                        0 ? (
 
                             <div className="perfil-sin-pedidos">
 
@@ -699,6 +775,9 @@ function PerfilCliente() {
                                 {pedidosUsuario.map(
                                     (pedido) => {
 
+
+                                        // CALCULO NETO E IVA SI ES UN PEDIDO ANTIGUO
+
                                         const netoPedido =
                                             pedido.neto ??
                                             Math.round(
@@ -715,6 +794,17 @@ function PerfilCliente() {
                                             );
 
 
+                                        const subtotalPedido =
+                                            pedido.subtotal ??
+                                            (
+                                                pedido.total -
+                                                (
+                                                    pedido.costoDelivery ||
+                                                    0
+                                                )
+                                            );
+
+
                                         return (
 
                                             <article
@@ -727,6 +817,7 @@ function PerfilCliente() {
 
                                                 <div className="perfil-pedido-resumen">
 
+
                                                     <div>
 
                                                         <span>
@@ -734,7 +825,10 @@ function PerfilCliente() {
                                                         </span>
 
                                                         <strong>
-                                                            #{pedido.codigo}
+                                                            #
+                                                            {
+                                                                pedido.codigo
+                                                            }
                                                         </strong>
 
                                                     </div>
@@ -747,7 +841,9 @@ function PerfilCliente() {
                                                         </span>
 
                                                         <strong>
-                                                            {pedido.fecha}
+                                                            {
+                                                                pedido.fecha
+                                                            }
                                                         </strong>
 
                                                     </div>
@@ -760,10 +856,14 @@ function PerfilCliente() {
                                                         </span>
 
                                                         <strong>
+
                                                             $
-                                                            {pedido.total.toLocaleString(
-                                                                "es-CL"
-                                                            )}
+                                                            {
+                                                                pedido.total.toLocaleString(
+                                                                    "es-CL"
+                                                                )
+                                                            }
+
                                                         </strong>
 
                                                     </div>
@@ -778,23 +878,27 @@ function PerfilCliente() {
                                                             )
                                                         }
                                                     >
-                                                        {pedidoAbierto ===
-                                                        pedido.codigo
-                                                            ? "OCULTAR"
-                                                            : "VER DETALLE"
+
+                                                        {
+                                                            pedidoAbierto ===
+                                                            pedido.codigo
+                                                                ? "OCULTAR"
+                                                                : "VER DETALLE"
                                                         }
+
                                                     </button>
 
                                                 </div>
 
 
                                                 {pedidoAbierto ===
-                                                    pedido.codigo && (
+                                                pedido.codigo && (
 
                                                     <div className="perfil-pedido-detalle">
 
 
                                                         <div className="perfil-boleta-datos">
+
 
                                                             <div>
 
@@ -803,7 +907,9 @@ function PerfilCliente() {
                                                                 </span>
 
                                                                 <strong>
-                                                                    {pedido.fecha}
+                                                                    {
+                                                                        pedido.fecha
+                                                                    }
                                                                 </strong>
 
                                                             </div>
@@ -816,8 +922,12 @@ function PerfilCliente() {
                                                                 </span>
 
                                                                 <strong>
-                                                                    {pedido.hora ||
-                                                                        "No registrada"}
+
+                                                                    {
+                                                                        pedido.hora ||
+                                                                        "No registrada"
+                                                                    }
+
                                                                 </strong>
 
                                                             </div>
@@ -830,8 +940,12 @@ function PerfilCliente() {
                                                                 </span>
 
                                                                 <strong>
-                                                                    {pedido.medioPago ||
-                                                                        "No registrado"}
+
+                                                                    {
+                                                                        pedido.medioPago ||
+                                                                        "No registrado"
+                                                                    }
+
                                                                 </strong>
 
                                                             </div>
@@ -855,30 +969,44 @@ function PerfilCliente() {
                                                                     >
 
                                                                         <span>
-                                                                            {producto.nombre}
+                                                                            {
+                                                                                producto.nombre
+                                                                            }
                                                                         </span>
 
 
                                                                         <span>
+
                                                                             $
-                                                                            {producto.precio.toLocaleString(
-                                                                                "es-CL"
-                                                                            )}
+                                                                            {
+                                                                                producto.precio.toLocaleString(
+                                                                                    "es-CL"
+                                                                                )
+                                                                            }
+
                                                                             {" "}
                                                                             ×
                                                                             {" "}
-                                                                            {producto.cantidad}
+
+                                                                            {
+                                                                                producto.cantidad
+                                                                            }
+
                                                                         </span>
 
 
                                                                         <strong>
+
                                                                             $
-                                                                            {(
-                                                                                producto.precio *
-                                                                                producto.cantidad
-                                                                            ).toLocaleString(
-                                                                                "es-CL"
-                                                                            )}
+                                                                            {
+                                                                                (
+                                                                                    producto.precio *
+                                                                                    producto.cantidad
+                                                                                ).toLocaleString(
+                                                                                    "es-CL"
+                                                                                )
+                                                                            }
+
                                                                         </strong>
 
                                                                     </div>
@@ -895,14 +1023,88 @@ function PerfilCliente() {
                                                             <div>
 
                                                                 <span>
+                                                                    Subtotal
+                                                                </span>
+
+                                                                <strong>
+
+                                                                    $
+                                                                    {
+                                                                        subtotalPedido.toLocaleString(
+                                                                            "es-CL"
+                                                                        )
+                                                                    }
+
+                                                                </strong>
+
+                                                            </div>
+
+
+                                                            {/* SI ES DELIVERY MUESTRO EL COSTO */}
+
+                                                            {pedido.tipoEntrega ===
+                                                            "Delivery" && (
+
+                                                                <div>
+
+                                                                    <span>
+                                                                        Delivery
+                                                                    </span>
+
+                                                                    <strong>
+
+                                                                        $
+                                                                        {
+                                                                            (
+                                                                                pedido.costoDelivery ||
+                                                                                0
+                                                                            ).toLocaleString(
+                                                                                "es-CL"
+                                                                            )
+                                                                        }
+
+                                                                    </strong>
+
+                                                                </div>
+
+                                                            )}
+
+
+                                                            {/* SI ES RETIRO LO INDICO EN LA BOLETA */}
+
+                                                            {pedido.tipoEntrega ===
+                                                            "Retiro en local" && (
+
+                                                                <div>
+
+                                                                    <span>
+                                                                        Tipo de entrega
+                                                                    </span>
+
+                                                                    <strong>
+                                                                        Retiro en local
+                                                                    </strong>
+
+                                                                </div>
+
+                                                            )}
+
+
+                                                            <div>
+
+                                                                <span>
                                                                     Neto
                                                                 </span>
 
                                                                 <strong>
+
                                                                     $
-                                                                    {netoPedido.toLocaleString(
-                                                                        "es-CL"
-                                                                    )}
+                                                                    {
+                                                                        netoPedido.toLocaleString(
+                                                                            "es-CL"
+                                                                        )
+                                                                    }
+
                                                                 </strong>
 
                                                             </div>
@@ -915,10 +1117,14 @@ function PerfilCliente() {
                                                                 </span>
 
                                                                 <strong>
+
                                                                     $
-                                                                    {ivaPedido.toLocaleString(
-                                                                        "es-CL"
-                                                                    )}
+                                                                    {
+                                                                        ivaPedido.toLocaleString(
+                                                                            "es-CL"
+                                                                        )
+                                                                    }
+
                                                                 </strong>
 
                                                             </div>
@@ -931,10 +1137,14 @@ function PerfilCliente() {
                                                                 </span>
 
                                                                 <strong>
+
                                                                     $
-                                                                    {pedido.total.toLocaleString(
-                                                                        "es-CL"
-                                                                    )}
+                                                                    {
+                                                                        pedido.total.toLocaleString(
+                                                                            "es-CL"
+                                                                        )
+                                                                    }
+
                                                                 </strong>
 
                                                             </div>

@@ -3,25 +3,40 @@ const pedidosIniciales = [
         codigo: 1,
         usuarioId: 1,
         cliente: "Juan Pérez",
+        correo: "juan@gmail.com",
+        telefono: "+569 12345678",
+
         fecha: "24/10/2026",
         hora: "13:15",
-        medioPago: "Débito",
-        neto: 12597,
-        iva: 2393,
-        total: 14990,
+
+        tipoEntrega: "Delivery",
+        direccion: "Av. Libertador 1540, Santiago",
+        comuna: "Santiago",
+        referencia: "Casa con portón negro",
+
+        medioPago: "Tarjeta",
+
+        subtotal: 10980,
+        costoDelivery: 2000,
+
+        neto: 10908,
+        iva: 2072,
+        total: 12980,
 
         productos: [
             {
                 codigoProducto: 1,
-                nombre: "Hamburguesa Gorila",
+                nombre: "Hamburguesa Clásica",
                 cantidad: 1,
-                precio: 8990
+                precio: 5990,
+                imagen: "/img/hamburguesa-clasica.png"
             },
             {
                 codigoProducto: 3,
-                nombre: "Fajita Texas",
+                nombre: "Fajita Italiana",
                 cantidad: 1,
-                precio: 6000
+                precio: 4990,
+                imagen: "/img/fajita-italiana.png"
             }
         ]
     },
@@ -30,24 +45,40 @@ const pedidosIniciales = [
         codigo: 2,
         usuarioId: 2,
         cliente: "María González",
+        correo: "maria@gmail.com",
+        telefono: "+569 87654321",
+
         fecha: "24/10/2026",
         hora: "13:42",
-        medioPago: "Transferencia",
-        neto: 5882,
-        iva: 1118,
-        total: 7000,
+
+        tipoEntrega: "Retiro en local",
+        direccion: "Retiro en local",
+        comuna: "",
+        referencia: "",
+
+        medioPago: "Efectivo",
+
+        subtotal: 8990,
+        costoDelivery: 0,
+
+        neto: 7555,
+        iva: 1435,
+        total: 8990,
 
         productos: [
             {
                 codigoProducto: 2,
-                nombre: "Papas Fritas",
-                cantidad: 2,
-                precio: 3500
+                nombre: "Papa Suprema",
+                cantidad: 1,
+                precio: 8990,
+                imagen: "/img/papa-suprema.png"
             }
         ]
     }
 ];
 
+
+// CARGO LOS PEDIDOS
 
 const cargarPedidos = () => {
 
@@ -57,7 +88,9 @@ const cargarPedidos = () => {
         );
 
 
-    if (pedidosGuardados) {
+    if (
+        pedidosGuardados
+    ) {
 
         return JSON.parse(
             pedidosGuardados
@@ -83,6 +116,8 @@ let pedidos =
     cargarPedidos();
 
 
+// ACTUALIZO DESDE LOCALSTORAGE
+
 const actualizarDesdeLocalStorage = () => {
 
     const pedidosGuardados =
@@ -91,7 +126,9 @@ const actualizarDesdeLocalStorage = () => {
         );
 
 
-    if (pedidosGuardados) {
+    if (
+        pedidosGuardados
+    ) {
 
         pedidos =
             JSON.parse(
@@ -100,6 +137,8 @@ const actualizarDesdeLocalStorage = () => {
     }
 };
 
+
+// GUARDO LOS PEDIDOS
 
 const guardarPedidos = () => {
 
@@ -112,11 +151,12 @@ const guardarPedidos = () => {
 };
 
 
-// LEER TODOS LOS PEDIDOS
+// OBTENGO TODOS LOS PEDIDOS
 
 export const obtenerPedidos = () => {
 
     actualizarDesdeLocalStorage();
+
 
     return [
         ...pedidos
@@ -124,13 +164,14 @@ export const obtenerPedidos = () => {
 };
 
 
-// BUSCAR UN PEDIDO POR CODIGO
+// BUSCO UN PEDIDO
 
 export const obtenerPedidoPorCodigo = (
     codigo
 ) => {
 
     actualizarDesdeLocalStorage();
+
 
     return pedidos.find(
         (pedido) =>
@@ -140,7 +181,7 @@ export const obtenerPedidoPorCodigo = (
 };
 
 
-// CREAR PEDIDO
+// CREO UN PEDIDO
 
 export const crearPedido = (
     nuevoPedido
@@ -160,8 +201,11 @@ export const crearPedido = (
 
 
     const pedido = {
+
         ...nuevoPedido,
-        codigo: codigoNuevo
+
+        codigo:
+            codigoNuevo
     };
 
 

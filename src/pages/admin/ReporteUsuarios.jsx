@@ -1,52 +1,88 @@
 import "../../styles/reportes.css";
 
-import { obtenerUsuarios } from "../../data/usuarios.js";
-import { obtenerPedidos } from "../../data/pedidos.js";
+import {
+    obtenerUsuarios
+} from "../../data/usuarios.js";
+
+import {
+    obtenerPedidos
+} from "../../data/pedidos.js";
 
 
 function ReporteUsuarios() {
 
-    const usuarios = obtenerUsuarios();
-    const pedidos = obtenerPedidos();
+    const usuarios =
+        obtenerUsuarios();
 
 
-    const clientes = usuarios.filter(
-        (usuario) => usuario.rol === "Cliente"
-    );
+    const pedidos =
+        obtenerPedidos();
 
 
-    const administradores = usuarios.filter(
-        (usuario) => usuario.rol === "Administrador"
-    );
+    const clientes =
+        usuarios.filter(
+            (usuario) =>
+                usuario.rol ===
+                "Cliente"
+        );
 
 
-    const obtenerComprasUsuario = (usuario) => {
+    const administradores =
+        usuarios.filter(
+            (usuario) =>
+                usuario.rol ===
+                "Administrador"
+        );
+
+
+    // OBTENGO LAS COMPRAS DEL USUARIO
+
+    const obtenerComprasUsuario = (
+        usuario
+    ) => {
 
         return pedidos.filter(
             (pedido) =>
-                pedido.usuarioId === usuario.id
+                pedido.usuarioId ===
+                usuario.id
         );
     };
 
 
-    const clientesConCompras = clientes.filter(
-        (usuario) =>
-            obtenerComprasUsuario(usuario).length > 0
-    );
+    const clientesConCompras =
+        clientes.filter(
+            (usuario) =>
+                obtenerComprasUsuario(
+                    usuario
+                ).length >
+                0
+        );
 
 
     const clientesSinCompras =
-        clientes.length - clientesConCompras.length;
+        clientes.length -
+        clientesConCompras.length;
 
 
-    const obtenerTotalGastado = (usuario) => {
+    // CALCULO CUANTO HA GASTADO
+
+    const obtenerTotalGastado = (
+        usuario
+    ) => {
 
         const compras =
-            obtenerComprasUsuario(usuario);
+            obtenerComprasUsuario(
+                usuario
+            );
+
 
         return compras.reduce(
-            (total, pedido) =>
-                total + pedido.total,
+            (
+                total,
+                pedido
+            ) =>
+                total +
+                pedido.total,
             0
         );
     };
@@ -56,18 +92,8 @@ function ReporteUsuarios() {
 
         <main className="reporte-admin">
 
-            <div
-                className="
-                    d-flex
-                    justify-content-between
-                    flex-wrap
-                    flex-md-nowrap
-                    align-items-center
-                    pb-2
-                    mb-4
-                    border-bottom
-                "
-            >
+
+            <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-4 border-bottom">
 
                 <div>
 
@@ -102,7 +128,9 @@ function ReporteUsuarios() {
                             </p>
 
                             <h3 className="fw-bold mb-0">
-                                {clientes.length}
+                                {
+                                    clientes.length
+                                }
                             </h3>
 
                         </div>
@@ -127,7 +155,9 @@ function ReporteUsuarios() {
                             </p>
 
                             <h3 className="fw-bold mb-0">
-                                {clientesConCompras.length}
+                                {
+                                    clientesConCompras.length
+                                }
                             </h3>
 
                         </div>
@@ -152,7 +182,9 @@ function ReporteUsuarios() {
                             </p>
 
                             <h3 className="fw-bold mb-0">
-                                {clientesSinCompras}
+                                {
+                                    clientesSinCompras
+                                }
                             </h3>
 
                         </div>
@@ -177,7 +209,9 @@ function ReporteUsuarios() {
                             </p>
 
                             <h3 className="fw-bold mb-0">
-                                {administradores.length}
+                                {
+                                    administradores.length
+                                }
                             </h3>
 
                         </div>
@@ -185,7 +219,6 @@ function ReporteUsuarios() {
                     </div>
 
                 </div>
-
 
             </div>
 
@@ -206,11 +239,35 @@ function ReporteUsuarios() {
                             <thead className="table-dark">
 
                                 <tr>
-                                    <th>USUARIO</th>
-                                    <th>CORREO</th>
-                                    <th>ROL</th>
-                                    <th>COMPRAS</th>
-                                    <th>TOTAL GASTADO</th>
+
+                                    <th>
+                                        USUARIO
+                                    </th>
+
+                                    <th>
+                                        CORREO
+                                    </th>
+
+                                    <th>
+                                        TELÉFONO
+                                    </th>
+
+                                    <th>
+                                        DIRECCIÓN
+                                    </th>
+
+                                    <th>
+                                        ROL
+                                    </th>
+
+                                    <th>
+                                        COMPRAS
+                                    </th>
+
+                                    <th>
+                                        TOTAL GASTADO
+                                    </th>
+
                                 </tr>
 
                             </thead>
@@ -218,59 +275,98 @@ function ReporteUsuarios() {
 
                             <tbody>
 
-                                {usuarios.map((usuario) => {
+                                {usuarios.map(
+                                    (usuario) => {
 
-                                    const compras =
-                                        obtenerComprasUsuario(usuario);
+                                        const compras =
+                                            obtenerComprasUsuario(
+                                                usuario
+                                            );
 
-                                    const totalGastado =
-                                        obtenerTotalGastado(usuario);
 
-                                    return (
+                                        const totalGastado =
+                                            obtenerTotalGastado(
+                                                usuario
+                                            );
 
-                                        <tr key={usuario.id}>
 
-                                            <td>
-                                                #{usuario.id}{" "}
-                                                {usuario.nombre}
-                                            </td>
+                                        return (
 
-                                            <td>
-                                                {usuario.correo}
-                                            </td>
+                                            <tr
+                                                key={
+                                                    usuario.id
+                                                }
+                                            >
 
-                                            <td>
+                                                <td>
+                                                    #{usuario.id}{" "}
+                                                    {usuario.nombre}
+                                                </td>
 
-                                                <span
-                                                    className={
-                                                        usuario.rol === "Administrador"
-                                                            ? "badge text-bg-dark"
-                                                            : "badge text-bg-secondary"
+
+                                                <td>
+                                                    {
+                                                        usuario.correo
                                                     }
-                                                >
-                                                    {usuario.rol}
-                                                </span>
+                                                </td>
 
-                                            </td>
 
-                                            <td>
-                                                {compras.length}
-                                            </td>
+                                                <td>
+                                                    {
+                                                        usuario.telefono
+                                                    }
+                                                </td>
 
-                                            <td className="fw-semibold">
 
-                                                $
-                                                {totalGastado.toLocaleString(
-                                                    "es-CL"
-                                                )}
+                                                <td>
+                                                    {
+                                                        usuario.direccion ||
+                                                        "Sin dirección"
+                                                    }
+                                                </td>
 
-                                            </td>
 
-                                        </tr>
+                                                <td>
 
-                                    );
+                                                    <span
+                                                        className={
+                                                            usuario.rol ===
+                                                            "Administrador"
+                                                                ? "badge text-bg-dark"
+                                                                : "badge text-bg-secondary"
+                                                        }
+                                                    >
+                                                        {
+                                                            usuario.rol
+                                                        }
+                                                    </span>
 
-                                })}
+                                                </td>
+
+
+                                                <td>
+                                                    {
+                                                        compras.length
+                                                    }
+                                                </td>
+
+
+                                                <td className="fw-semibold">
+
+                                                    $
+                                                    {
+                                                        totalGastado.toLocaleString(
+                                                            "es-CL"
+                                                        )
+                                                    }
+
+                                                </td>
+
+                                            </tr>
+
+                                        );
+                                    }
+                                )}
 
                             </tbody>
 

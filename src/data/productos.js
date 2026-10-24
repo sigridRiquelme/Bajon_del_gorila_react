@@ -1,46 +1,103 @@
 const productosIniciales = [
     {
         codigo: 1,
-        nombre: "Hamburguesa Gorila",
+        nombre: "Hamburguesa Clásica",
         categoria: "Hamburguesas",
-        precio: 8990,
+        precio: 5990,
         stock: 15,
         estado: "Disponible",
-        imagen: "/img/gorila-burger.png"
+
+        descripcion:
+            "Hamburguesa de carne con queso cheddar, lechuga fresca y tomate.",
+
+        imagen:
+            "/img/hamburguesa-clasica.png",
+
+        promocion: false,
+        descuento: 0
     },
+
     {
         codigo: 2,
-        nombre: "Papas Fritas",
+        nombre: "Papa Suprema",
         categoria: "Papas",
-        precio: 3500,
+        precio: 8990,
         stock: 20,
         estado: "Disponible",
-        imagen: "/img/PAPAS GORILA.jpeg"
+
+        descripcion:
+            "Papas fritas con queso cheddar, tomate, carne y cebollín.",
+
+        imagen:
+            "/img/papa-suprema.png",
+
+        promocion: false,
+        descuento: 0
     },
+
     {
         codigo: 3,
-        nombre: "Fajita Texas",
+        nombre: "Fajita Italiana",
         categoria: "Fajitas",
-        precio: 6000,
+        precio: 4990,
         stock: 10,
         estado: "Disponible",
-        imagen: "/img/fajita-texas.png"
+
+        descripcion:
+            "Fajita rellena con carne, tomate, palta y mayonesa.",
+
+        imagen:
+            "/img/fajita-italiana.png",
+
+        promocion: false,
+        descuento: 0
     }
 ];
 
 
-// CARGAR PRODUCTOS
+// COMPLETO DATOS ANTIGUOS
+
+const normalizarProducto = (
+    producto
+) => {
+
+    return {
+
+        ...producto,
+
+        descripcion:
+            producto.descripcion ||
+            "Producto disponible en El Bajón del Gorila.",
+
+        promocion:
+            producto.promocion ??
+            false,
+
+        descuento:
+            producto.descuento ??
+            0
+    };
+};
+
+
+// CARGO LOS PRODUCTOS
 
 const cargarProductos = () => {
 
     const productosGuardados =
-        localStorage.getItem("productos");
+        localStorage.getItem(
+            "productos"
+        );
 
 
-    if (productosGuardados) {
+    if (
+        productosGuardados
+    ) {
 
         return JSON.parse(
             productosGuardados
+        ).map(
+            normalizarProducto
         );
     }
 
@@ -63,7 +120,7 @@ let productos =
     cargarProductos();
 
 
-// CAMBIO: ACTUALIZO LOS PRODUCTOS CON LO QUE REALMENTE ESTA GUARDADO
+// ACTUALIZO DESDE LOCALSTORAGE
 
 const actualizarDesdeLocalStorage = () => {
 
@@ -73,17 +130,21 @@ const actualizarDesdeLocalStorage = () => {
         );
 
 
-    if (productosGuardados) {
+    if (
+        productosGuardados
+    ) {
 
         productos =
             JSON.parse(
                 productosGuardados
+            ).map(
+                normalizarProducto
             );
     }
 };
 
 
-// GUARDAR PRODUCTOS
+// GUARDO LOS PRODUCTOS
 
 const guardarProductos = () => {
 
@@ -96,19 +157,67 @@ const guardarProductos = () => {
 };
 
 
-// LEER PRODUCTOS
+// CALCULO EL PRECIO FINAL
+
+export const obtenerPrecioFinal = (
+    producto
+) => {
+
+    if (
+        !producto.promocion ||
+        !producto.descuento
+    ) {
+
+        return producto.precio;
+    }
+
+
+    const descuento =
+        producto.precio *
+        (
+            producto.descuento /
+            100
+        );
+
+
+    return Math.round(
+        producto.precio -
+        descuento
+    );
+};
+
+
+// OBTENGO LOS PRODUCTOS
 
 export const obtenerProductos = () => {
 
     actualizarDesdeLocalStorage();
 
-    return [
-        ...productos
-    ];
+
+    return productos.map(
+        normalizarProducto
+    );
 };
 
 
-// AGREGAR PRODUCTO
+// BUSCO UN PRODUCTO
+
+export const obtenerProductoPorCodigo = (
+    codigo
+) => {
+
+    actualizarDesdeLocalStorage();
+
+
+    return productos.find(
+        (producto) =>
+            producto.codigo ===
+            codigo
+    );
+};
+
+
+// AGREGO UN PRODUCTO
 
 export const agregarProducto = (
     nuevoProducto
@@ -128,8 +237,19 @@ export const agregarProducto = (
 
 
     const producto = {
+
         ...nuevoProducto,
-        codigo: codigoNuevo
+
+        codigo:
+            codigoNuevo,
+
+        promocion:
+            nuevoProducto.promocion ??
+            false,
+
+        descuento:
+            nuevoProducto.descuento ??
+            0
     };
 
 
@@ -146,7 +266,7 @@ export const agregarProducto = (
 };
 
 
-// ACTUALIZAR PRODUCTO
+// ACTUALIZO UN PRODUCTO
 
 export const actualizarProducto = (
     codigo,
@@ -159,14 +279,13 @@ export const actualizarProducto = (
     productos =
         productos.map(
             (producto) =>
-                producto.codigo === codigo
-
+                producto.codigo ===
+                codigo
                     ? {
                         ...producto,
                         ...datosActualizados,
-                        codigo: codigo
+                        codigo
                     }
-
                     : producto
         );
 
@@ -175,7 +294,7 @@ export const actualizarProducto = (
 };
 
 
-// ELIMINAR PRODUCTO
+// ELIMINO UN PRODUCTO
 
 export const eliminarProducto = (
     codigo

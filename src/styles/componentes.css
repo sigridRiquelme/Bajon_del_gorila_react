@@ -139,22 +139,24 @@
 }
 
 .contenedor-imagen-producto {
-  height: 200px;
-  position: relative;
-  overflow: hidden;
-  background: #e8e4dc;
+    position: relative;
+    width: 100%;
+    height: 250px;
+    overflow: hidden;
+    background-color: #f3f1ef;
 }
 
 .imagen-producto {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  transition: transform 0.3s;
+    width: 100%;
+    height: 250px;
+    object-fit: contain;
+    object-position: center;
+    display: block;
+    transition: transform 0.25s ease;
 }
 
 .tarjeta-producto:hover .imagen-producto {
-  transform: scale(1.05);
+    transform: scale(1.03);
 }
 
 .etiqueta-producto {
@@ -257,4 +259,23 @@
 
 .boton-agregar.agregado {
   background: var(--verde);
+}
+
+/* PROMOCION PRODUCTO */
+
+.precio-con-promocion {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.precio-anterior-producto {
+    color: #999999;
+    font-size: 14px;
+    text-decoration: line-through;
+}
+
+.precio-con-promocion .precio-producto {
+    color: var(--naranja);
+    font-size: 22px;
 }

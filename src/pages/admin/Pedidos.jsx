@@ -31,6 +31,8 @@ function Pedidos() {
     ] = useState(null);
 
 
+    // ABRO EL DETALLE DEL PEDIDO
+
     const verDetallePedido = (
         codigo
     ) => {
@@ -47,9 +49,23 @@ function Pedidos() {
     };
 
 
+    // OBTENGO EL NOMBRE DEL CLIENTE
+
     const obtenerNombreCliente = (
         pedido
     ) => {
+
+        if (
+            pedido.usuarioId ===
+            null
+        ) {
+
+            return (
+                pedido.cliente ||
+                "Invitado"
+            );
+        }
+
 
         const usuario =
             obtenerUsuarioPorId(
@@ -77,7 +93,9 @@ function Pedidos() {
                     </h1>
 
                     <p>
-                        {listaPedidos.length} pedidos
+                        {
+                            listaPedidos.length
+                        } pedidos
                     </p>
 
                 </div>
@@ -92,11 +110,31 @@ function Pedidos() {
                     <thead>
 
                         <tr>
-                            <th>CÓDIGO</th>
-                            <th>CLIENTE</th>
-                            <th>FECHA</th>
-                            <th>TOTAL</th>
-                            <th>ACCIÓN</th>
+
+                            <th>
+                                CÓDIGO
+                            </th>
+
+                            <th>
+                                CLIENTE
+                            </th>
+
+                            <th>
+                                FECHA
+                            </th>
+
+                            <th>
+                                ENTREGA
+                            </th>
+
+                            <th>
+                                TOTAL
+                            </th>
+
+                            <th>
+                                ACCIÓN
+                            </th>
+
                         </tr>
 
                     </thead>
@@ -104,7 +142,8 @@ function Pedidos() {
 
                     <tbody>
 
-                        {listaPedidos.length > 0 ? (
+                        {listaPedidos.length >
+                        0 ? (
 
                             listaPedidos.map(
                                 (pedido) => (
@@ -124,6 +163,10 @@ function Pedidos() {
                                         fecha={
                                             pedido.fecha
                                         }
+                                        entrega={
+                                            pedido.tipoEntrega ||
+                                            "No registrada"
+                                        }
                                         total={
                                             pedido.total
                                         }
@@ -139,7 +182,7 @@ function Pedidos() {
 
                             <tr>
 
-                                <td colSpan="5">
+                                <td colSpan="6">
                                     No hay pedidos registrados.
                                 </td>
 
@@ -156,6 +199,9 @@ function Pedidos() {
 
             {pedidoSeleccionado && (() => {
 
+
+                // CALCULO DATOS ANTIGUOS SI NO LOS TIENEN
+
                 const netoPedido =
                     pedidoSeleccionado.neto ??
                     Math.round(
@@ -170,6 +216,22 @@ function Pedidos() {
                         pedidoSeleccionado.total -
                         netoPedido
                     );
+
+
+                const subtotalPedido =
+                    pedidoSeleccionado.subtotal ??
+                    (
+                        pedidoSeleccionado.total -
+                        (
+                            pedidoSeleccionado.costoDelivery ||
+                            0
+                        )
+                    );
+
+
+                const costoDelivery =
+                    pedidoSeleccionado.costoDelivery ||
+                    0;
 
 
                 return (
@@ -190,7 +252,10 @@ function Pedidos() {
 
 
                                     <h2>
-                                        Pedido #{pedidoSeleccionado.codigo}
+                                        Pedido #
+                                        {
+                                            pedidoSeleccionado.codigo
+                                        }
                                     </h2>
 
                                 </div>
@@ -208,9 +273,29 @@ function Pedidos() {
                                     </span>
 
                                     <strong>
-                                        {obtenerNombreCliente(
-                                            pedidoSeleccionado
-                                        )}
+                                        {
+                                            obtenerNombreCliente(
+                                                pedidoSeleccionado
+                                            )
+                                        }
+                                    </strong>
+
+                                </div>
+
+
+                                <div>
+
+                                    <span>
+                                        Tipo de cliente
+                                    </span>
+
+                                    <strong>
+                                        {
+                                            pedidoSeleccionado.usuarioId ===
+                                            null
+                                                ? "Invitado"
+                                                : "Registrado"
+                                        }
                                     </strong>
 
                                 </div>
@@ -223,7 +308,9 @@ function Pedidos() {
                                     </span>
 
                                     <strong>
-                                        {pedidoSeleccionado.fecha}
+                                        {
+                                            pedidoSeleccionado.fecha
+                                        }
                                     </strong>
 
                                 </div>
@@ -236,8 +323,10 @@ function Pedidos() {
                                     </span>
 
                                     <strong>
-                                        {pedidoSeleccionado.hora ||
-                                            "No registrada"}
+                                        {
+                                            pedidoSeleccionado.hora ||
+                                            "No registrada"
+                                        }
                                     </strong>
 
                                 </div>
@@ -250,11 +339,145 @@ function Pedidos() {
                                     </span>
 
                                     <strong>
-                                        {pedidoSeleccionado.medioPago ||
-                                            "No registrado"}
+                                        {
+                                            pedidoSeleccionado.medioPago ||
+                                            "No registrado"
+                                        }
                                     </strong>
 
                                 </div>
+
+
+                                <div>
+
+                                    <span>
+                                        Tipo de entrega
+                                    </span>
+
+                                    <strong>
+                                        {
+                                            pedidoSeleccionado.tipoEntrega ||
+                                            "No registrada"
+                                        }
+                                    </strong>
+
+                                </div>
+
+
+                                {pedidoSeleccionado.tipoEntrega ===
+                                "Delivery" && (
+
+                                    <>
+
+                                        <div>
+
+                                            <span>
+                                                Dirección
+                                            </span>
+
+                                            <strong>
+                                                {
+                                                    pedidoSeleccionado.direccion ||
+                                                    "No registrada"
+                                                }
+                                            </strong>
+
+                                        </div>
+
+
+                                        <div>
+
+                                            <span>
+                                                Comuna
+                                            </span>
+
+                                            <strong>
+                                                {
+                                                    pedidoSeleccionado.comuna ||
+                                                    "No registrada"
+                                                }
+                                            </strong>
+
+                                        </div>
+
+
+                                        {pedidoSeleccionado.referencia && (
+
+                                            <div>
+
+                                                <span>
+                                                    Referencia
+                                                </span>
+
+                                                <strong>
+                                                    {
+                                                        pedidoSeleccionado.referencia
+                                                    }
+                                                </strong>
+
+                                            </div>
+
+                                        )}
+
+                                    </>
+
+                                )}
+
+
+                                {pedidoSeleccionado.tipoEntrega ===
+                                "Retiro en local" && (
+
+                                    <div>
+
+                                        <span>
+                                            Entrega
+                                        </span>
+
+                                        <strong>
+                                            Retiro en local
+                                        </strong>
+
+                                    </div>
+
+                                )}
+
+
+                                {pedidoSeleccionado.correo && (
+
+                                    <div>
+
+                                        <span>
+                                            Correo
+                                        </span>
+
+                                        <strong>
+                                            {
+                                                pedidoSeleccionado.correo
+                                            }
+                                        </strong>
+
+                                    </div>
+
+                                )}
+
+
+                                {pedidoSeleccionado.telefono && (
+
+                                    <div>
+
+                                        <span>
+                                            Teléfono
+                                        </span>
+
+                                        <strong>
+                                            {
+                                                pedidoSeleccionado.telefono
+                                            }
+                                        </strong>
+
+                                    </div>
+
+                                )}
 
                             </div>
 
@@ -282,20 +505,26 @@ function Pedidos() {
                                             <div className="producto-info">
 
                                                 <span className="producto-nombre">
-                                                    {producto.nombre}
+                                                    {
+                                                        producto.nombre
+                                                    }
                                                 </span>
 
 
                                                 <span className="producto-cantidad">
 
                                                     $
-                                                    {producto.precio.toLocaleString(
-                                                        "es-CL"
-                                                    )}
+                                                    {
+                                                        producto.precio.toLocaleString(
+                                                            "es-CL"
+                                                        )
+                                                    }
 
                                                     {" × "}
 
-                                                    {producto.cantidad}
+                                                    {
+                                                        producto.cantidad
+                                                    }
 
                                                 </span>
 
@@ -306,12 +535,14 @@ function Pedidos() {
 
                                                 $
 
-                                                {(
-                                                    producto.precio *
-                                                    producto.cantidad
-                                                ).toLocaleString(
-                                                    "es-CL"
-                                                )}
+                                                {
+                                                    (
+                                                        producto.precio *
+                                                        producto.cantidad
+                                                    ).toLocaleString(
+                                                        "es-CL"
+                                                    )
+                                                }
 
                                             </span>
 
@@ -329,6 +560,71 @@ function Pedidos() {
                                 <div className="fila-resumen">
 
                                     <span>
+                                        Subtotal
+                                    </span>
+
+                                    <span>
+
+                                        $
+
+                                        {
+                                            subtotalPedido.toLocaleString(
+                                                "es-CL"
+                                            )
+                                        }
+
+                                    </span>
+
+                                </div>
+
+
+                                {pedidoSeleccionado.tipoEntrega ===
+                                "Delivery" && (
+
+                                    <div className="fila-resumen">
+
+                                        <span>
+                                            Delivery
+                                        </span>
+
+                                        <span>
+
+                                            $
+
+                                            {
+                                                costoDelivery.toLocaleString(
+                                                    "es-CL"
+                                                )
+                                            }
+
+                                        </span>
+
+                                    </div>
+
+                                )}
+
+
+                                {pedidoSeleccionado.tipoEntrega ===
+                                "Retiro en local" && (
+
+                                    <div className="fila-resumen">
+
+                                        <span>
+                                            Entrega
+                                        </span>
+
+                                        <span>
+                                            Retiro en local
+                                        </span>
+
+                                    </div>
+
+                                )}
+
+
+                                <div className="fila-resumen">
+
+                                    <span>
                                         Neto
                                     </span>
 
@@ -336,9 +632,11 @@ function Pedidos() {
 
                                         $
 
-                                        {netoPedido.toLocaleString(
-                                            "es-CL"
-                                        )}
+                                        {
+                                            netoPedido.toLocaleString(
+                                                "es-CL"
+                                            )
+                                        }
 
                                     </span>
 
@@ -355,9 +653,11 @@ function Pedidos() {
 
                                         $
 
-                                        {ivaPedido.toLocaleString(
-                                            "es-CL"
-                                        )}
+                                        {
+                                            ivaPedido.toLocaleString(
+                                                "es-CL"
+                                            )
+                                        }
 
                                     </span>
 
@@ -374,9 +674,11 @@ function Pedidos() {
 
                                         $
 
-                                        {pedidoSeleccionado.total.toLocaleString(
-                                            "es-CL"
-                                        )}
+                                        {
+                                            pedidoSeleccionado.total.toLocaleString(
+                                                "es-CL"
+                                            )
+                                        }
 
                                     </span>
 
@@ -403,9 +705,7 @@ function Pedidos() {
                     </div>
 
                 );
-
             })()}
-
 
         </main>
     );

@@ -5,6 +5,7 @@ const usuariosIniciales = [
         correo: "admin@gmail.com",
         password: "admin123",
         telefono: "+569 11112222",
+        direccion: "Av. Principal 1234, Santiago",
         rol: "Administrador"
     },
     {
@@ -13,6 +14,7 @@ const usuariosIniciales = [
         correo: "juan@gmail.com",
         password: "1234",
         telefono: "+569 12345678",
+        direccion: "Av. Libertador 1540, Santiago",
         rol: "Cliente"
     },
     {
@@ -21,10 +23,13 @@ const usuariosIniciales = [
         correo: "maria@gmail.com",
         password: "1234",
         telefono: "+569 87654321",
+        direccion: "Las Rejas 2450, Estación Central",
         rol: "Cliente"
     }
 ];
 
+
+// CARGO LOS USUARIOS GUARDADOS
 
 const cargarUsuarios = () => {
 
@@ -34,7 +39,9 @@ const cargarUsuarios = () => {
         );
 
 
-    if (usuariosGuardados) {
+    if (
+        usuariosGuardados
+    ) {
 
         return JSON.parse(
             usuariosGuardados
@@ -60,7 +67,7 @@ let usuarios =
     cargarUsuarios();
 
 
-// CAMBIO: siempre trabajo con los usuarios guardados realmente
+// SIEMPRE TRABAJO CON LOS DATOS GUARDADOS
 
 const actualizarDesdeLocalStorage = () => {
 
@@ -70,7 +77,9 @@ const actualizarDesdeLocalStorage = () => {
         );
 
 
-    if (usuariosGuardados) {
+    if (
+        usuariosGuardados
+    ) {
 
         usuarios =
             JSON.parse(
@@ -105,29 +114,48 @@ const guardarUsuarios = () => {
 };
 
 
+// OBTENGO TODOS LOS USUARIOS
+
 export const obtenerUsuarios = () => {
 
     actualizarDesdeLocalStorage();
 
 
-    return [...usuarios].sort(
+    return [
+        ...usuarios
+    ].sort(
         (a, b) => {
 
-            if (a.id === 0) {
+            // EL ADMIN SIEMPRE VA PRIMERO
+
+            if (
+                a.id ===
+                0
+            ) {
+
                 return -1;
             }
 
 
-            if (b.id === 0) {
+            if (
+                b.id ===
+                0
+            ) {
+
                 return 1;
             }
 
 
-            return a.id - b.id;
+            return (
+                a.id -
+                b.id
+            );
         }
     );
 };
 
+
+// BUSCO UN USUARIO
 
 export const obtenerUsuarioPorId = (
     id
@@ -138,10 +166,13 @@ export const obtenerUsuarioPorId = (
 
     return usuarios.find(
         (usuario) =>
-            usuario.id === id
+            usuario.id ===
+            id
     );
 };
 
+
+// AGREGO UN USUARIO
 
 export const agregarUsuario = (
     nuevoUsuario
@@ -161,8 +192,11 @@ export const agregarUsuario = (
 
 
     const usuario = {
+
         ...nuevoUsuario,
-        id: nuevoId
+
+        id:
+            nuevoId
     };
 
 
@@ -179,6 +213,8 @@ export const agregarUsuario = (
 };
 
 
+// ACTUALIZO UN USUARIO
+
 export const actualizarUsuario = (
     id,
     datosActualizados
@@ -190,7 +226,8 @@ export const actualizarUsuario = (
     usuarios =
         usuarios.map(
             (usuario) =>
-                usuario.id === id
+                usuario.id ===
+                id
                     ? {
                         ...usuario,
                         ...datosActualizados,
@@ -204,6 +241,8 @@ export const actualizarUsuario = (
 };
 
 
+// ELIMINO UN USUARIO
+
 export const eliminarUsuario = (
     id
 ) => {
@@ -214,7 +253,8 @@ export const eliminarUsuario = (
     usuarios =
         usuarios.filter(
             (usuario) =>
-                usuario.id !== id
+                usuario.id !==
+                id
         );
 
 

@@ -1,7 +1,10 @@
-import { useState } from "react";
+import {
+    useState
+} from "react";
 
 import {
     Link,
+    useLocation,
     useNavigate
 } from "react-router-dom";
 
@@ -19,17 +22,39 @@ function Login() {
     const navigate =
         useNavigate();
 
-    const [correo, setCorreo] =
-        useState("");
 
-    const [password, setPassword] =
-        useState("");
-
-    const [error, setError] =
-        useState("");
+    const location =
+        useLocation();
 
 
-    const iniciarSesion = (e) => {
+    const [
+        correo,
+        setCorreo
+    ] = useState("");
+
+
+    const [
+        password,
+        setPassword
+    ] = useState("");
+
+
+    const [
+        error,
+        setError
+    ] = useState("");
+
+
+    // REVISO SI VENGO DESDE EL CHECKOUT
+
+    const desdeCheckout =
+        location.state?.desdeCheckout ===
+        true;
+
+
+    const iniciarSesion = (
+        e
+    ) => {
 
         e.preventDefault();
 
@@ -42,11 +67,13 @@ function Login() {
                 .toLowerCase();
 
 
-        // CAMPOS VACIOS
+        // VALIDO LOS CAMPOS
 
         if (
-            correoLimpio === "" ||
-            password === ""
+            correoLimpio ===
+            "" ||
+            password ===
+            ""
         ) {
 
             setError(
@@ -57,7 +84,7 @@ function Login() {
         }
 
 
-        // BUSCAR USUARIO
+        // BUSCO EL USUARIO
 
         const usuario =
             obtenerUsuarios().find(
@@ -69,7 +96,9 @@ function Login() {
             );
 
 
-        if (!usuario) {
+        if (
+            !usuario
+        ) {
 
             setError(
                 "El correo no está registrado."
@@ -79,7 +108,7 @@ function Login() {
         }
 
 
-        // VALIDAR CONTRASEÑA
+        // VALIDO LA CONTRASEÑA
 
         if (
             usuario.password !==
@@ -94,7 +123,28 @@ function Login() {
         }
 
 
-        // GUARDAR USUARIO CONECTADO
+        // REVISO SI TENIA CARRITO COMO INVITADO
+
+        const carritoInvitadoGuardado =
+            localStorage.getItem(
+                "carrito_invitado"
+            );
+
+
+        const carritoInvitado =
+            carritoInvitadoGuardado
+                ? JSON.parse(
+                    carritoInvitadoGuardado
+                )
+                : [];
+
+
+        const teniaCarritoInvitado =
+            carritoInvitado.length >
+            0;
+
+
+        // GUARDO EL USUARIO CONECTADO
 
         localStorage.setItem(
             "usuarioActualId",
@@ -102,7 +152,7 @@ function Login() {
         );
 
 
-        // REDIRECCION SEGUN ROL
+        // EL ADMIN VA A SU PANEL
 
         if (
             usuario.rol ===
@@ -113,17 +163,40 @@ function Login() {
                 "/admin"
             );
 
-        } else {
+            return;
+        }
 
-            // CAMBIO: si tenia productos como invitado los paso a su cuenta
 
-            pasarCarritoInvitado(
-                usuario.id
+        // PASO EL CARRITO INVITADO A SU CUENTA
+
+        pasarCarritoInvitado(
+            usuario.id
+        );
+
+
+        // SI VENIA DEL CHECKOUT SIGO LA COMPRA
+
+        if (
+            desdeCheckout ||
+            teniaCarritoInvitado
+        ) {
+
+            navigate(
+                "/checkout",
+                {
+                    replace: true
+                }
             );
 
-
-            navigate("/");
+            return;
         }
+
+
+        // LOGIN NORMAL
+
+        navigate(
+            "/"
+        );
     };
 
 
@@ -132,7 +205,8 @@ function Login() {
         <main
             className="container py-5"
             style={{
-                maxWidth: "500px"
+                maxWidth:
+                    "500px"
             }}
         >
 
@@ -143,23 +217,38 @@ function Login() {
                     <h1
                         className="text-center mb-2"
                         style={{
-                            color: "#ff6500",
-                            fontWeight: "bold"
+                            color:
+                                "#ff6500",
+
+                            fontWeight:
+                                "bold"
                         }}
                     >
                         INICIAR SESIÓN
                     </h1>
 
 
-                    <p className="text-center text-secondary mb-4">
-                        Ingresa a tu cuenta
-                    </p>
+                    {desdeCheckout ? (
+
+                        <p className="text-center text-secondary mb-4">
+                            Inicia sesión para continuar con tu compra
+                        </p>
+
+                    ) : (
+
+                        <p className="text-center text-secondary mb-4">
+                            Ingresa a tu cuenta
+                        </p>
+
+                    )}
 
 
                     {error && (
 
                         <div className="alert alert-danger">
-                            {error}
+                            {
+                                error
+                            }
                         </div>
 
                     )}
@@ -186,14 +275,18 @@ function Login() {
                                 type="email"
                                 className="form-control"
                                 placeholder="ejemplo@gmail.com"
-                                value={correo}
+                                value={
+                                    correo
+                                }
                                 onChange={(e) => {
 
                                     setCorreo(
                                         e.target.value
                                     );
 
-                                    setError("");
+                                    setError(
+                                        ""
+                                    );
                                 }}
                             />
 
@@ -215,14 +308,18 @@ function Login() {
                                 type="password"
                                 className="form-control"
                                 placeholder="Contraseña"
-                                value={password}
+                                value={
+                                    password
+                                }
                                 onChange={(e) => {
 
                                     setPassword(
                                         e.target.value
                                     );
 
-                                    setError("");
+                                    setError(
+                                        ""
+                                    );
                                 }}
                             />
 

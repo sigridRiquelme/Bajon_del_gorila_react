@@ -1,5 +1,11 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import {
+    useState
+} from "react";
+
+import {
+    Link,
+    useNavigate
+} from "react-router-dom";
 
 import {
     agregarUsuario,
@@ -9,42 +15,101 @@ import {
 
 function Registro() {
 
-    const navigate = useNavigate();
+    const navigate =
+        useNavigate();
 
-    const [nombre, setNombre] = useState("");
-    const [correo, setCorreo] = useState("");
-    const [password, setPassword] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState("");
-    const [telefono, setTelefono] = useState("");
 
-    const [errores, setErrores] = useState({});
-    const [mensaje, setMensaje] = useState("");
+    const [
+        nombre,
+        setNombre
+    ] = useState("");
 
+
+    const [
+        correo,
+        setCorreo
+    ] = useState("");
+
+
+    const [
+        password,
+        setPassword
+    ] = useState("");
+
+
+    const [
+        confirmPassword,
+        setConfirmPassword
+    ] = useState("");
+
+
+    const [
+        telefono,
+        setTelefono
+    ] = useState("");
+
+
+    const [
+        direccion,
+        setDireccion
+    ] = useState("");
+
+
+    const [
+        errores,
+        setErrores
+    ] = useState({});
+
+
+    const [
+        mensaje,
+        setMensaje
+    ] = useState("");
+
+
+    // VALIDO EL FORMULARIO
 
     const validarFormulario = () => {
 
         const nuevosErrores = {};
 
+
         const nombreLimpio =
             nombre.trim();
 
+
         const correoLimpio =
-            correo.trim().toLowerCase();
+            correo
+                .trim()
+                .toLowerCase();
+
+
+        const direccionLimpia =
+            direccion.trim();
 
 
         // NOMBRE
 
-        if (nombreLimpio === "") {
+        if (
+            nombreLimpio ===
+            ""
+        ) {
 
             nuevosErrores.nombre =
                 "El nombre es obligatorio.";
 
-        } else if (nombreLimpio.length < 3) {
+        } else if (
+            nombreLimpio.length <
+            3
+        ) {
 
             nuevosErrores.nombre =
                 "El nombre debe tener al menos 3 caracteres.";
 
-        } else if (nombreLimpio.length > 50) {
+        } else if (
+            nombreLimpio.length >
+            50
+        ) {
 
             nuevosErrores.nombre =
                 "El nombre no puede superar los 50 caracteres.";
@@ -56,12 +121,20 @@ function Registro() {
         const correoValido =
             /^[^\s@]+@(gmail\.com|duoc\.cl|duocuc\.cl)$/i;
 
-        if (correoLimpio === "") {
+
+        if (
+            correoLimpio ===
+            ""
+        ) {
 
             nuevosErrores.correo =
                 "El correo es obligatorio.";
 
-        } else if (!correoValido.test(correoLimpio)) {
+        } else if (
+            !correoValido.test(
+                correoLimpio
+            )
+        ) {
 
             nuevosErrores.correo =
                 "El correo debe ser Gmail, Duoc o Duoc UC.";
@@ -73,10 +146,14 @@ function Registro() {
                     (usuario) =>
                         usuario.correo
                             .toLowerCase()
-                            .trim() === correoLimpio
+                            .trim() ===
+                        correoLimpio
                 );
 
-            if (correoExiste) {
+
+            if (
+                correoExiste
+            ) {
 
                 nuevosErrores.correo =
                     "Este correo ya está registrado.";
@@ -86,14 +163,19 @@ function Registro() {
 
         // CONTRASEÑA
 
-        if (password === "") {
+        if (
+            password ===
+            ""
+        ) {
 
             nuevosErrores.password =
                 "La contraseña es obligatoria.";
 
         } else if (
-            password.length < 4 ||
-            password.length > 10
+            password.length <
+            4 ||
+            password.length >
+            10
         ) {
 
             nuevosErrores.password =
@@ -103,27 +185,38 @@ function Registro() {
 
         // CONFIRMAR CONTRASEÑA
 
-        if (confirmPassword === "") {
+        if (
+            confirmPassword ===
+            ""
+        ) {
 
             nuevosErrores.confirmPassword =
                 "Debes confirmar la contraseña.";
 
-        } else if (password !== confirmPassword) {
+        } else if (
+            password !==
+            confirmPassword
+        ) {
 
             nuevosErrores.confirmPassword =
                 "Las contraseñas no coinciden.";
         }
 
 
-        // TELÉFONO
+        // TELEFONO
 
-        if (telefono === "") {
+        if (
+            telefono ===
+            ""
+        ) {
 
             nuevosErrores.telefono =
                 "El teléfono es obligatorio.";
 
         } else if (
-            !/^\+569 \d{8}$/.test(telefono)
+            !/^\+569 \d{8}$/.test(
+                telefono
+            )
         ) {
 
             nuevosErrores.telefono =
@@ -131,34 +224,88 @@ function Registro() {
         }
 
 
-        setErrores(nuevosErrores);
+        // DIRECCION
 
-        return Object.keys(nuevosErrores).length === 0;
+        if (
+            direccionLimpia ===
+            ""
+        ) {
+
+            nuevosErrores.direccion =
+                "La dirección es obligatoria.";
+
+        } else if (
+            direccionLimpia.length <
+            10
+        ) {
+
+            nuevosErrores.direccion =
+                "La dirección debe tener al menos 10 caracteres.";
+
+        } else if (
+            direccionLimpia.length >
+            100
+        ) {
+
+            nuevosErrores.direccion =
+                "La dirección no puede superar los 100 caracteres.";
+        }
+
+
+        setErrores(
+            nuevosErrores
+        );
+
+
+        return (
+            Object.keys(
+                nuevosErrores
+            ).length ===
+            0
+        );
     };
 
 
-    const registrarUsuario = (e) => {
+    // REGISTRO AL CLIENTE
+
+    const registrarUsuario = (
+        e
+    ) => {
 
         e.preventDefault();
 
         setMensaje("");
 
-        if (!validarFormulario()) {
+
+        if (
+            !validarFormulario()
+        ) {
+
             return;
         }
 
 
         agregarUsuario({
-            nombre: nombre.trim(),
+
+            nombre:
+                nombre.trim(),
 
             correo:
-                correo.trim().toLowerCase(),
+                correo
+                    .trim()
+                    .toLowerCase(),
 
-            password,
+            password:
+                password,
 
-            telefono: telefono.trim(),
+            telefono:
+                telefono.trim(),
 
-            rol: "Cliente"
+            direccion:
+                direccion.trim(),
+
+            rol:
+                "Cliente"
         });
 
 
@@ -172,6 +319,7 @@ function Registro() {
         setPassword("");
         setConfirmPassword("");
         setTelefono("");
+        setDireccion("");
         setErrores({});
     };
 
@@ -181,7 +329,8 @@ function Registro() {
         <main
             className="container py-5"
             style={{
-                maxWidth: "650px"
+                maxWidth:
+                    "650px"
             }}
         >
 
@@ -192,12 +341,16 @@ function Registro() {
                     <h1
                         className="text-center mb-2"
                         style={{
-                            color: "#ff6500",
-                            fontWeight: "bold"
+                            color:
+                                "#ff6500",
+
+                            fontWeight:
+                                "bold"
                         }}
                     >
                         REGISTRO
                     </h1>
+
 
                     <p className="text-center text-secondary mb-4">
                         Crea tu cuenta en El Bajón del Gorila
@@ -207,7 +360,11 @@ function Registro() {
                     {mensaje && (
 
                         <div className="alert alert-success">
-                            {mensaje}
+
+                            {
+                                mensaje
+                            }
+
 
                             <div className="mt-2">
 
@@ -215,7 +372,9 @@ function Registro() {
                                     type="button"
                                     className="btn btn-success btn-sm"
                                     onClick={() =>
-                                        navigate("/login")
+                                        navigate(
+                                            "/login"
+                                        )
                                     }
                                 >
                                     Ir a iniciar sesión
@@ -228,8 +387,11 @@ function Registro() {
                     )}
 
 
-                    <form onSubmit={registrarUsuario}>
-
+                    <form
+                        onSubmit={
+                            registrarUsuario
+                        }
+                    >
 
                         <div className="mb-3">
 
@@ -240,6 +402,7 @@ function Registro() {
                                 Nombre completo
                             </label>
 
+
                             <input
                                 id="nombre"
                                 type="text"
@@ -249,7 +412,9 @@ function Registro() {
                                         : ""
                                 }`}
                                 maxLength="50"
-                                value={nombre}
+                                value={
+                                    nombre
+                                }
                                 onChange={(e) => {
 
                                     setNombre(
@@ -263,10 +428,13 @@ function Registro() {
                                 }}
                             />
 
+
                             {errores.nombre && (
 
                                 <div className="invalid-feedback">
-                                    {errores.nombre}
+                                    {
+                                        errores.nombre
+                                    }
                                 </div>
 
                             )}
@@ -283,6 +451,7 @@ function Registro() {
                                 Correo electrónico
                             </label>
 
+
                             <input
                                 id="correo"
                                 type="email"
@@ -292,7 +461,9 @@ function Registro() {
                                         : ""
                                 }`}
                                 placeholder="ejemplo@gmail.com"
-                                value={correo}
+                                value={
+                                    correo
+                                }
                                 onChange={(e) => {
 
                                     setCorreo(
@@ -306,10 +477,13 @@ function Registro() {
                                 }}
                             />
 
+
                             {errores.correo && (
 
                                 <div className="invalid-feedback">
-                                    {errores.correo}
+                                    {
+                                        errores.correo
+                                    }
                                 </div>
 
                             )}
@@ -329,6 +503,7 @@ function Registro() {
                                     Contraseña
                                 </label>
 
+
                                 <input
                                     id="password"
                                     type="password"
@@ -338,7 +513,9 @@ function Registro() {
                                             : ""
                                     }`}
                                     placeholder="4 a 10 caracteres"
-                                    value={password}
+                                    value={
+                                        password
+                                    }
                                     onChange={(e) => {
 
                                         setPassword(
@@ -352,10 +529,13 @@ function Registro() {
                                     }}
                                 />
 
+
                                 {errores.password && (
 
                                     <div className="invalid-feedback">
-                                        {errores.password}
+                                        {
+                                            errores.password
+                                        }
                                     </div>
 
                                 )}
@@ -372,6 +552,7 @@ function Registro() {
                                     Confirmar contraseña
                                 </label>
 
+
                                 <input
                                     id="confirmPassword"
                                     type="password"
@@ -380,7 +561,9 @@ function Registro() {
                                             ? "is-invalid"
                                             : ""
                                     }`}
-                                    value={confirmPassword}
+                                    value={
+                                        confirmPassword
+                                    }
                                     onChange={(e) => {
 
                                         setConfirmPassword(
@@ -394,6 +577,7 @@ function Registro() {
                                     }}
                                 />
 
+
                                 {errores.confirmPassword && (
 
                                     <div className="invalid-feedback">
@@ -406,11 +590,10 @@ function Registro() {
 
                             </div>
 
-
                         </div>
 
 
-                        <div className="mb-4">
+                        <div className="mb-3">
 
                             <label
                                 htmlFor="telefono"
@@ -425,6 +608,7 @@ function Registro() {
                                 <span className="input-group-text">
                                     +569
                                 </span>
+
 
                                 <input
                                     id="telefono"
@@ -456,11 +640,14 @@ function Registro() {
                                                     8
                                                 );
 
+
                                         setTelefono(
-                                            soloNumeros.length > 0
+                                            soloNumeros.length >
+                                            0
                                                 ? `+569 ${soloNumeros}`
                                                 : ""
                                         );
+
 
                                         setErrores({
                                             ...errores,
@@ -469,10 +656,13 @@ function Registro() {
                                     }}
                                 />
 
+
                                 {errores.telefono && (
 
                                     <div className="invalid-feedback">
-                                        {errores.telefono}
+                                        {
+                                            errores.telefono
+                                        }
                                     </div>
 
                                 )}
@@ -482,16 +672,66 @@ function Registro() {
                         </div>
 
 
+                        <div className="mb-4">
+
+                            <label
+                                htmlFor="direccion"
+                                className="form-label"
+                            >
+                                Dirección
+                            </label>
+
+
+                            <input
+                                id="direccion"
+                                type="text"
+                                maxLength="100"
+                                className={`form-control ${
+                                    errores.direccion
+                                        ? "is-invalid"
+                                        : ""
+                                }`}
+                                placeholder="Ej: Av. Principal 1234, Santiago"
+                                value={
+                                    direccion
+                                }
+                                onChange={(e) => {
+
+                                    setDireccion(
+                                        e.target.value
+                                    );
+
+                                    setErrores({
+                                        ...errores,
+                                        direccion: ""
+                                    });
+                                }}
+                            />
+
+
+                            {errores.direccion && (
+
+                                <div className="invalid-feedback">
+                                    {
+                                        errores.direccion
+                                    }
+                                </div>
+
+                            )}
+
+                        </div>
+
+
                         <button
                             type="submit"
                             className="btn w-100 text-white fw-bold"
                             style={{
-                                backgroundColor: "#ff6500"
+                                backgroundColor:
+                                    "#ff6500"
                             }}
                         >
                             REGISTRARME
                         </button>
-
 
                     </form>
 
@@ -505,7 +745,6 @@ function Registro() {
                         </Link>
 
                     </p>
-
 
                 </div>
 

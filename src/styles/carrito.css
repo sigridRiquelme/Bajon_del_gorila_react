@@ -332,3 +332,65 @@
         justify-content: space-between;
     }
 }
+
+.pasos-checkout {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 40px;
+}
+
+.paso {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #999999;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.numero-paso {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #cccccc;
+    border-radius: 50%;
+    background-color: white;
+}
+
+.paso.activo {
+    color: var(--naranja);
+}
+
+.paso.activo .numero-paso {
+    border-color: var(--naranja);
+    background-color: var(--naranja);
+    color: white;
+}
+
+.linea-paso {
+    width: 90px;
+    height: 2px;
+    margin: 0 15px;
+    background-color: #dddddd;
+}
+
+@media (max-width: 650px) {
+
+    .pasos-checkout {
+        align-items: flex-start;
+    }
+
+    .paso {
+        flex-direction: column;
+        text-align: center;
+        font-size: 11px;
+    }
+
+    .linea-paso {
+        width: 35px;
+        margin: 15px 8px 0;
+    }
+}

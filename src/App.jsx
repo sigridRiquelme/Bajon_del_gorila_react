@@ -10,9 +10,14 @@ import Contacto from "./components/Contacto.jsx";
 
 import Inicio from "./pages/Inicio.jsx";
 import Menu from "./pages/Menu.jsx";
+import DetalleProducto from "./pages/DetalleProducto.jsx";
 import Promociones from "./pages/Promociones.jsx";
 import PerfilCliente from "./pages/PerfilCliente.jsx";
-import Carrito from "./pages/Carrito.jsx";
+
+import Carrito from "./pages/carrito/Carrito.jsx";
+import Checkout from "./pages/carrito/Checkout.jsx";
+import CompraExitosa from "./pages/carrito/CompraExitosa.jsx";
+import CompraError from "./pages/carrito/CompraError.jsx";
 
 import Dashboard from "./pages/admin/Dashboard.jsx";
 import Productos from "./pages/admin/Productos.jsx";
@@ -39,6 +44,7 @@ function App() {
 
                 <Route path="/" element={<Inicio />} />
                 <Route path="/menu" element={<Menu />} />
+                <Route path="/producto/:codigo" element={<DetalleProducto />} />
                 <Route path="/promociones" element={<Promociones />} />
                 <Route path="/nosotros" element={<Nosotros />} />
                 <Route path="/contacto" element={<Contacto />} />
@@ -46,8 +52,12 @@ function App() {
                 <Route path="/registro" element={<Registro />} />
                 <Route path="/perfil" element={<PerfilCliente />} />
 
-                {/* CARRITO */}
+                {/* FLUJO DE COMPRA */}
+
                 <Route path="/carrito" element={<Carrito />} />
+                <Route path="/checkout" element={<Checkout />} />
+                <Route path="/compra-exitosa" element={<CompraExitosa />} />
+                <Route path="/compra-error" element={<CompraError />} />
 
             </Route>
 
@@ -63,7 +73,6 @@ function App() {
                 <Route path="productos/reporte" element={<ReporteInventario />} />
 
                 <Route path="pedidos" element={<Pedidos />} />
-
                 <Route path="usuarios" element={<Usuarios />} />
 
                 <Route path="reportes/usuarios" element={<ReporteUsuarios />} />

@@ -1,4 +1,7 @@
-import { useState } from "react";
+import {
+    useState
+} from "react";
+
 import "../../styles/usuarios.css";
 
 import {
@@ -10,85 +13,153 @@ import {
 
 function PerfilAdmin() {
 
-    const administrador = obtenerUsuarioPorId(0);
+    const administrador =
+        obtenerUsuarioPorId(
+            0
+        );
 
-    const [modoEdicion, setModoEdicion] = useState(false);
 
-    const [datosFormulario, setDatosFormulario] = useState({
-        nombre: administrador?.nombre || "",
-        correo: administrador?.correo || "",
-        telefono: administrador?.telefono || ""
+    const [
+        modoEdicion,
+        setModoEdicion
+    ] = useState(false);
+
+
+    const [
+        datosFormulario,
+        setDatosFormulario
+    ] = useState({
+
+        nombre:
+            administrador?.nombre ||
+            "",
+
+        correo:
+            administrador?.correo ||
+            "",
+
+        telefono:
+            administrador?.telefono ||
+            "",
+
+        direccion:
+            administrador?.direccion ||
+            ""
     });
 
-    const [errores, setErrores] = useState({});
 
-    const [mensaje, setMensaje] = useState("");
+    const [
+        errores,
+        setErrores
+    ] = useState({});
 
 
-    const manejarCambio = (e) => {
+    const [
+        mensaje,
+        setMensaje
+    ] = useState("");
 
-        const { name, value } = e.target;
+
+    // CAMBIO LOS DATOS DEL FORMULARIO
+
+    const manejarCambio = (
+        e
+    ) => {
+
+        const {
+            name,
+            value
+        } = e.target;
+
 
         setDatosFormulario({
             ...datosFormulario,
             [name]: value
         });
 
+
         setErrores({
             ...errores,
             [name]: ""
         });
 
+
         setMensaje("");
     };
 
+
+    // VALIDO LOS DATOS
 
     const validarFormulario = () => {
 
         const nuevosErrores = {};
 
+
         const nombre =
             datosFormulario.nombre.trim();
+
 
         const correo =
             datosFormulario.correo
                 .trim()
                 .toLowerCase();
 
+
         const telefono =
             datosFormulario.telefono.trim();
 
 
-        // VALIDAR NOMBRE
+        const direccion =
+            datosFormulario.direccion.trim();
 
-        if (nombre === "") {
+
+        // NOMBRE
+
+        if (
+            nombre ===
+            ""
+        ) {
 
             nuevosErrores.nombre =
                 "El nombre es obligatorio.";
 
-        } else if (nombre.length < 3) {
+        } else if (
+            nombre.length <
+            3
+        ) {
 
             nuevosErrores.nombre =
                 "El nombre debe tener al menos 3 caracteres.";
 
-        } else if (nombre.length > 50) {
+        } else if (
+            nombre.length >
+            50
+        ) {
 
             nuevosErrores.nombre =
                 "El nombre no puede superar los 50 caracteres.";
         }
 
 
-        // VALIDAR CORREO
+        // CORREO
 
         const correoValido =
             /^[^\s@]+@(gmail\.com|duoc\.cl|duocuc\.cl)$/i;
 
-        if (correo === "") {
+
+        if (
+            correo ===
+            ""
+        ) {
 
             nuevosErrores.correo =
                 "El correo es obligatorio.";
 
-        } else if (!correoValido.test(correo)) {
+        } else if (
+            !correoValido.test(
+                correo
+            )
+        ) {
 
             nuevosErrores.correo =
                 "El correo debe ser Gmail, Duoc o Duoc UC.";
@@ -98,13 +169,18 @@ function PerfilAdmin() {
             const correoRepetido =
                 obtenerUsuarios().some(
                     (usuario) =>
-                        usuario.id !== 0 &&
+                        usuario.id !==
+                            0 &&
                         usuario.correo
                             .toLowerCase()
-                            .trim() === correo
+                            .trim() ===
+                            correo
                 );
 
-            if (correoRepetido) {
+
+            if (
+                correoRepetido
+            ) {
 
                 nuevosErrores.correo =
                     "Este correo ya está registrado.";
@@ -112,15 +188,20 @@ function PerfilAdmin() {
         }
 
 
-        // VALIDAR TELÉFONO
+        // TELEFONO
 
-        if (telefono === "") {
+        if (
+            telefono ===
+            ""
+        ) {
 
             nuevosErrores.telefono =
                 "El teléfono es obligatorio.";
 
         } else if (
-            !/^\+569 \d{8}$/.test(telefono)
+            !/^\+569 \d{8}$/.test(
+                telefono
+            )
         ) {
 
             nuevosErrores.telefono =
@@ -128,38 +209,89 @@ function PerfilAdmin() {
         }
 
 
-        setErrores(nuevosErrores);
+        // DIRECCION
 
-        return Object.keys(nuevosErrores).length === 0;
+        if (
+            direccion ===
+            ""
+        ) {
+
+            nuevosErrores.direccion =
+                "La dirección es obligatoria.";
+
+        } else if (
+            direccion.length <
+            10
+        ) {
+
+            nuevosErrores.direccion =
+                "La dirección debe tener al menos 10 caracteres.";
+
+        } else if (
+            direccion.length >
+            100
+        ) {
+
+            nuevosErrores.direccion =
+                "La dirección no puede superar los 100 caracteres.";
+        }
+
+
+        setErrores(
+            nuevosErrores
+        );
+
+
+        return (
+            Object.keys(
+                nuevosErrores
+            ).length ===
+            0
+        );
     };
 
 
-    const guardarCambios = (e) => {
+    // GUARDO LOS CAMBIOS
+
+    const guardarCambios = (
+        e
+    ) => {
 
         e.preventDefault();
 
-        if (!validarFormulario()) {
+
+        if (
+            !validarFormulario()
+        ) {
+
             return;
         }
 
 
-        actualizarUsuario(0, {
-            ...administrador,
+        actualizarUsuario(
+            0,
+            {
+                nombre:
+                    datosFormulario.nombre.trim(),
 
-            nombre:
-                datosFormulario.nombre.trim(),
+                correo:
+                    datosFormulario.correo
+                        .trim()
+                        .toLowerCase(),
 
-            correo:
-                datosFormulario.correo
-                    .trim()
-                    .toLowerCase(),
+                telefono:
+                    datosFormulario.telefono.trim(),
 
-            telefono:
-                datosFormulario.telefono.trim()
-        });
+                direccion:
+                    datosFormulario.direccion.trim()
+            }
+        );
 
 
-        setModoEdicion(false);
+        setModoEdicion(
+            false
+        );
+
 
         setMensaje(
             "Los datos del perfil fueron actualizados correctamente."
@@ -167,23 +299,45 @@ function PerfilAdmin() {
     };
 
 
+    // CANCELO LA EDICION
+
     const cancelarEdicion = () => {
 
         setDatosFormulario({
-            nombre: administrador?.nombre || "",
-            correo: administrador?.correo || "",
-            telefono: administrador?.telefono || ""
+
+            nombre:
+                administrador?.nombre ||
+                "",
+
+            correo:
+                administrador?.correo ||
+                "",
+
+            telefono:
+                administrador?.telefono ||
+                "",
+
+            direccion:
+                administrador?.direccion ||
+                ""
         });
+
 
         setErrores({});
         setMensaje("");
-        setModoEdicion(false);
+
+        setModoEdicion(
+            false
+        );
     };
 
 
-    if (!administrador) {
+    if (
+        !administrador
+    ) {
 
         return (
+
             <main>
 
                 <h1>
@@ -233,11 +387,15 @@ function PerfilAdmin() {
                         <div>
 
                             <h2 className="h5 mb-1">
-                                {administrador.nombre}
+                                {
+                                    administrador.nombre
+                                }
                             </h2>
 
                             <span className="badge bg-dark">
-                                {administrador.rol}
+                                {
+                                    administrador.rol
+                                }
                             </span>
 
                         </div>
@@ -248,7 +406,9 @@ function PerfilAdmin() {
                     {mensaje && (
 
                         <div className="alert alert-success">
-                            {mensaje}
+                            {
+                                mensaje
+                            }
                         </div>
 
                     )}
@@ -266,7 +426,10 @@ function PerfilAdmin() {
                                 </label>
 
                                 <p className="fw-semibold mb-0">
-                                    #{administrador.id}
+                                    #
+                                    {
+                                        administrador.id
+                                    }
                                 </p>
 
                             </div>
@@ -279,7 +442,9 @@ function PerfilAdmin() {
                                 </label>
 
                                 <p className="fw-semibold mb-0">
-                                    {administrador.rol}
+                                    {
+                                        administrador.rol
+                                    }
                                 </p>
 
                             </div>
@@ -292,7 +457,9 @@ function PerfilAdmin() {
                                 </label>
 
                                 <p className="fw-semibold mb-0">
-                                    {administrador.nombre}
+                                    {
+                                        administrador.nombre
+                                    }
                                 </p>
 
                             </div>
@@ -305,7 +472,9 @@ function PerfilAdmin() {
                                 </label>
 
                                 <p className="fw-semibold mb-0">
-                                    {administrador.correo}
+                                    {
+                                        administrador.correo
+                                    }
                                 </p>
 
                             </div>
@@ -318,7 +487,25 @@ function PerfilAdmin() {
                                 </label>
 
                                 <p className="fw-semibold mb-0">
-                                    {administrador.telefono}
+                                    {
+                                        administrador.telefono
+                                    }
+                                </p>
+
+                            </div>
+
+
+                            <div className="col-12 col-md-6">
+
+                                <label className="form-label text-secondary">
+                                    Dirección
+                                </label>
+
+                                <p className="fw-semibold mb-0">
+                                    {
+                                        administrador.direccion ||
+                                        "Sin dirección registrada"
+                                    }
                                 </p>
 
                             </div>
@@ -330,7 +517,9 @@ function PerfilAdmin() {
                                     type="button"
                                     className="btn btn-dark"
                                     onClick={() =>
-                                        setModoEdicion(true)
+                                        setModoEdicion(
+                                            true
+                                        )
                                     }
                                 >
 
@@ -342,12 +531,15 @@ function PerfilAdmin() {
 
                             </div>
 
-
                         </div>
 
                     ) : (
 
-                        <form onSubmit={guardarCambios}>
+                        <form
+                            onSubmit={
+                                guardarCambios
+                            }
+                        >
 
                             <div className="row g-3">
 
@@ -360,6 +552,7 @@ function PerfilAdmin() {
                                     >
                                         Nombre
                                     </label>
+
 
                                     <input
                                         id="nombre"
@@ -374,13 +567,18 @@ function PerfilAdmin() {
                                         value={
                                             datosFormulario.nombre
                                         }
-                                        onChange={manejarCambio}
+                                        onChange={
+                                            manejarCambio
+                                        }
                                     />
+
 
                                     {errores.nombre && (
 
                                         <div className="invalid-feedback">
-                                            {errores.nombre}
+                                            {
+                                                errores.nombre
+                                            }
                                         </div>
 
                                     )}
@@ -397,6 +595,7 @@ function PerfilAdmin() {
                                         Correo
                                     </label>
 
+
                                     <input
                                         id="correo"
                                         name="correo"
@@ -409,13 +608,18 @@ function PerfilAdmin() {
                                         value={
                                             datosFormulario.correo
                                         }
-                                        onChange={manejarCambio}
+                                        onChange={
+                                            manejarCambio
+                                        }
                                     />
+
 
                                     {errores.correo && (
 
                                         <div className="invalid-feedback">
-                                            {errores.correo}
+                                            {
+                                                errores.correo
+                                            }
                                         </div>
 
                                     )}
@@ -425,10 +629,7 @@ function PerfilAdmin() {
 
                                 <div className="col-12 col-md-6">
 
-                                    <label
-                                        htmlFor="telefono"
-                                        className="form-label"
-                                    >
+                                    <label htmlFor="telefono">
                                         Teléfono
                                     </label>
 
@@ -445,12 +646,6 @@ function PerfilAdmin() {
                                             type="text"
                                             inputMode="numeric"
                                             maxLength="8"
-                                            placeholder="84755654"
-                                            className={`form-control ${
-                                                errores.telefono
-                                                    ? "is-invalid"
-                                                    : ""
-                                            }`}
                                             value={
                                                 datosFormulario.telefono
                                                     .replace(
@@ -476,7 +671,8 @@ function PerfilAdmin() {
                                                     ...datosFormulario,
 
                                                     telefono:
-                                                        soloNumeros.length > 0
+                                                        soloNumeros.length >
+                                                        0
                                                             ? `+569 ${soloNumeros}`
                                                             : ""
                                                 });
@@ -486,6 +682,7 @@ function PerfilAdmin() {
                                                     ...errores,
                                                     telefono: ""
                                                 });
+
 
                                                 setMensaje("");
                                             }}
@@ -497,7 +694,51 @@ function PerfilAdmin() {
                                     {errores.telefono && (
 
                                         <div className="mensaje-error">
-                                            {errores.telefono}
+                                            {
+                                                errores.telefono
+                                            }
+                                        </div>
+
+                                    )}
+
+                                </div>
+
+
+                                <div className="col-12 col-md-6">
+
+                                    <label
+                                        htmlFor="direccion"
+                                        className="form-label"
+                                    >
+                                        Dirección
+                                    </label>
+
+
+                                    <input
+                                        id="direccion"
+                                        name="direccion"
+                                        type="text"
+                                        maxLength="100"
+                                        className={`form-control ${
+                                            errores.direccion
+                                                ? "is-invalid"
+                                                : ""
+                                        }`}
+                                        value={
+                                            datosFormulario.direccion
+                                        }
+                                        onChange={
+                                            manejarCambio
+                                        }
+                                    />
+
+
+                                    {errores.direccion && (
+
+                                        <div className="invalid-feedback">
+                                            {
+                                                errores.direccion
+                                            }
                                         </div>
 
                                     )}
@@ -511,10 +752,13 @@ function PerfilAdmin() {
                                         Rol
                                     </label>
 
+
                                     <input
                                         type="text"
                                         className="form-control"
-                                        value={administrador.rol}
+                                        value={
+                                            administrador.rol
+                                        }
                                         disabled
                                     />
 
@@ -536,7 +780,9 @@ function PerfilAdmin() {
                                         <button
                                             type="button"
                                             className="btn btn-outline-secondary"
-                                            onClick={cancelarEdicion}
+                                            onClick={
+                                                cancelarEdicion
+                                            }
                                         >
                                             Cancelar
                                         </button>
@@ -544,7 +790,6 @@ function PerfilAdmin() {
                                     </div>
 
                                 </div>
-
 
                             </div>
 

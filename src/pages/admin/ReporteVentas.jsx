@@ -14,100 +14,231 @@ function ReporteVentas() {
 
     const pedidos = obtenerPedidos();
 
-    const [tipoFiltro, setTipoFiltro] = useState("todo");
-    const [fechaFiltro, setFechaFiltro] = useState("");
+    const [tipoFiltro, setTipoFiltro] =
+        useState("todo");
+
+    const [fechaFiltro, setFechaFiltro] =
+        useState("");
 
 
-    const pedidosFiltrados = pedidos.filter((pedido) => {
+    // CAMBIO: convierto las fechas de las boletas para poder filtrarlas bien
 
-        if (tipoFiltro === "todo") {
-            return true;
+    const obtenerPartesFecha = (fecha) => {
+
+        const partes =
+            fecha.split("/");
+
+
+        if (partes.length !== 3) {
+
+            return {
+                dia: "",
+                mes: "",
+                anio: ""
+            };
         }
 
-        if (fechaFiltro === "") {
-            return false;
-        }
 
-        if (tipoFiltro === "dia") {
-            return pedido.fecha === fechaFiltro;
-        }
+        return {
+            dia: partes[0],
+            mes: partes[1],
+            anio: partes[2]
+        };
+    };
 
-        if (tipoFiltro === "mes") {
-            return pedido.fecha.startsWith(fechaFiltro);
-        }
 
-        if (tipoFiltro === "anio") {
+    const pedidosFiltrados =
+        pedidos.filter(
+            (pedido) => {
 
-            if (!/^\d{4}$/.test(fechaFiltro)) {
-                return false;
+                if (
+                    tipoFiltro ===
+                    "todo"
+                ) {
+
+                    return true;
+                }
+
+
+                if (
+                    fechaFiltro === ""
+                ) {
+
+                    return false;
+                }
+
+
+                const {
+                    dia,
+                    mes,
+                    anio
+                } = obtenerPartesFecha(
+                    pedido.fecha
+                );
+
+
+                if (
+                    tipoFiltro ===
+                    "dia"
+                ) {
+
+                    const [
+                        anioFiltro,
+                        mesFiltro,
+                        diaFiltro
+                    ] =
+                        fechaFiltro.split(
+                            "-"
+                        );
+
+
+                    return (
+                        dia === diaFiltro &&
+                        mes === mesFiltro &&
+                        anio === anioFiltro
+                    );
+                }
+
+
+                if (
+                    tipoFiltro ===
+                    "mes"
+                ) {
+
+                    const [
+                        anioFiltro,
+                        mesFiltro
+                    ] =
+                        fechaFiltro.split(
+                            "-"
+                        );
+
+
+                    return (
+                        mes === mesFiltro &&
+                        anio === anioFiltro
+                    );
+                }
+
+
+                if (
+                    tipoFiltro ===
+                    "anio"
+                ) {
+
+                    if (
+                        !/^\d{4}$/.test(
+                            fechaFiltro
+                        )
+                    ) {
+
+                        return false;
+                    }
+
+
+                    return (
+                        anio ===
+                        fechaFiltro
+                    );
+                }
+
+
+                return true;
             }
-
-            return pedido.fecha.startsWith(fechaFiltro);
-        }
-
-        return true;
-    });
+        );
 
 
-    const cantidadVentas = pedidosFiltrados.length;
+    const cantidadVentas =
+        pedidosFiltrados.length;
 
 
-    const totalVendido = pedidosFiltrados.reduce(
-        (total, pedido) =>
-            total + pedido.total,
-        0
-    );
+    const totalVendido =
+        pedidosFiltrados.reduce(
+            (total, pedido) =>
+                total +
+                pedido.total,
+            0
+        );
 
 
     const promedioVenta =
         cantidadVentas > 0
-            ? totalVendido / cantidadVentas
+            ? totalVendido /
+                cantidadVentas
             : 0;
 
 
-    const ventasPorFecha = pedidosFiltrados.reduce(
-        (fechas, pedido) => {
+    const ventasPorFecha =
+        pedidosFiltrados.reduce(
+            (
+                fechas,
+                pedido
+            ) => {
 
-            if (!fechas[pedido.fecha]) {
+                if (
+                    !fechas[
+                        pedido.fecha
+                    ]
+                ) {
 
-                fechas[pedido.fecha] = {
-                    cantidad: 0,
-                    total: 0
-                };
-
-            }
-
-            fechas[pedido.fecha].cantidad++;
-
-            fechas[pedido.fecha].total += pedido.total;
-
-            return fechas;
-
-        },
-        {}
-    );
+                    fechas[
+                        pedido.fecha
+                    ] = {
+                        cantidad: 0,
+                        total: 0
+                    };
+                }
 
 
-    const cambiarTipoFiltro = (e) => {
+                fechas[
+                    pedido.fecha
+                ].cantidad++;
 
-        setTipoFiltro(e.target.value);
+
+                fechas[
+                    pedido.fecha
+                ].total +=
+                    pedido.total;
+
+
+                return fechas;
+            },
+            {}
+        );
+
+
+    const cambiarTipoFiltro = (
+        e
+    ) => {
+
+        setTipoFiltro(
+            e.target.value
+        );
+
         setFechaFiltro("");
-
     };
 
-    const obtenerNombreCliente = (pedido) => {
+
+    const obtenerNombreCliente = (
+        pedido
+    ) => {
 
         const usuario =
-            obtenerUsuarioPorId(pedido.usuarioId);
+            obtenerUsuarioPorId(
+                pedido.usuarioId
+            );
+
 
         return usuario
             ? usuario.nombre
             : pedido.cliente;
     };
 
+
     return (
 
         <main className="reporte-admin">
+
 
             <div
                 className="
@@ -127,6 +258,7 @@ function ReporteVentas() {
                     <h1 className="h2">
                         Reporte de ventas
                     </h1>
+
 
                     <p className="text-secondary mb-0">
                         Resumen general de las ventas realizadas
@@ -157,11 +289,16 @@ function ReporteVentas() {
                                 Mostrar por
                             </label>
 
+
                             <select
                                 id="tipoFiltro"
                                 className="form-select"
-                                value={tipoFiltro}
-                                onChange={cambiarTipoFiltro}
+                                value={
+                                    tipoFiltro
+                                }
+                                onChange={
+                                    cambiarTipoFiltro
+                                }
                             >
 
                                 <option value="todo">
@@ -185,7 +322,8 @@ function ReporteVentas() {
                         </div>
 
 
-                        {tipoFiltro === "dia" && (
+                        {tipoFiltro ===
+                            "dia" && (
 
                             <div className="col-12 col-md-4">
 
@@ -196,13 +334,18 @@ function ReporteVentas() {
                                     Seleccionar día
                                 </label>
 
+
                                 <input
                                     id="fechaDia"
                                     type="date"
                                     className="form-control"
-                                    value={fechaFiltro}
+                                    value={
+                                        fechaFiltro
+                                    }
                                     onChange={(e) =>
-                                        setFechaFiltro(e.target.value)
+                                        setFechaFiltro(
+                                            e.target.value
+                                        )
                                     }
                                 />
 
@@ -211,7 +354,8 @@ function ReporteVentas() {
                         )}
 
 
-                        {tipoFiltro === "mes" && (
+                        {tipoFiltro ===
+                            "mes" && (
 
                             <div className="col-12 col-md-4">
 
@@ -222,13 +366,18 @@ function ReporteVentas() {
                                     Seleccionar mes
                                 </label>
 
+
                                 <input
                                     id="fechaMes"
                                     type="month"
                                     className="form-control"
-                                    value={fechaFiltro}
+                                    value={
+                                        fechaFiltro
+                                    }
                                     onChange={(e) =>
-                                        setFechaFiltro(e.target.value)
+                                        setFechaFiltro(
+                                            e.target.value
+                                        )
                                     }
                                 />
 
@@ -237,7 +386,8 @@ function ReporteVentas() {
                         )}
 
 
-                        {tipoFiltro === "anio" && (
+                        {tipoFiltro ===
+                            "anio" && (
 
                             <div className="col-12 col-md-4">
 
@@ -248,21 +398,34 @@ function ReporteVentas() {
                                     Seleccionar año
                                 </label>
 
+
                                 <input
+                                    id="fechaAnio"
                                     type="text"
                                     inputMode="numeric"
                                     className="form-control"
                                     placeholder="Ej: 2026"
                                     maxLength="4"
-                                    value={fechaFiltro}
+                                    value={
+                                        fechaFiltro
+                                    }
                                     onChange={(e) => {
 
                                         const soloNumeros =
                                             e.target.value
-                                                .replace(/\D/g, "")
-                                                .slice(0, 4);
+                                                .replace(
+                                                    /\D/g,
+                                                    ""
+                                                )
+                                                .slice(
+                                                    0,
+                                                    4
+                                                );
 
-                                        setFechaFiltro(soloNumeros);
+
+                                        setFechaFiltro(
+                                            soloNumeros
+                                        );
                                     }}
                                 />
 
@@ -287,12 +450,16 @@ function ReporteVentas() {
                         <div className="card-body">
 
                             <div className="reporte-icono">
+
                                 <i className="bi bi-receipt"></i>
+
                             </div>
+
 
                             <p className="card-text text-secondary">
                                 Ventas realizadas
                             </p>
+
 
                             <h3 className="fw-bold mb-0">
                                 {cantidadVentas}
@@ -312,12 +479,16 @@ function ReporteVentas() {
                         <div className="card-body">
 
                             <div className="reporte-icono">
+
                                 <i className="bi bi-cash-stack"></i>
+
                             </div>
+
 
                             <p className="card-text text-secondary">
                                 Total vendido
                             </p>
+
 
                             <h3 className="fw-bold mb-0">
 
@@ -342,12 +513,16 @@ function ReporteVentas() {
                         <div className="card-body">
 
                             <div className="reporte-icono">
+
                                 <i className="bi bi-calculator"></i>
+
                             </div>
+
 
                             <p className="card-text text-secondary">
                                 Promedio por venta
                             </p>
+
 
                             <h3 className="fw-bold mb-0">
 
@@ -366,7 +541,6 @@ function ReporteVentas() {
                     </div>
 
                 </div>
-
 
             </div>
 
@@ -404,17 +578,28 @@ function ReporteVentas() {
                                     Object.entries(
                                         ventasPorFecha
                                     ).map(
-                                        ([fecha, datos]) => (
+                                        (
+                                            [
+                                                fecha,
+                                                datos
+                                            ]
+                                        ) => (
 
-                                            <tr key={fecha}>
+                                            <tr
+                                                key={
+                                                    fecha
+                                                }
+                                            >
 
                                                 <td>
                                                     {fecha}
                                                 </td>
 
+
                                                 <td>
                                                     {datos.cantidad}
                                                 </td>
+
 
                                                 <td className="fw-semibold">
 
@@ -484,34 +669,51 @@ function ReporteVentas() {
 
                             <tbody>
 
-                                {pedidosFiltrados.length > 0 ? (
+                                {pedidosFiltrados.length >
+                                0 ? (
 
                                     pedidosFiltrados.map(
-                                        (pedido) => (
+                                        (
+                                            pedido
+                                        ) => (
 
-                                            <tr key={pedido.codigo}>
+                                            <tr
+                                                key={
+                                                    pedido.codigo
+                                                }
+                                            >
 
                                                 <td>
                                                     #{pedido.codigo}
                                                 </td>
 
+
                                                 <td>
-                                                    {obtenerNombreCliente(pedido)}
+                                                    {obtenerNombreCliente(
+                                                        pedido
+                                                    )}
                                                 </td>
+
 
                                                 <td>
                                                     {pedido.fecha}
                                                 </td>
 
+
                                                 <td>
 
                                                     {pedido.productos.reduce(
-                                                        (total, producto) =>
-                                                            total + producto.cantidad,
+                                                        (
+                                                            total,
+                                                            producto
+                                                        ) =>
+                                                            total +
+                                                            producto.cantidad,
                                                         0
                                                     )}
 
                                                 </td>
+
 
                                                 <td className="fw-semibold">
 

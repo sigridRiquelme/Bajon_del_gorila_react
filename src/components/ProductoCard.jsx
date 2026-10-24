@@ -2,23 +2,42 @@ import {
     useState
 } from "react";
 
+import {
+    Link
+} from "react-router-dom";
+
+import {
+    obtenerPrecioFinal
+} from "../data/productos.js";
+
 
 function ProductoCard({
     producto,
     onAgregar
 }) {
 
-    const [esFavorito, setEsFavorito] =
-        useState(false);
+    const [
+        esFavorito,
+        setEsFavorito
+    ] = useState(false);
 
-    const [cantidad, setCantidad] =
-        useState(1);
+
+    const [
+        cantidad,
+        setCantidad
+    ] = useState(1);
 
 
-    const precioFormateado =
-        producto.precio.toLocaleString(
-            "es-CL"
+    const precioFinal =
+        obtenerPrecioFinal(
+            producto
         );
+
+
+    const tienePromocion =
+        producto.promocion &&
+        producto.descuento >
+        0;
 
 
     const stockDisponible =
@@ -27,13 +46,17 @@ function ProductoCard({
 
 
     const sinStock =
-        stockDisponible <= 0 ||
-        producto.estado === "Sin stock";
+        stockDisponible <=
+            0 ||
+        producto.estado ===
+            "Sin stock";
 
 
     const stockBajo =
-        stockDisponible > 0 &&
-        stockDisponible <= 5;
+        stockDisponible >
+            0 &&
+        stockDisponible <=
+            5;
 
 
     const aumentarCantidad = () => {
@@ -52,7 +75,10 @@ function ProductoCard({
 
     const disminuirCantidad = () => {
 
-        if (cantidad > 1) {
+        if (
+            cantidad >
+            1
+        ) {
 
             setCantidad(
                 cantidad - 1
@@ -67,17 +93,26 @@ function ProductoCard({
             !onAgregar ||
             sinStock
         ) {
+
             return;
         }
 
 
+        // ENVIO EL PRECIO PROMOCIONAL AL CARRITO
+
         onAgregar(
-            producto,
+            {
+                ...producto,
+                precio:
+                    precioFinal
+            },
             cantidad
         );
 
 
-        setCantidad(1);
+        setCantidad(
+            1
+        );
     };
 
 
@@ -88,19 +123,37 @@ function ProductoCard({
 
             <div className="contenedor-imagen-producto">
 
-                <img
-                    className="imagen-producto"
-                    src={producto.imagen}
-                    alt={producto.nombre}
-                />
+                <Link
+                    to={`/producto/${producto.codigo}`}
+                >
+
+                    <img
+                        className="imagen-producto"
+                        src={
+                            producto.imagen
+                        }
+                        alt={
+                            producto.nombre
+                        }
+                    />
+
+                </Link>
 
 
-                {producto.etiqueta && (
+                {tienePromocion ? (
+
+                    <span className="etiqueta etiqueta-naranja etiqueta-producto">
+                        -{producto.descuento}% OFF
+                    </span>
+
+                ) : producto.etiqueta && (
 
                     <span
                         className={`etiqueta etiqueta-${producto.colorEtiqueta} etiqueta-producto`}
                     >
-                        {producto.etiqueta}
+                        {
+                            producto.etiqueta
+                        }
                     </span>
 
                 )}
@@ -109,17 +162,16 @@ function ProductoCard({
                 <button
                     type="button"
                     className="boton-favorito"
-                    aria-label={`${esFavorito ? "Quitar" : "Agregar"} ${producto.nombre} ${esFavorito ? "de" : "a"} favoritos`}
-                    aria-pressed={esFavorito}
                     onClick={() =>
                         setEsFavorito(
                             !esFavorito
                         )
                     }
                 >
-                    {esFavorito
-                        ? "❤️"
-                        : "🤍"
+                    {
+                        esFavorito
+                            ? "❤️"
+                            : "🤍"
                     }
                 </button>
 
@@ -129,13 +181,27 @@ function ProductoCard({
             <div className="cuerpo-producto">
 
                 <span className="categoria-producto">
-                    {producto.categoria}
+                    {
+                        producto.categoria
+                    }
                 </span>
 
 
-                <h3 className="titulo-producto">
-                    {producto.nombre}
-                </h3>
+                <Link
+                    to={`/producto/${producto.codigo}`}
+                    style={{
+                        textDecoration:
+                            "none"
+                    }}
+                >
+
+                    <h3 className="titulo-producto">
+                        {
+                            producto.nombre
+                        }
+                    </h3>
+
+                </Link>
 
 
                 <div className="valoracion">
@@ -145,14 +211,19 @@ function ProductoCard({
                     </span>
 
                     <span className="numero-valoracion">
-                        {producto.valoracion}
+                        {
+                            producto.valoracion ||
+                            4.8
+                        }
                     </span>
 
                 </div>
 
 
                 <p className="descripcion-producto">
-                    {producto.descripcion}
+                    {
+                        producto.descripcion
+                    }
                 </p>
 
 
@@ -166,11 +237,12 @@ function ProductoCard({
                     }`}
                 >
 
-                    {sinStock
-                        ? "Sin stock disponible"
-                        : stockBajo
-                            ? `Últimas ${stockDisponible} unidades disponibles`
-                            : `Stock disponible: ${stockDisponible}`
+                    {
+                        sinStock
+                            ? "Sin stock disponible"
+                            : stockBajo
+                                ? `Últimas ${stockDisponible} unidades disponibles`
+                                : `Stock disponible: ${stockDisponible}`
                     }
 
                 </div>
@@ -178,9 +250,50 @@ function ProductoCard({
 
                 <div className="pie-producto">
 
-                    <span className="precio-producto">
-                        ${precioFormateado}
-                    </span>
+
+                    {tienePromocion ? (
+
+                        <div className="precio-con-promocion">
+
+                            <span className="precio-anterior-producto">
+
+                                $
+                                {
+                                    producto.precio.toLocaleString(
+                                        "es-CL"
+                                    )
+                                }
+
+                            </span>
+
+
+                            <span className="precio-producto">
+
+                                $
+                                {
+                                    precioFinal.toLocaleString(
+                                        "es-CL"
+                                    )
+                                }
+
+                            </span>
+
+                        </div>
+
+                    ) : (
+
+                        <span className="precio-producto">
+
+                            $
+                            {
+                                producto.precio.toLocaleString(
+                                    "es-CL"
+                                )
+                            }
+
+                        </span>
+
+                    )}
 
                 </div>
 
@@ -192,9 +305,12 @@ function ProductoCard({
 
                         <button
                             type="button"
-                            onClick={disminuirCantidad}
+                            onClick={
+                                disminuirCantidad
+                            }
                             disabled={
-                                cantidad <= 1 ||
+                                cantidad <=
+                                    1 ||
                                 sinStock
                             }
                         >
@@ -203,20 +319,23 @@ function ProductoCard({
 
 
                         <span>
-                            {sinStock
-                                ? 0
-                                : cantidad
+                            {
+                                sinStock
+                                    ? 0
+                                    : cantidad
                             }
                         </span>
 
 
                         <button
                             type="button"
-                            onClick={aumentarCantidad}
+                            onClick={
+                                aumentarCantidad
+                            }
                             disabled={
                                 sinStock ||
                                 cantidad >=
-                                stockDisponible
+                                    stockDisponible
                             }
                         >
                             +
@@ -232,24 +351,28 @@ function ProductoCard({
                             !onAgregar ||
                             sinStock
                         }
-                        title={
-                            sinStock
-                                ? "Producto sin stock disponible"
-                                : !onAgregar
-                                    ? "No disponible para esta cuenta"
-                                    : undefined
-                        }
                         onClick={
                             agregarProducto
                         }
                     >
-                        {sinStock
-                            ? "SIN STOCK"
-                            : "AGREGAR"
+
+                        {
+                            sinStock
+                                ? "SIN STOCK"
+                                : "AGREGAR"
                         }
+
                     </button>
 
                 </div>
+
+
+                <Link
+                    to={`/producto/${producto.codigo}`}
+                    className="boton-ver-detalle"
+                >
+                    VER DETALLE
+                </Link>
 
             </div>
 

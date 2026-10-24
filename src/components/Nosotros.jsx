@@ -1,55 +1,153 @@
-import React from 'react';
-import { Container, Row, Col, Card } from 'react-bootstrap';
+import "../styles/publicas.css";
 
-const Nosotros = () => {
-  return (
-    <Container className="py-5" style={{ minHeight: '80vh', color: '#fff' }}>
-      <Row className="justify-content-center mb-5">
-        <Col md={10} lg={8} className="text-center">
-          <h2 style={{ color: '#ff6500', fontWeight: 'bold' }}>¿Quiénes Somos?</h2>
-          <hr style={{ borderColor: '#ff6500', borderWidth: '2px' }} />
-          <p className="lead mt-4">
-            <strong>El Bajón del Gorila</strong> nació con una misión clara: calmar el hambre feroz de las noches santiaguinas con comida rápida, abundante y de calidad.
-          </p>
-        </Col>
-      </Row>
 
-      <Row className="justify-content-center">
-        <Col md={4} className="mb-4">
-          <Card style={{ backgroundColor: '#1E1E1E', border: '1px solid #333' }} className="h-100 shadow">
-            <Card.Body className="text-center">
-              <h4 style={{ color: '#ffc400' }}>Nuestra Historia</h4>
-              <Card.Text>
-                Comenzamos como un pequeño carrito y, gracias a la preferencia de nuestros clientes más noctámbulos, hoy somos el punto de encuentro por excelencia para el bajón.
-              </Card.Text>
-            </Card.Body>
-          </Card>
-        </Col>
+function Nosotros() {
 
-        <Col md={4} className="mb-4">
-          <Card style={{ backgroundColor: '#1E1E1E', border: '1px solid #333' }} className="h-100 shadow">
-            <Card.Body className="text-center">
-              <h4 style={{ color: '#ffc400' }}>Calidad Bestial</h4>
-              <Card.Text>
-                Ingredientes frescos, porciones tamaño gorila y salsas caseras que marcan la diferencia. No escatimamos a la hora de armar tu hamburguesa o tus papas.
-              </Card.Text>
-            </Card.Body>
-          </Card>
-        </Col>
+    return (
 
-        <Col md={4} className="mb-4">
-          <Card style={{ backgroundColor: '#1E1E1E', border: '1px solid #333' }} className="h-100 shadow">
-            <Card.Body className="text-center">
-              <h4 style={{ color: '#ffc400' }}>El Equipo</h4>
-              <Card.Text>
-                Somos un equipo apasionado por la comida callejera. Trabajamos a toda máquina para que tu pedido llegue caliente, rápido y listo para devorar.
-              </Card.Text>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
-    </Container>
-  );
-};
+        <main className="pagina-publica">
+
+
+            <section className="nosotros-hero">
+
+                <div className="contenedor">
+
+                    <p className="pagina-antetitulo">
+                        NUESTRA HISTORIA
+                    </p>
+
+
+                    <h1>
+                        EL BAJÓN DEL GORILA
+                    </h1>
+
+
+                    <p className="nosotros-introduccion">
+                        Comida rápida hecha para esos momentos en que pega el hambre de verdad.
+                    </p>
+
+                </div>
+
+            </section>
+
+
+            <section className="nosotros-contenido">
+
+                <div className="contenedor">
+
+
+                    <div className="nosotros-texto">
+
+                        <div>
+
+                            <p className="pagina-antetitulo">
+                                ¿QUIÉNES SOMOS?
+                            </p>
+
+
+                            <h2>
+                                COMIDA SIMPLE, RICA Y CONTUNDENTE
+                            </h2>
+
+
+                            <p>
+                                El Bajón del Gorila nació como un emprendimiento dedicado a preparar comida rápida con buenas porciones, buenos ingredientes y mucho sabor.
+                            </p>
+
+
+                            <p>
+                                Nuestro menú tiene hamburguesas, churrascos, completos, fajitas, papas y otras opciones pensadas para compartir o simplemente darse un buen bajón.
+                            </p>
+
+
+                            <p>
+                                Buscamos entregar una experiencia cercana, rápida y sencilla, manteniendo siempre la calidad de nuestros productos y mejorando con cada pedido.
+                            </p>
+
+                        </div>
+
+
+                        <div className="nosotros-frase">
+
+                            <span>
+                                🦍
+                            </span>
+
+                            <h3>
+                                CUANDO PEGA EL HAMBRE, PEGA EL BAJÓN.
+                            </h3>
+
+                            <p>
+                                Y nosotros estamos para solucionarlo.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div className="nosotros-valores">
+
+
+                        <article>
+
+                            <span>
+                                🍔
+                            </span>
+
+                            <h3>
+                                BUENA COMIDA
+                            </h3>
+
+                            <p>
+                                Productos preparados con dedicación y pensados para disfrutar de principio a fin.
+                            </p>
+
+                        </article>
+
+
+                        <article>
+
+                            <span>
+                                🤝
+                            </span>
+
+                            <h3>
+                                CERCANÍA
+                            </h3>
+
+                            <p>
+                                Valoramos a nuestros clientes y buscamos entregar una atención simple y cercana.
+                            </p>
+
+                        </article>
+
+
+                        <article>
+
+                            <span>
+                                🔥
+                            </span>
+
+                            <h3>
+                                SABOR GORILA
+                            </h3>
+
+                            <p>
+                                Porciones contundentes y combinaciones que realmente solucionan el bajón.
+                            </p>
+
+                        </article>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        </main>
+    );
+}
+
 
 export default Nosotros;

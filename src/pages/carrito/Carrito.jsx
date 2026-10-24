@@ -11,24 +11,18 @@ import {
 import {
     obtenerCarrito,
     cambiarCantidad,
-    eliminarDelCarrito,
-    vaciarCarrito
-} from "../data/carrito.js";
+    eliminarDelCarrito
+} from "../../data/carrito.js";
 
 import {
-    obtenerProductos,
-    actualizarProducto
-} from "../data/productos.js";
+    obtenerProductos
+} from "../../data/productos.js";
 
 import {
     obtenerUsuarioPorId
-} from "../data/usuarios.js";
+} from "../../data/usuarios.js";
 
-import {
-    crearPedido
-} from "../data/pedidos.js";
-
-import "../styles/carrito.css";
+import "../../styles/carrito.css";
 
 
 function Carrito() {
@@ -36,6 +30,8 @@ function Carrito() {
     const navigate =
         useNavigate();
 
+
+    // OBTENGO EL USUARIO SI HAY SESION
 
     const usuarioActualId =
         localStorage.getItem(
@@ -46,7 +42,9 @@ function Carrito() {
     const usuarioActual =
         usuarioActualId !== null
             ? obtenerUsuarioPorId(
-                Number(usuarioActualId)
+                Number(
+                    usuarioActualId
+                )
             )
             : null;
 
@@ -76,25 +74,11 @@ function Carrito() {
     ] = useState(false);
 
 
-    const [
-        compraExitosa,
-        setCompraExitosa
-    ] = useState(false);
+    // EL ADMIN NO PUEDE COMPRAR
 
-
-    const [
-        codigoPedido,
-        setCodigoPedido
-    ] = useState(null);
-
-
-    const [
-        medioPago,
-        setMedioPago
-    ] = useState("Efectivo");
-
-
-    if (esAdministrador) {
+    if (
+        esAdministrador
+    ) {
 
         return (
             <Navigate
@@ -104,6 +88,8 @@ function Carrito() {
         );
     }
 
+
+    // BUSCO EL STOCK ACTUAL
 
     const obtenerStockActual = (
         codigo
@@ -174,7 +160,8 @@ function Carrito() {
 
 
         if (
-            item.cantidad <= 1
+            item.cantidad <=
+            1
         ) {
 
             const carritoActualizado =
@@ -227,9 +214,14 @@ function Carrito() {
     };
 
 
+    // CALCULO LOS TOTALES
+
     const totalPedido =
         carrito.reduce(
-            (total, item) =>
+            (
+                total,
+                item
+            ) =>
                 total +
                 item.precio *
                 item.cantidad,
@@ -239,47 +231,27 @@ function Carrito() {
 
     const neto =
         Math.round(
-            totalPedido / 1.19
+            totalPedido /
+            1.19
         );
 
 
     const iva =
-        totalPedido - neto;
+        totalPedido -
+        neto;
 
 
-    const confirmarCompra = () => {
+    // CLIENTE O INVITADO PUEDEN CONTINUAR
+
+    const continuarCompra = () => {
 
         setMensaje("");
         setHayError(false);
 
 
-        if (!usuarioActual) {
-
-            navigate(
-                "/login"
-            );
-
-            return;
-        }
-
-
         if (
-            usuarioActual.rol !==
-            "Cliente"
-        ) {
-
-            setMensaje(
-                "Solo los clientes pueden realizar compras."
-            );
-
-            setHayError(true);
-
-            return;
-        }
-
-
-        if (
-            carrito.length === 0
+            carrito.length ===
+            0
         ) {
 
             setMensaje(
@@ -292,239 +264,10 @@ function Carrito() {
         }
 
 
-        const productosActuales =
-            obtenerProductos();
-
-
-        for (
-            const item of carrito
-        ) {
-
-            const productoActual =
-                productosActuales.find(
-                    (producto) =>
-                        producto.codigo ===
-                        item.codigo
-                );
-
-
-            if (!productoActual) {
-
-                setMensaje(
-                    `${item.nombre} ya no está disponible.`
-                );
-
-                setHayError(true);
-
-                return;
-            }
-
-
-            if (
-                productoActual.estado ===
-                "Oculto"
-            ) {
-
-                setMensaje(
-                    `${item.nombre} ya no está disponible.`
-                );
-
-                setHayError(true);
-
-                return;
-            }
-
-
-            if (
-                productoActual.stock <
-                item.cantidad
-            ) {
-
-                setMensaje(
-                    `No hay suficiente stock de ${item.nombre}. Actualmente quedan ${productoActual.stock}.`
-                );
-
-                setHayError(true);
-
-                return;
-            }
-        }
-
-
-        const fechaActual =
-            new Date();
-
-
-        const fecha =
-            `${String(
-                fechaActual.getDate()
-            ).padStart(2, "0")}/${String(
-                fechaActual.getMonth() + 1
-            ).padStart(2, "0")}/${fechaActual.getFullYear()}`;
-
-
-        const hora =
-            `${String(
-                fechaActual.getHours()
-            ).padStart(2, "0")}:${String(
-                fechaActual.getMinutes()
-            ).padStart(2, "0")}`;
-
-
-        // GUARDO LOS DATOS COMPLETOS DE LA BOLETA
-
-        const nuevoPedido =
-            crearPedido({
-
-                usuarioId:
-                    usuarioActual.id,
-
-                cliente:
-                    usuarioActual.nombre,
-
-                fecha:
-                    fecha,
-
-                hora:
-                    hora,
-
-                medioPago:
-                    medioPago,
-
-                neto:
-                    neto,
-
-                iva:
-                    iva,
-
-                total:
-                    totalPedido,
-
-                productos:
-                    carrito.map(
-                        (item) => ({
-
-                            codigoProducto:
-                                item.codigo,
-
-                            nombre:
-                                item.nombre,
-
-                            cantidad:
-                                item.cantidad,
-
-                            precio:
-                                item.precio
-                        })
-                    )
-            });
-
-
-        carrito.forEach(
-            (item) => {
-
-                const productoActual =
-                    productosActuales.find(
-                        (producto) =>
-                            producto.codigo ===
-                            item.codigo
-                    );
-
-
-                const nuevoStock =
-                    productoActual.stock -
-                    item.cantidad;
-
-
-                actualizarProducto(
-                    item.codigo,
-                    {
-                        stock:
-                            nuevoStock,
-
-                        estado:
-                            nuevoStock === 0
-                                ? "Sin stock"
-                                : productoActual.estado
-                    }
-                );
-            }
-        );
-
-
-        vaciarCarrito();
-
-
-        setCarrito([]);
-
-
-        setCodigoPedido(
-            nuevoPedido.codigo
-        );
-
-
-        setCompraExitosa(
-            true
+        navigate(
+            "/checkout"
         );
     };
-
-
-    if (compraExitosa) {
-
-        return (
-
-            <main className="pagina-carrito">
-
-                <div className="carrito-contenedor">
-
-                    <section className="carrito-vacio">
-
-                        <div className="carrito-vacio-icono">
-                            🦍
-                        </div>
-
-
-                        <h2>
-                            ¡PEDIDO REALIZADO!
-                        </h2>
-
-
-                        <p>
-                            Tu compra fue registrada correctamente.
-                        </p>
-
-
-                        <p>
-                            Boleta #{codigoPedido}
-                        </p>
-
-
-                        <Link
-                            to="/perfil"
-                            className="btn-ir-menu"
-                        >
-                            VER MIS BOLETAS
-                        </Link>
-
-
-                        <div className="carrito-volver-menu">
-
-                            <Link
-                                to="/menu"
-                                className="btn-seguir-comprando"
-                            >
-                                VOLVER AL MENÚ
-                            </Link>
-
-                        </div>
-
-                    </section>
-
-                </div>
-
-            </main>
-        );
-    }
 
 
     return (
@@ -532,6 +275,55 @@ function Carrito() {
         <main className="pagina-carrito">
 
             <div className="carrito-contenedor">
+
+
+                <section className="pasos-checkout">
+
+                    <div className="paso activo">
+
+                        <span className="numero-paso">
+                            1
+                        </span>
+
+                        <span>
+                            Carrito
+                        </span>
+
+                    </div>
+
+
+                    <div className="linea-paso"></div>
+
+
+                    <div className="paso">
+
+                        <span className="numero-paso">
+                            2
+                        </span>
+
+                        <span>
+                            Entrega y pago
+                        </span>
+
+                    </div>
+
+
+                    <div className="linea-paso"></div>
+
+
+                    <div className="paso">
+
+                        <span className="numero-paso">
+                            3
+                        </span>
+
+                        <span>
+                            Confirmación
+                        </span>
+
+                    </div>
+
+                </section>
 
 
                 <div className="carrito-encabezado">
@@ -568,13 +360,16 @@ function Carrito() {
                                 : "carrito-mensaje"
                         }
                     >
-                        {mensaje}
+                        {
+                            mensaje
+                        }
                     </div>
 
                 )}
 
 
-                {carrito.length === 0 ? (
+                {carrito.length ===
+                0 ? (
 
                     <section className="carrito-vacio">
 
@@ -636,16 +431,21 @@ function Carrito() {
                                         <div className="carrito-producto-info">
 
                                             <h3>
-                                                {item.nombre}
+                                                {
+                                                    item.nombre
+                                                }
                                             </h3>
 
 
                                             <span className="carrito-precio-unitario">
 
                                                 $
-                                                {item.precio.toLocaleString(
-                                                    "es-CL"
-                                                )}
+                                                {
+                                                    item.precio.toLocaleString(
+                                                        "es-CL"
+                                                    )
+                                                }
+
                                                 {" "}
                                                 c/u
 
@@ -667,7 +467,9 @@ function Carrito() {
 
 
                                                 <span>
-                                                    {item.cantidad}
+                                                    {
+                                                        item.cantidad
+                                                    }
                                                 </span>
 
 
@@ -692,12 +494,14 @@ function Carrito() {
                                             <strong>
 
                                                 $
-                                                {(
-                                                    item.precio *
-                                                    item.cantidad
-                                                ).toLocaleString(
-                                                    "es-CL"
-                                                )}
+                                                {
+                                                    (
+                                                        item.precio *
+                                                        item.cantidad
+                                                    ).toLocaleString(
+                                                        "es-CL"
+                                                    )
+                                                }
 
                                             </strong>
 
@@ -727,7 +531,7 @@ function Carrito() {
                         <aside className="carrito-resumen">
 
                             <h2>
-                                RESUMEN
+                                RESUMEN DEL PEDIDO
                             </h2>
 
 
@@ -739,12 +543,17 @@ function Carrito() {
 
                                 <strong>
 
-                                    {carrito.reduce(
-                                        (total, item) =>
-                                            total +
-                                            item.cantidad,
-                                        0
-                                    )}
+                                    {
+                                        carrito.reduce(
+                                            (
+                                                total,
+                                                item
+                                            ) =>
+                                                total +
+                                                item.cantidad,
+                                            0
+                                        )
+                                    }
 
                                 </strong>
 
@@ -758,10 +567,14 @@ function Carrito() {
                                 </span>
 
                                 <span>
+
                                     $
-                                    {neto.toLocaleString(
-                                        "es-CL"
-                                    )}
+                                    {
+                                        neto.toLocaleString(
+                                            "es-CL"
+                                        )
+                                    }
+
                                 </span>
 
                             </div>
@@ -774,10 +587,14 @@ function Carrito() {
                                 </span>
 
                                 <span>
+
                                     $
-                                    {iva.toLocaleString(
-                                        "es-CL"
-                                    )}
+                                    {
+                                        iva.toLocaleString(
+                                            "es-CL"
+                                        )
+                                    }
+
                                 </span>
 
                             </div>
@@ -790,51 +607,15 @@ function Carrito() {
                                 </span>
 
                                 <strong>
+
                                     $
-                                    {totalPedido.toLocaleString(
-                                        "es-CL"
-                                    )}
-                                </strong>
-
-                            </div>
-
-
-                            <div className="carrito-medio-pago">
-
-                                <label htmlFor="medioPago">
-                                    Medio de pago
-                                </label>
-
-
-                                <select
-                                    id="medioPago"
-                                    value={
-                                        medioPago
-                                    }
-                                    onChange={(e) =>
-                                        setMedioPago(
-                                            e.target.value
+                                    {
+                                        totalPedido.toLocaleString(
+                                            "es-CL"
                                         )
                                     }
-                                >
 
-                                    <option value="Efectivo">
-                                        Efectivo
-                                    </option>
-
-                                    <option value="Débito">
-                                        Débito
-                                    </option>
-
-                                    <option value="Crédito">
-                                        Crédito
-                                    </option>
-
-                                    <option value="Transferencia">
-                                        Transferencia
-                                    </option>
-
-                                </select>
+                                </strong>
 
                             </div>
 
@@ -843,10 +624,10 @@ function Carrito() {
                                 type="button"
                                 className="btn-confirmar-compra"
                                 onClick={
-                                    confirmarCompra
+                                    continuarCompra
                                 }
                             >
-                                CONTINUAR COMPRA
+                                CONTINUAR A ENTREGA →
                             </button>
 
                         </aside>
