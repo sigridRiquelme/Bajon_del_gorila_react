@@ -79,12 +79,7 @@ function Usuarios() {
 
         return pedidos.filter(
             (pedido) =>
-                pedido.cliente
-                    .toLowerCase()
-                    .trim() ===
-                usuario.nombre
-                    .toLowerCase()
-                    .trim()
+                pedido.usuarioId === usuario.id
         );
     };
 
@@ -153,49 +148,84 @@ function Usuarios() {
         const nuevosErrores = {};
 
 
-        if (datosFormulario.nombre.trim() === "") {
+        // VALIDAR NOMBRE
+
+        const nombre =
+            datosFormulario.nombre.trim();
+
+        if (nombre === "") {
 
             nuevosErrores.nombre =
                 "El nombre es obligatorio";
 
-        } else if (
-            datosFormulario.nombre.trim().length < 3
-        ) {
+        } else if (nombre.length < 3) {
 
             nuevosErrores.nombre =
                 "El nombre debe tener al menos 3 caracteres";
+
+        } else if (nombre.length > 50) {
+
+            nuevosErrores.nombre =
+                "El nombre no puede superar los 50 caracteres";
         }
 
 
-        if (datosFormulario.correo.trim() === "") {
+        // VALIDAR CORREO
+
+        const correo =
+            datosFormulario.correo
+                .trim()
+                .toLowerCase();
+
+        const correoValido =
+            /^[^\s@]+@(gmail\.com|duoc\.cl|duocuc\.cl)$/i;
+
+
+        if (correo === "") {
 
             nuevosErrores.correo =
                 "El correo es obligatorio";
 
-        } else if (
-            !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
-                datosFormulario.correo
-            )
-        ) {
+        } else if (!correoValido.test(correo)) {
 
             nuevosErrores.correo =
-                "Ingresa un correo válido";
+                "El correo debe ser Gmail, Duoc o Duoc UC";
+
+        } else {
+
+            const correoRepetido =
+                listaUsuarios.some(
+                    (usuario) =>
+                        usuario.id !== usuarioEditando.id &&
+                        usuario.correo
+                            .toLowerCase()
+                            .trim() === correo
+                );
+
+            if (correoRepetido) {
+
+                nuevosErrores.correo =
+                    "Este correo ya está registrado";
+            }
         }
 
 
-        if (datosFormulario.telefono.trim() === "") {
+        // VALIDAR TELÉFONO
+
+        const telefono =
+            datosFormulario.telefono.trim();
+
+        if (telefono === "") {
 
             nuevosErrores.telefono =
                 "El teléfono es obligatorio";
 
         } else if (
-            !/^\+569\d{8}$/.test(
-                datosFormulario.telefono
-            )
+            !/^\+569 \d{8}$/.test(telefono)
         ) {
 
             nuevosErrores.telefono =
-                "El teléfono debe tener formato +569XXXXXXXX";
+                "El teléfono debe tener formato +569 12345678";
         }
 
 
@@ -213,10 +243,30 @@ function Usuarios() {
             return;
         }
 
+
+        const datosActualizados = {
+            nombre: datosFormulario.nombre.trim(),
+
+            correo:
+                datosFormulario.correo
+                    .trim()
+                    .toLowerCase(),
+
+            telefono:
+                datosFormulario.telefono.trim(),
+
+            rol:
+                usuarioEditando.id === 0
+                    ? "Administrador"
+                    : datosFormulario.rol
+        };
+
+
         actualizarUsuario(
             usuarioEditando.id,
-            datosFormulario
+            datosActualizados
         );
+
 
         setListaUsuarios(
             obtenerUsuarios()
@@ -246,6 +296,7 @@ function Usuarios() {
 
         setUsuarioAEliminar(usuario);
     };
+
 
     const confirmarEliminarUsuario = () => {
 
@@ -395,29 +446,35 @@ function Usuarios() {
                             <section className="datos-usuario">
 
                                 <div>
+
                                     <span>Correo</span>
 
                                     <strong>
                                         {usuarioSeleccionado.correo}
                                     </strong>
+
                                 </div>
 
 
                                 <div>
+
                                     <span>Teléfono</span>
 
                                     <strong>
                                         {usuarioSeleccionado.telefono}
                                     </strong>
+
                                 </div>
 
 
                                 <div>
+
                                     <span>Rol</span>
 
                                     <strong>
                                         {usuarioSeleccionado.rol}
                                     </strong>
+
                                 </div>
 
                             </section>
@@ -550,6 +607,7 @@ function Usuarios() {
                                         id="nombre"
                                         type="text"
                                         name="nombre"
+                                        maxLength="50"
                                         value={
                                             datosFormulario.nombre
                                         }
@@ -610,21 +668,66 @@ function Usuarios() {
                                         Teléfono
                                     </label>
 
-                                    <input
-                                        id="telefono"
-                                        type="text"
-                                        name="telefono"
-                                        placeholder="+56912345678"
-                                        value={
-                                            datosFormulario.telefono
-                                        }
-                                        onChange={handleChange}
-                                        className={
-                                            errores.telefono
-                                                ? "campo-error"
-                                                : ""
-                                        }
-                                    />
+
+                                    <div className="telefono-input">
+
+                                        <span className="prefijo-telefono">
+                                            +569
+                                        </span>
+
+
+                                        <input
+                                            id="telefono"
+                                            type="text"
+                                            inputMode="numeric"
+                                            maxLength="8"
+                                            placeholder="84755654"
+                                            value={
+                                                datosFormulario.telefono
+                                                    .replace(
+                                                        "+569 ",
+                                                        ""
+                                                    )
+                                            }
+                                            onChange={(e) => {
+
+                                                const soloNumeros =
+                                                    e.target.value
+                                                        .replace(
+                                                            /\D/g,
+                                                            ""
+                                                        )
+                                                        .slice(
+                                                            0,
+                                                            8
+                                                        );
+
+
+                                                setDatosFormulario({
+                                                    ...datosFormulario,
+
+                                                    telefono:
+                                                        soloNumeros.length > 0
+                                                            ? `+569 ${soloNumeros}`
+                                                            : ""
+                                                });
+
+
+                                                setErrores({
+                                                    ...errores,
+                                                    telefono: ""
+                                                });
+
+                                            }}
+                                            className={
+                                                errores.telefono
+                                                    ? "campo-error"
+                                                    : ""
+                                            }
+                                        />
+
+                                    </div>
+
 
                                     {errores.telefono && (
 
@@ -643,24 +746,38 @@ function Usuarios() {
                                         Rol
                                     </label>
 
-                                    <select
-                                        id="rol"
-                                        name="rol"
-                                        value={
-                                            datosFormulario.rol
-                                        }
-                                        onChange={handleChange}
-                                    >
 
-                                        <option value="Cliente">
-                                            Cliente
-                                        </option>
+                                    {usuarioEditando.id === 0 ? (
 
-                                        <option value="Administrador">
-                                            Administrador
-                                        </option>
+                                        <input
+                                            id="rol"
+                                            type="text"
+                                            value="Administrador"
+                                            disabled
+                                        />
 
-                                    </select>
+                                    ) : (
+
+                                        <select
+                                            id="rol"
+                                            name="rol"
+                                            value={
+                                                datosFormulario.rol
+                                            }
+                                            onChange={handleChange}
+                                        >
+
+                                            <option value="Cliente">
+                                                Cliente
+                                            </option>
+
+                                            <option value="Administrador">
+                                                Administrador
+                                            </option>
+
+                                        </select>
+
+                                    )}
 
                                 </div>
 
@@ -670,9 +787,15 @@ function Usuarios() {
                                     <button
                                         type="button"
                                         className="btn-cancelar-usuario"
-                                        onClick={() =>
-                                            setMostrarFormulario(false)
-                                        }
+                                        onClick={() => {
+
+                                            setMostrarFormulario(false);
+
+                                            setUsuarioEditando(null);
+
+                                            setErrores({});
+
+                                        }}
                                     >
                                         Cancelar
                                     </button>
@@ -709,6 +832,7 @@ function Usuarios() {
 
                         <p>
                             ¿Seguro que deseas eliminar a{" "}
+
                             <strong>
                                 {usuarioAEliminar.nombre}
                             </strong>
@@ -751,6 +875,7 @@ function Usuarios() {
             )}
 
         </main>
+
     );
 }
 

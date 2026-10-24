@@ -480,3 +480,31 @@
     background-color: #dc3545;
     color: white;
 }
+
+.telefono-input {
+    display: flex;
+    align-items: stretch;
+}
+
+.prefijo-telefono {
+    display: flex;
+    align-items: center;
+
+    padding: 10px 12px;
+
+    background-color: #eeeeee;
+
+    border: 1px solid #cccccc;
+    border-right: none;
+
+    border-radius: 6px 0 0 6px;
+
+    color: #555555;
+    font-weight: 600;
+}
+
+.telefono-input input {
+    flex: 1;
+
+    border-radius: 0 6px 6px 0;
+}

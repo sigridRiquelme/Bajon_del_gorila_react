@@ -3,6 +3,7 @@ import "../../styles/usuarios.css";
 
 import {
     obtenerUsuarioPorId,
+    obtenerUsuarios,
     actualizarUsuario
 } from "../../data/usuarios.js";
 
@@ -46,31 +47,84 @@ function PerfilAdmin() {
 
         const nuevosErrores = {};
 
+        const nombre =
+            datosFormulario.nombre.trim();
 
-        if (datosFormulario.nombre.trim().length < 3) {
+        const correo =
+            datosFormulario.correo
+                .trim()
+                .toLowerCase();
+
+        const telefono =
+            datosFormulario.telefono.trim();
+
+
+        // VALIDAR NOMBRE
+
+        if (nombre === "") {
+
+            nuevosErrores.nombre =
+                "El nombre es obligatorio.";
+
+        } else if (nombre.length < 3) {
 
             nuevosErrores.nombre =
                 "El nombre debe tener al menos 3 caracteres.";
+
+        } else if (nombre.length > 50) {
+
+            nuevosErrores.nombre =
+                "El nombre no puede superar los 50 caracteres.";
         }
 
+
+        // VALIDAR CORREO
 
         const correoValido =
-            /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            /^[^\s@]+@(gmail\.com|duoc\.cl|duocuc\.cl)$/i;
 
-        if (!correoValido.test(datosFormulario.correo)) {
+        if (correo === "") {
 
             nuevosErrores.correo =
-                "Ingresa un correo válido.";
+                "El correo es obligatorio.";
+
+        } else if (!correoValido.test(correo)) {
+
+            nuevosErrores.correo =
+                "El correo debe ser Gmail, Duoc o Duoc UC.";
+
+        } else {
+
+            const correoRepetido =
+                obtenerUsuarios().some(
+                    (usuario) =>
+                        usuario.id !== 0 &&
+                        usuario.correo
+                            .toLowerCase()
+                            .trim() === correo
+                );
+
+            if (correoRepetido) {
+
+                nuevosErrores.correo =
+                    "Este correo ya está registrado.";
+            }
         }
 
 
-        const telefonoValido =
-            /^\+569\d{8}$/;
+        // VALIDAR TELÉFONO
 
-        if (!telefonoValido.test(datosFormulario.telefono)) {
+        if (telefono === "") {
 
             nuevosErrores.telefono =
-                "El teléfono debe tener formato +569XXXXXXXX.";
+                "El teléfono es obligatorio.";
+
+        } else if (
+            !/^\+569 \d{8}$/.test(telefono)
+        ) {
+
+            nuevosErrores.telefono =
+                "El teléfono debe tener formato +569 12345678.";
         }
 
 
@@ -91,9 +145,17 @@ function PerfilAdmin() {
 
         actualizarUsuario(0, {
             ...administrador,
-            nombre: datosFormulario.nombre.trim(),
-            correo: datosFormulario.correo.trim(),
-            telefono: datosFormulario.telefono.trim()
+
+            nombre:
+                datosFormulario.nombre.trim(),
+
+            correo:
+                datosFormulario.correo
+                    .trim()
+                    .toLowerCase(),
+
+            telefono:
+                datosFormulario.telefono.trim()
         });
 
 
@@ -123,11 +185,15 @@ function PerfilAdmin() {
 
         return (
             <main>
-                <h1>Perfil</h1>
+
+                <h1>
+                    Perfil
+                </h1>
 
                 <p>
                     No se encontró el usuario administrador.
                 </p>
+
             </main>
         );
     }
@@ -154,11 +220,15 @@ function PerfilAdmin() {
 
                 <div className="card-body p-4">
 
+
                     <div className="d-flex align-items-center gap-3 mb-4">
 
                         <div className="reporte-icono mb-0">
+
                             <i className="bi bi-person-fill"></i>
+
                         </div>
+
 
                         <div>
 
@@ -187,6 +257,7 @@ function PerfilAdmin() {
                     {!modoEdicion ? (
 
                         <div className="row g-4">
+
 
                             <div className="col-12 col-md-6">
 
@@ -262,11 +333,15 @@ function PerfilAdmin() {
                                         setModoEdicion(true)
                                     }
                                 >
+
                                     <i className="bi bi-pencil me-2"></i>
+
                                     Editar perfil
+
                                 </button>
 
                             </div>
+
 
                         </div>
 
@@ -275,6 +350,7 @@ function PerfilAdmin() {
                         <form onSubmit={guardarCambios}>
 
                             <div className="row g-3">
+
 
                                 <div className="col-12 col-md-6">
 
@@ -289,12 +365,15 @@ function PerfilAdmin() {
                                         id="nombre"
                                         name="nombre"
                                         type="text"
+                                        maxLength="50"
                                         className={`form-control ${
                                             errores.nombre
                                                 ? "is-invalid"
                                                 : ""
                                         }`}
-                                        value={datosFormulario.nombre}
+                                        value={
+                                            datosFormulario.nombre
+                                        }
                                         onChange={manejarCambio}
                                     />
 
@@ -327,7 +406,9 @@ function PerfilAdmin() {
                                                 ? "is-invalid"
                                                 : ""
                                         }`}
-                                        value={datosFormulario.correo}
+                                        value={
+                                            datosFormulario.correo
+                                        }
                                         onChange={manejarCambio}
                                     />
 
@@ -351,22 +432,71 @@ function PerfilAdmin() {
                                         Teléfono
                                     </label>
 
-                                    <input
-                                        id="telefono"
-                                        name="telefono"
-                                        type="text"
-                                        className={`form-control ${
-                                            errores.telefono
-                                                ? "is-invalid"
-                                                : ""
-                                        }`}
-                                        value={datosFormulario.telefono}
-                                        onChange={manejarCambio}
-                                    />
+
+                                    <div className="telefono-input">
+
+                                        <span className="prefijo-telefono">
+                                            +569
+                                        </span>
+
+
+                                        <input
+                                            id="telefono"
+                                            type="text"
+                                            inputMode="numeric"
+                                            maxLength="8"
+                                            placeholder="84755654"
+                                            className={`form-control ${
+                                                errores.telefono
+                                                    ? "is-invalid"
+                                                    : ""
+                                            }`}
+                                            value={
+                                                datosFormulario.telefono
+                                                    .replace(
+                                                        "+569 ",
+                                                        ""
+                                                    )
+                                            }
+                                            onChange={(e) => {
+
+                                                const soloNumeros =
+                                                    e.target.value
+                                                        .replace(
+                                                            /\D/g,
+                                                            ""
+                                                        )
+                                                        .slice(
+                                                            0,
+                                                            8
+                                                        );
+
+
+                                                setDatosFormulario({
+                                                    ...datosFormulario,
+
+                                                    telefono:
+                                                        soloNumeros.length > 0
+                                                            ? `+569 ${soloNumeros}`
+                                                            : ""
+                                                });
+
+
+                                                setErrores({
+                                                    ...errores,
+                                                    telefono: ""
+                                                });
+
+                                                setMensaje("");
+                                            }}
+                                        />
+
+                                    </div>
+
 
                                     {errores.telefono && (
 
-                                        <div className="invalid-feedback">
+                                        <div className="mensaje-error">
                                             {errores.telefono}
                                         </div>
 
@@ -414,6 +544,7 @@ function PerfilAdmin() {
                                     </div>
 
                                 </div>
+
 
                             </div>
 

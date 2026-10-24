@@ -2,22 +2,22 @@ const usuariosIniciales = [
     {
         id: 0,
         nombre: "Administrador",
-        correo: "admin@bajondelgorila.cl",
-        telefono: "+56911112222",
+        correo: "admin@gmail.com",
+        telefono: "+569 11112222",
         rol: "Administrador"
     },
     {
         id: 1,
         nombre: "Juan Pérez",
         correo: "juan@gmail.com",
-        telefono: "+56912345678",
+        telefono: "+569 12345678",
         rol: "Cliente"
     },
     {
         id: 2,
         nombre: "María González",
         correo: "maria@gmail.com",
-        telefono: "+56987654321",
+        telefono: "+569 87654321",
         rol: "Cliente"
     }
 ];

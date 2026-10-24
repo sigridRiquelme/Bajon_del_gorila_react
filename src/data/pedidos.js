@@ -1,6 +1,7 @@
 const pedidosIniciales = [
     {
         codigo: 1,
+        usuarioId: 1,
         cliente: "Juan Pérez",
         fecha: "2026-10-13",
         total: 14990,
@@ -23,6 +24,7 @@ const pedidosIniciales = [
 
     {
         codigo: 2,
+        usuarioId: 2,
         cliente: "María González",
         fecha: "2026-10-13",
         total: 7000,

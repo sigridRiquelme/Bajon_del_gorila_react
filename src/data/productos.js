@@ -131,14 +131,3 @@ export const eliminarProducto = (codigo) => {
     guardarProductos();
 };
 
-//restaurar archivos solo para pruebas luego eliminar
-export const reiniciarProductos = () => {
-
-    productos = productosIniciales.map((producto) => ({
-        ...producto
-    }));
-
-    guardarProductos();
-
-    return [...productos];
-};

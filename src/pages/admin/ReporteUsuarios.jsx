@@ -24,12 +24,7 @@ function ReporteUsuarios() {
 
         return pedidos.filter(
             (pedido) =>
-                pedido.cliente
-                    .toLowerCase()
-                    .trim() ===
-                usuario.nombre
-                    .toLowerCase()
-                    .trim()
+                pedido.usuarioId === usuario.id
         );
     };
 

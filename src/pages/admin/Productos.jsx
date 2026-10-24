@@ -6,7 +6,6 @@ import {
     agregarProducto as agregarProductoData,
     actualizarProducto,
     eliminarProducto as eliminarProductoData,
-    reiniciarProductos
 } from "../../data/productos.js";
 
 
@@ -225,13 +224,6 @@ function Productos() {
         setMostrarFormulario(true);
     };
 
-    //temporal
-    const restaurarProductos = () => {
-        reiniciarProductos();
-        setListaProductos(obtenerProductos());
-    };
-
-
     return (
 
         <main className="productos-admin">
@@ -412,12 +404,6 @@ function Productos() {
 
             </div>
 
-            <button
-                className="btn-reiniciar"
-                onClick={restaurarProductos}
-            >
-                RESTAURAR PRODUCTOS DE PRUEBA
-            </button>
 
 
 

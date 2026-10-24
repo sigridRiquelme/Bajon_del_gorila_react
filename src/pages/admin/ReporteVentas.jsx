@@ -5,6 +5,10 @@ import {
     obtenerPedidos
 } from "../../data/pedidos.js";
 
+import {
+    obtenerUsuarioPorId
+} from "../../data/usuarios.js";
+
 
 function ReporteVentas() {
 
@@ -20,6 +24,10 @@ function ReporteVentas() {
             return true;
         }
 
+        if (fechaFiltro === "") {
+            return false;
+        }
+
         if (tipoFiltro === "dia") {
             return pedido.fecha === fechaFiltro;
         }
@@ -29,6 +37,11 @@ function ReporteVentas() {
         }
 
         if (tipoFiltro === "anio") {
+
+            if (!/^\d{4}$/.test(fechaFiltro)) {
+                return false;
+            }
+
             return pedido.fecha.startsWith(fechaFiltro);
         }
 
@@ -82,6 +95,15 @@ function ReporteVentas() {
 
     };
 
+    const obtenerNombreCliente = (pedido) => {
+
+        const usuario =
+            obtenerUsuarioPorId(pedido.usuarioId);
+
+        return usuario
+            ? usuario.nombre
+            : pedido.cliente;
+    };
 
     return (
 
@@ -227,16 +249,21 @@ function ReporteVentas() {
                                 </label>
 
                                 <input
-                                    id="fechaAnio"
-                                    type="number"
+                                    type="text"
+                                    inputMode="numeric"
                                     className="form-control"
                                     placeholder="Ej: 2026"
-                                    min="2000"
-                                    max="2100"
+                                    maxLength="4"
                                     value={fechaFiltro}
-                                    onChange={(e) =>
-                                        setFechaFiltro(e.target.value)
-                                    }
+                                    onChange={(e) => {
+
+                                        const soloNumeros =
+                                            e.target.value
+                                                .replace(/\D/g, "")
+                                                .slice(0, 4);
+
+                                        setFechaFiltro(soloNumeros);
+                                    }}
                                 />
 
                             </div>
@@ -469,7 +496,7 @@ function ReporteVentas() {
                                                 </td>
 
                                                 <td>
-                                                    {pedido.cliente}
+                                                    {obtenerNombreCliente(pedido)}
                                                 </td>
 
                                                 <td>

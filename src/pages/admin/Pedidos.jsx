@@ -8,6 +8,10 @@ import {
     obtenerPedidoPorCodigo
 } from "../../data/pedidos.js";
 
+import {
+    obtenerUsuarioPorId
+} from "../../data/usuarios.js";
+
 
 function Pedidos() {
 
@@ -29,6 +33,16 @@ function Pedidos() {
     const calcularIva = (total) => {
         const neto = calcularNeto(total);
         return total - neto;
+    };
+
+    const obtenerNombreCliente = (pedido) => {
+
+        const usuario =
+            obtenerUsuarioPorId(pedido.usuarioId);
+
+        return usuario
+            ? usuario.nombre
+            : pedido.cliente;
     };
 
 
@@ -69,7 +83,7 @@ function Pedidos() {
                                 <PedidoFila
                                     key={pedido.codigo}
                                     codigo={pedido.codigo}
-                                    cliente={pedido.cliente}
+                                    cliente={obtenerNombreCliente(pedido)}
                                     fecha={pedido.fecha}
                                     total={pedido.total}
                                     onVerDetalle={verDetallePedido}
@@ -125,7 +139,7 @@ function Pedidos() {
 
                             <p>
                                 <strong>Cliente:</strong>{" "}
-                                {pedidoSeleccionado.cliente}
+                                {obtenerNombreCliente(pedidoSeleccionado)}
                             </p>
 
                             <p>
