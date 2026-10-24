@@ -1,0 +1,515 @@
+/* PAGINAS PUBLICAS: NOSOTROS Y CONTACTO */
+/* ESTILOS DE NOSOTROS Y CONTACTO */
+.pagina-publica {
+    min-height: 75vh;
+
+    background-color: var(--crema);
+}
+
+
+.pagina-antetitulo {
+    margin: 0 0 8px;
+
+    color: var(--naranja);
+
+    font-size: 13px;
+    font-weight: 800;
+
+    letter-spacing: 2px;
+}
+
+
+/* NOSOTROS */
+
+.nosotros-hero {
+    padding: 80px 0 65px;
+
+    background-color: var(--oscuro);
+
+    color: white;
+
+    text-align: center;
+}
+
+
+.nosotros-hero h1 {
+    margin: 0;
+
+    font-family: "Anton", sans-serif;
+
+    font-size: clamp(
+        42px,
+        7vw,
+        75px
+    );
+
+    letter-spacing: 1px;
+}
+
+
+.nosotros-introduccion {
+    max-width: 650px;
+
+    margin: 20px auto 0;
+
+    color: #cccccc;
+
+    font-size: 18px;
+
+    line-height: 1.6;
+}
+
+
+.nosotros-contenido {
+    padding: 70px 0;
+}
+
+
+.nosotros-texto {
+    display: grid;
+
+    grid-template-columns:
+        minmax(0, 1.5fr)
+        minmax(280px, 0.7fr);
+
+    gap: 40px;
+
+    align-items: center;
+}
+
+
+.nosotros-texto h2 {
+    margin: 0 0 20px;
+
+    color: var(--oscuro);
+
+    font-family: "Anton", sans-serif;
+
+    font-size: 38px;
+}
+
+
+.nosotros-texto p {
+    color: #666666;
+
+    line-height: 1.8;
+}
+
+
+.nosotros-frase {
+    padding: 35px;
+
+    border-radius: 16px;
+
+    background-color: var(--oscuro);
+
+    color: white;
+
+    text-align: center;
+}
+
+
+.nosotros-frase span {
+    display: block;
+
+    margin-bottom: 15px;
+
+    font-size: 45px;
+}
+
+
+.nosotros-frase h3 {
+    margin: 0 0 10px;
+
+    color: var(--naranja);
+
+    font-family: "Anton", sans-serif;
+
+    font-size: 26px;
+}
+
+
+.nosotros-frase p {
+    margin: 0;
+
+    color: #cccccc;
+}
+
+
+.nosotros-valores {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 20px;
+
+    margin-top: 55px;
+}
+
+
+.nosotros-valores article {
+    padding: 30px;
+
+    border-radius: 14px;
+
+    background-color: white;
+
+    text-align: center;
+
+    box-shadow:
+        0 2px 12px
+        rgba(0, 0, 0, 0.06);
+}
+
+
+.nosotros-valores span {
+    display: block;
+
+    margin-bottom: 15px;
+
+    font-size: 35px;
+}
+
+
+.nosotros-valores h3 {
+    margin: 0 0 10px;
+
+    color: var(--oscuro);
+
+    font-family: "Anton", sans-serif;
+
+    font-size: 22px;
+}
+
+
+.nosotros-valores p {
+    margin: 0;
+
+    color: #777777;
+
+    font-size: 14px;
+
+    line-height: 1.6;
+}
+
+
+/* CONTACTO */
+
+.contacto-encabezado {
+    padding: 65px 0 50px;
+
+    background-color: var(--oscuro);
+
+    color: white;
+
+    text-align: center;
+}
+
+
+.contacto-encabezado h1 {
+    margin: 0;
+
+    font-family: "Anton", sans-serif;
+
+    font-size: 55px;
+}
+
+
+.contacto-encabezado p:last-child {
+    max-width: 600px;
+
+    margin: 15px auto 0;
+
+    color: #cccccc;
+
+    line-height: 1.6;
+}
+
+
+.contacto-seccion {
+    padding: 65px 0;
+}
+
+
+.contacto-grid {
+    display: grid;
+
+    grid-template-columns:
+        minmax(280px, 0.8fr)
+        minmax(0, 1.2fr);
+
+    gap: 35px;
+
+    align-items: start;
+}
+
+
+.contacto-informacion {
+    padding: 30px;
+}
+
+
+.contacto-informacion h2 {
+    margin: 0 0 15px;
+
+    color: var(--oscuro);
+
+    font-family: "Anton", sans-serif;
+
+    font-size: 35px;
+}
+
+
+.contacto-informacion > p {
+    color: #666666;
+
+    line-height: 1.7;
+}
+
+
+.contacto-datos {
+    display: flex;
+    flex-direction: column;
+
+    gap: 15px;
+
+    margin-top: 30px;
+}
+
+
+.contacto-datos > div {
+    display: flex;
+    align-items: flex-start;
+
+    gap: 15px;
+
+    padding: 18px;
+
+    border-radius: 10px;
+
+    background-color: white;
+}
+
+
+.contacto-datos > div > span {
+    font-size: 25px;
+}
+
+
+.contacto-datos strong {
+    display: block;
+
+    margin-bottom: 4px;
+
+    color: var(--oscuro);
+}
+
+
+.contacto-datos p {
+    margin: 0;
+
+    color: #777777;
+
+    font-size: 14px;
+}
+
+
+.contacto-formulario {
+    padding: 30px;
+
+    border-radius: 14px;
+
+    background-color: white;
+
+    box-shadow:
+        0 2px 14px
+        rgba(0, 0, 0, 0.07);
+}
+
+
+.contacto-formulario h2 {
+    margin: 0 0 25px;
+
+    color: var(--oscuro);
+
+    font-family: "Anton", sans-serif;
+
+    font-size: 28px;
+}
+
+
+.contacto-fila {
+    display: grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap: 15px;
+}
+
+
+.contacto-campo {
+    display: flex;
+    flex-direction: column;
+
+    margin-bottom: 18px;
+}
+
+
+.contacto-campo label {
+    margin-bottom: 7px;
+
+    color: #333333;
+
+    font-size: 13px;
+    font-weight: 700;
+}
+
+
+.contacto-campo input,
+.contacto-campo select,
+.contacto-campo textarea {
+    width: 100%;
+
+    padding: 13px 14px;
+
+    border: 1px solid #dddddd;
+    border-radius: 8px;
+
+    background-color: white;
+
+    font-family: inherit;
+
+    outline: none;
+}
+
+
+.contacto-campo textarea {
+    min-height: 120px;
+
+    resize: vertical;
+}
+
+
+.contacto-campo input:focus,
+.contacto-campo select:focus,
+.contacto-campo textarea:focus {
+    border-color: var(--naranja);
+}
+
+
+.contacto-campo .campo-error {
+    border-color: #d93025;
+}
+
+
+.contacto-campo small {
+    margin-top: 5px;
+
+    color: #d93025;
+
+    font-size: 12px;
+    font-weight: 600;
+}
+
+
+.contacto-exito {
+    margin-bottom: 20px;
+
+    padding: 13px 15px;
+
+    border-radius: 8px;
+
+    background-color: #e8f5e9;
+
+    color: #2e7d32;
+
+    font-weight: 600;
+}
+
+
+.contacto-boton {
+    width: 100%;
+
+    padding: 14px;
+
+    border: none;
+    border-radius: 8px;
+
+    background-color: var(--naranja);
+
+    color: white;
+
+    font-family: "Anton", sans-serif;
+
+    font-size: 15px;
+
+    letter-spacing: 1px;
+
+    cursor: pointer;
+}
+
+
+.contacto-boton:hover {
+    background-color: #e55a00;
+}
+
+
+/* RESPONSIVE */
+
+@media (max-width: 850px) {
+
+    .nosotros-texto,
+    .contacto-grid {
+        grid-template-columns:
+            1fr;
+    }
+
+
+    .nosotros-valores {
+        grid-template-columns:
+            1fr;
+    }
+}
+
+
+@media (max-width: 650px) {
+
+    .nosotros-hero,
+    .contacto-encabezado {
+        padding:
+            50px 0 40px;
+    }
+
+
+    .nosotros-contenido,
+    .contacto-seccion {
+        padding:
+            45px 0;
+    }
+
+
+    .nosotros-texto h2 {
+        font-size: 31px;
+    }
+
+
+    .contacto-informacion {
+        padding:
+            10px 0;
+    }
+
+
+    .contacto-formulario {
+        padding: 22px;
+    }
+
+
+    .contacto-fila {
+        grid-template-columns:
+            1fr;
+
+        gap: 0;
+    }
+}

@@ -4,13 +4,23 @@ import { BrowserRouter } from "react-router-dom";
 
 import App from "./App.jsx";
 
-import "./styles/base.css";
+// ESTILOS GENERALES DEL SITIO
+import "./styles/Base.css";
+import "./styles/componentes.css";
+
+// BOOTSTRAP
 import "bootstrap-icons/font/bootstrap-icons.css";
+import "bootstrap/dist/css/bootstrap.min.css";
+
 
 createRoot(document.getElementById("root")).render(
     <StrictMode>
+
         <BrowserRouter>
+
             <App />
+
         </BrowserRouter>
+
     </StrictMode>
 );

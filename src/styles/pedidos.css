@@ -1,0 +1,267 @@
+.pedidos-admin {
+    width: 100%;
+}
+
+.encabezado-pedidos {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.encabezado-pedidos h1 {
+    margin: 0;
+    font-size: 38px;
+    font-weight: 800;
+    color: #171717;
+}
+
+.encabezado-pedidos p {
+    margin-top: 8px;
+    color: #888888;
+    font-size: 16px;
+}
+
+.tabla-pedidos {
+    margin-top: 30px;
+    background-color: white;
+    border-radius: 14px;
+    overflow-x: auto;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.tabla-pedidos table {
+    width: 100%;
+    min-width: 760px;
+    border-collapse: collapse;
+}
+
+.tabla-pedidos thead {
+    background-color: #171717;
+}
+
+.tabla-pedidos th {
+    padding: 17px 18px;
+    color: #ffc400;
+    font-size: 12px;
+    font-weight: 700;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.tabla-pedidos td {
+    padding: 16px 18px;
+    border-bottom: 1px solid #eeeeee;
+    font-size: 14px;
+    vertical-align: middle;
+}
+
+.tabla-pedidos tbody tr:hover {
+    background-color: #fafafa;
+}
+
+.btn-ver-detalle {
+    width: auto;
+    padding: 9px 14px;
+    border: none;
+    border-radius: 8px;
+    background-color: #ff6500;
+    color: white;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-ver-detalle:hover {
+    background-color: #e95c00;
+}
+
+.tabla-pedidos td[colspan="5"] {
+    padding: 35px;
+    text-align: center;
+    color: #888888;
+}
+
+.modal-pedido-fondo {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    background-color: rgba(0, 0, 0, 0.55);
+}
+
+.detalle-pedido {
+    width: 100%;
+    max-width: 570px;
+    max-height: 90vh;
+    padding: 30px;
+    overflow-y: auto;
+    border-radius: 14px;
+    background-color: white;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+}
+
+.encabezado-boleta {
+    padding-bottom: 18px;
+    border-bottom: 1px solid #eeeeee;
+}
+
+.etiqueta-boleta {
+    display: inline-block;
+    margin-bottom: 8px;
+    color: #ff6500;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+.detalle-pedido h2 {
+    margin: 0;
+    color: #171717;
+    font-size: 28px;
+    font-weight: 800;
+}
+
+.detalle-pedido h3 {
+    margin-top: 25px;
+    margin-bottom: 12px;
+    color: #171717;
+    font-size: 18px;
+}
+
+.datos-pedido {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-top: 18px;
+    padding: 16px;
+    border-radius: 8px;
+    background-color: #f8f8f8;
+}
+
+.datos-pedido div {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.datos-pedido span {
+    color: #888888;
+    font-size: 12px;
+}
+
+.datos-pedido strong {
+    color: #171717;
+    font-size: 14px;
+}
+
+.detalle-productos {
+    border-top: 1px solid #eeeeee;
+    border-bottom: 1px solid #eeeeee;
+}
+
+.producto-pedido {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    padding: 14px 0;
+    border-bottom: 1px solid #eeeeee;
+}
+
+.producto-pedido:last-child {
+    border-bottom: none;
+}
+
+.producto-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.producto-nombre {
+    color: #171717;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.producto-cantidad {
+    color: #888888;
+    font-size: 12px;
+}
+
+.producto-precio {
+    color: #171717;
+    font-size: 14px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.resumen-boleta {
+    margin-top: 20px;
+    padding-top: 15px;
+}
+
+.fila-resumen {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    font-size: 14px;
+}
+
+.iva-boleta {
+    color: #666666;
+}
+
+.total-pedido {
+    margin-top: 8px;
+    padding-top: 14px;
+    border-top: 2px solid #171717;
+    color: #171717;
+    font-size: 22px;
+    font-weight: 800;
+}
+
+.btn-cerrar-pedido {
+    width: 100%;
+    margin-top: 25px;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    background-color: #eeeeee;
+    color: #333333;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-cerrar-pedido:hover {
+    background-color: #dddddd;
+}
+
+@media (max-width: 768px) {
+
+    .encabezado-pedidos h1 {
+        font-size: 30px;
+    }
+
+    .detalle-pedido {
+        padding: 22px;
+    }
+
+    .producto-pedido {
+        align-items: flex-start;
+    }
+}
+
+@media (max-width: 500px) {
+
+    .datos-pedido {
+        grid-template-columns: 1fr;
+    }
+}

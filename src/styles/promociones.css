@@ -1,0 +1,271 @@
+/* =========================
+   PROMOCIONES
+   ========================= */
+.cabecera-promociones {
+  position: relative;
+  overflow: hidden;
+}
+
+.cabecera-promociones::after {
+  content: '🔥';
+  position: absolute;
+  right: 5%;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 200px;
+  opacity: 0.04;
+}
+
+.cabecera-promociones .contenedor {
+  position: relative;
+  z-index: 2;
+}
+
+.seccion-lista-promociones {
+  padding: 60px 0 80px;
+  background: var(--crema);
+}
+
+.lista-promociones {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.tarjeta-promocion {
+  min-height: 320px;
+  display: grid;
+  grid-template-columns: 1fr 480px;
+  overflow: hidden;
+  border-radius: 20px;
+  background: white;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+}
+
+.tarjeta-promocion.invertida {
+  grid-template-columns: 480px 1fr;
+}
+
+.tarjeta-promocion.invertida .contenido-promocion {
+  order: 2;
+}
+
+.tarjeta-promocion.invertida .contenedor-imagen-promocion {
+  order: 1;
+}
+
+.contenido-promocion {
+  padding: 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.etiqueta-promocion {
+  margin-bottom: 20px;
+  border: 1.5px solid rgba(255, 107, 0, 0.2);
+  background: rgba(255, 107, 0, 0.08);
+  color: var(--naranja);
+}
+
+.etiqueta-promocion.verde {
+  border-color: rgba(69, 107, 60, 0.2);
+  background: rgba(69, 107, 60, 0.08);
+  color: var(--verde);
+}
+
+.etiqueta-promocion.oscuro {
+  border-color: rgba(23, 23, 23, 0.2);
+  background: rgba(23, 23, 23, 0.08);
+  color: var(--oscuro);
+}
+
+.contenido-promocion h2 {
+  margin: 0 0 12px;
+  color: var(--oscuro);
+  font-size: 2.4rem;
+}
+
+.contenido-promocion p {
+  margin: 0 0 24px;
+  color: #666;
+  line-height: 1.6;
+}
+
+.fila-precio-promocion {
+  margin-bottom: 28px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.precio-promocion {
+  color: var(--naranja);
+  font-family: 'Anton', sans-serif;
+  font-size: 2.4rem;
+}
+
+.precio-original-promocion {
+  color: #aaa;
+  text-decoration: line-through;
+}
+
+.etiqueta-descuento {
+  padding: 5px 10px;
+  border-radius: 4px;
+  background: var(--naranja);
+  color: white;
+  font-family: 'Anton', sans-serif;
+}
+
+.etiqueta-descuento.verde {
+  background: var(--verde);
+}
+
+.etiqueta-descuento.oscuro {
+  background: var(--oscuro);
+  color: var(--amarillo);
+}
+
+.contenedor-imagen-promocion {
+  min-height: 320px;
+  position: relative;
+  overflow: hidden;
+  background: #e8e4dc;
+}
+
+.contenedor-imagen-promocion img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.circulo-descuento {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 72px;
+  height: 72px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--amarillo);
+  color: var(--oscuro);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  font-family: 'Anton', sans-serif;
+}
+
+.circulo-descuento.naranja {
+  background: var(--naranja);
+}
+
+.circulo-descuento strong {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.circulo-descuento small {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.boletin {
+  margin-top: 60px;
+  padding: 48px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 32px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, var(--oscuro), var(--gris));
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+.boletin h3 {
+  margin: 0 0 8px;
+  color: var(--amarillo);
+  font-size: 2rem;
+}
+
+.texto-boletin > p:last-child {
+  margin: 0;
+  color: #888;
+  font-size: 0.95rem;
+}
+
+.formulario-boletin {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.formulario-boletin input {
+  width: 260px;
+  border-color: #333;
+  background: #2a2a2a;
+  color: white;
+}
+
+.mensaje-alertas {
+  margin-top: 16px;
+  text-align: right;
+  color: var(--verde);
+  font-weight: 600;
+}
+
+.mensaje-alertas.error {
+  color: #c62828;
+}
+
+/* PRODUCTOS EN PROMOCION */
+
+.seccion-promociones-productos {
+    min-height: 400px;
+
+    padding: 60px 0 80px;
+
+    background-color: var(--crema);
+}
+
+
+.promociones-vacias {
+    padding: 70px 20px;
+
+    border-radius: 14px;
+
+    background-color: white;
+
+    text-align: center;
+}
+
+
+.promociones-vacias span {
+    display: block;
+
+    margin-bottom: 15px;
+
+    font-size: 55px;
+}
+
+
+.promociones-vacias h2 {
+    margin: 0 0 10px;
+
+    font-family: "Anton", sans-serif;
+
+    color: var(--oscuro);
+}
+
+
+.promociones-vacias p {
+    margin: 0;
+
+    color: #777777;
+}

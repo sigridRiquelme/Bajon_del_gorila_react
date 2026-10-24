@@ -1,0 +1,45 @@
+/* RESPONSIVE DEL CONTENIDO PUBLICO */
+@media (max-width: 1100px) {
+  .grilla-productos,
+  .grilla-razones { grid-template-columns: repeat(2, 1fr); }
+
+  .tarjeta-promocion,
+  .tarjeta-promocion.invertida { grid-template-columns: 1fr 380px; }
+
+  .tarjeta-promocion.invertida { grid-template-columns: 380px 1fr; }
+}
+
+@media (max-width: 860px) {
+  .imagen-portada { width: 100%; opacity: 0.35; }
+  .texto-portada { max-width: 650px; }
+  .grilla-promocion-semanal { grid-template-columns: 1fr; }
+  .tarjeta-promocion,
+  .tarjeta-promocion.invertida { grid-template-columns: 1fr; }
+  .tarjeta-promocion.invertida .contenido-promocion,
+  .tarjeta-promocion.invertida .contenedor-imagen-promocion { order: initial; }
+  .contenedor-imagen-promocion { min-height: 280px; }
+  .boletin { align-items: stretch; flex-direction: column; }
+  .formulario-boletin { width: 100%; }
+  .formulario-boletin input { flex: 1; width: auto; }
+}
+
+@media (max-width: 620px) {
+  .contenedor { width: min(100% - 32px, 1344px); }
+  .portada { min-height: 560px; }
+  .contenido-portada { padding-block: 64px; }
+  .estadisticas-portada { gap: 16px; flex-wrap: wrap; }
+  .fila-encabezado-seccion { align-items: flex-start; flex-direction: column; }
+  .fila-encabezado-seccion h2,
+  .encabezado-razones h2,
+  .banner-accion h2 { font-size: 2.15rem; }
+  .grilla-productos,
+  .grilla-razones { grid-template-columns: 1fr; }
+  .barra-filtros { top: 118px; }
+  .caja-busqueda,
+  .selector-orden { flex: 1 1 100%; width: 100%; }
+  .filtros-categoria { flex: 1 1 100%; }
+  .cabecera-pagina h1 { font-size: 2.7rem; }
+  .contenido-promocion { padding: 32px 24px; }
+  .boletin { padding: 32px 24px; }
+  .formulario-boletin { flex-direction: column; }
+}
