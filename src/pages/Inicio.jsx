@@ -6,10 +6,12 @@ import {
     Link
 } from "react-router-dom";
 
-import ProductoCard from "../components/ProductoCard.jsx";
+import ProductoCard
+    from "../components/ProductoCard.jsx";
 
 import {
-    obtenerProductos
+    obtenerProductos,
+    obtenerPrecioFinal
 } from "../data/productos.js";
 
 import {
@@ -59,6 +61,8 @@ function Inicio() {
     ] = useState(false);
 
 
+    // OBTENGO EL USUARIO ACTUAL
+
     const usuarioActualId =
         localStorage.getItem(
             "usuarioActualId"
@@ -68,7 +72,9 @@ function Inicio() {
     const usuarioActual =
         usuarioActualId !== null
             ? obtenerUsuarioPorId(
-                Number(usuarioActualId)
+                Number(
+                    usuarioActualId
+                )
             )
             : null;
 
@@ -78,7 +84,7 @@ function Inicio() {
         "Administrador";
 
 
-    // USO LOS MISMOS PRODUCTOS QUE ADMINISTRA EL PANEL
+    // USO LOS PRODUCTOS DEL ADMIN
 
     const productosDestacados =
         obtenerProductos()
@@ -117,14 +123,11 @@ function Inicio() {
 
 
                     return {
+
                         ...producto,
 
                         id:
                             producto.codigo,
-
-                        descripcion:
-                            producto.descripcion ||
-                            "Producto disponible en El Bajón del Gorila.",
 
                         valoracion:
                             producto.valoracion ||
@@ -137,6 +140,30 @@ function Inicio() {
             );
 
 
+    // OBTENGO LA PRIMERA PROMOCION ACTIVA
+
+    const promocionDestacada =
+        obtenerProductos().find(
+            (producto) =>
+                producto.promocion ===
+                    true &&
+                producto.descuento >
+                    0 &&
+                producto.estado !==
+                    "Oculto"
+        );
+
+
+    const precioPromocion =
+        promocionDestacada
+            ? obtenerPrecioFinal(
+                promocionDestacada
+            )
+            : 0;
+
+
+    // AGREGO EL PRODUCTO AL CARRITO
+
     const agregarProducto = (
         producto,
         cantidad
@@ -146,29 +173,42 @@ function Inicio() {
         setHayErrorCarrito(false);
 
 
-        if (esAdministrador) {
+        // EL ADMIN NO PUEDE COMPRAR
+
+        if (
+            esAdministrador
+        ) {
 
             setMensajeCarrito(
                 "La cuenta de administrador no puede realizar compras."
             );
 
-            setHayErrorCarrito(true);
+
+            setHayErrorCarrito(
+                true
+            );
+
 
             return;
         }
 
 
         if (
-            producto.stockDisponible <= 0 ||
+            producto.stockDisponible <=
+                0 ||
             producto.estado ===
-            "Sin stock"
+                "Sin stock"
         ) {
 
             setMensajeCarrito(
                 "Este producto no tiene stock disponible."
             );
 
-            setHayErrorCarrito(true);
+
+            setHayErrorCarrito(
+                true
+            );
+
 
             return;
         }
@@ -183,7 +223,11 @@ function Inicio() {
                 `Solo puedes agregar ${producto.stockDisponible} unidades más de ${producto.nombre}.`
             );
 
-            setHayErrorCarrito(true);
+
+            setHayErrorCarrito(
+                true
+            );
+
 
             return;
         }
@@ -210,13 +254,17 @@ function Inicio() {
             `${cantidad} ${producto.nombre} agregado al carrito.`
         );
 
-        setHayErrorCarrito(false);
+
+        setHayErrorCarrito(
+            false
+        );
     };
 
 
     return (
 
         <>
+
 
             <section className="portada">
 
@@ -251,9 +299,13 @@ function Inicio() {
 
 
                         <h1>
+
                             ¿TE PEGÓ
+
                             <br />
+
                             EL BAJÓN?
+
                         </h1>
 
 
@@ -268,6 +320,7 @@ function Inicio() {
                             </strong>
 
                             {" "}
+
                             y más.
 
                         </p>
@@ -294,6 +347,7 @@ function Inicio() {
 
 
                         <div className="estadisticas-portada">
+
 
                             <div>
 
@@ -333,6 +387,7 @@ function Inicio() {
 
                             </div>
 
+
                         </div>
 
                     </div>
@@ -353,11 +408,15 @@ function Inicio() {
                         (categoria) => (
 
                             <Link
-                                key={categoria}
+                                key={
+                                    categoria
+                                }
                                 className="opcion-categoria"
                                 to="/menu"
                             >
-                                {categoria}
+                                {
+                                    categoria
+                                }
                             </Link>
 
                         )
@@ -414,13 +473,16 @@ function Inicio() {
                                     : "mensaje-menu"
                             }
                         >
-                            {mensajeCarrito}
+                            {
+                                mensajeCarrito
+                            }
                         </div>
 
                     )}
 
 
-                    {productosDestacados.length > 0 ? (
+                    {productosDestacados.length >
+                    0 ? (
 
                         <div className="grilla-productos">
 
@@ -454,9 +516,11 @@ function Inicio() {
                                 🦍
                             </div>
 
+
                             <h3>
                                 NO HAY PRODUCTOS DISPONIBLES
                             </h3>
+
 
                             <p>
                                 Vuelve a revisar más tarde.
@@ -471,93 +535,135 @@ function Inicio() {
             </section>
 
 
-            <section className="promocion-semanal">
+            {/* PROMOCION DESTACADA */}
 
-                <div className="contenedor grilla-promocion-semanal">
+            {promocionDestacada && (
 
-                    <div>
+                <section className="promocion-semanal">
 
-                        <span className="etiqueta etiqueta-naranja">
-                            🔥 OFERTA DE LA SEMANA
-                        </span>
+                    <div className="contenedor grilla-promocion-semanal">
 
 
-                        <h2 className="titulo-seccion">
+                        <div>
 
-                            EL BAJÓN
-
-                            <br />
-
-                            DE LA SEMANA
-
-                        </h2>
-
-
-                        <p className="texto-principal-promocion">
-                            King Kong Burger + Papas Gorila + Bebida Grande
-                        </p>
-
-
-                        <p className="texto-secundario-promocion">
-                            El combo más brutal del menú, a un precio que no puedes ignorar.
-                        </p>
-
-
-                        <div className="fila-precio">
-
-                            <span className="precio-grande">
-                                $12.990
+                            <span className="etiqueta etiqueta-naranja">
+                                🔥 OFERTA DE LA SEMANA
                             </span>
 
 
-                            <span className="precio-anterior">
-                                $20.970
-                            </span>
+                            <h2 className="titulo-seccion">
+
+                                EL BAJÓN
+
+                                <br />
+
+                                DE LA SEMANA
+
+                            </h2>
 
 
-                            <span className="etiqueta etiqueta-verde">
-                                -38%
-                            </span>
+                            <p className="texto-principal-promocion">
+                                {
+                                    promocionDestacada.nombre
+                                }
+                            </p>
+
+
+                            <p className="texto-secundario-promocion">
+                                {
+                                    promocionDestacada.descripcion
+                                }
+                            </p>
+
+
+                            <div className="fila-precio">
+
+
+                                <span className="precio-grande">
+
+                                    $
+                                    {
+                                        precioPromocion.toLocaleString(
+                                            "es-CL"
+                                        )
+                                    }
+
+                                </span>
+
+
+                                <span className="precio-anterior">
+
+                                    $
+                                    {
+                                        promocionDestacada.precio.toLocaleString(
+                                            "es-CL"
+                                        )
+                                    }
+
+                                </span>
+
+
+                                <span className="etiqueta etiqueta-verde">
+
+                                    -
+                                    {
+                                        promocionDestacada.descuento
+                                    }%
+
+                                </span>
+
+
+                            </div>
+
+
+                            <Link
+                                className="boton boton-amarillo"
+                                to={`/producto/${promocionDestacada.codigo}`}
+                            >
+                                QUIERO ESTA PROMO 🔥
+                            </Link>
 
                         </div>
 
 
-                        <Link
-                            className="boton boton-amarillo"
-                            to="/menu"
-                        >
-                            QUIERO ESTE COMBO 🔥
-                        </Link>
+                        <div className="contenedor-imagen-promocion-semanal">
 
-                    </div>
-
-
-                    <div className="contenedor-imagen-promocion-semanal">
-
-                        <img
-                            className="imagen-promocion-semanal"
-                            src="/img/combo kinkon.jpeg"
-                            alt="Combo King Kong"
-                        />
+                            <img
+                                className="imagen-promocion-semanal"
+                                src={
+                                    promocionDestacada.imagen
+                                }
+                                alt={
+                                    promocionDestacada.nombre
+                                }
+                            />
 
 
-                        <div className="caja-ahorro">
+                            <div className="caja-ahorro">
 
-                            <small>
-                                AHORRA
-                            </small>
+                                <small>
+                                    DESCUENTO
+                                </small>
 
-                            <strong>
-                                $7.980
-                            </strong>
+
+                                <strong>
+
+                                    {
+                                        promocionDestacada.descuento
+                                    }%
+
+                                </strong>
+
+                            </div>
 
                         </div>
 
+
                     </div>
 
-                </div>
+                </section>
 
-            </section>
+            )}
 
 
             <section className="seccion-clara">
@@ -588,9 +694,11 @@ function Inicio() {
                                 🔥
                             </div>
 
+
                             <h3>
                                 Preparado al momento
                             </h3>
+
 
                             <p>
                                 Cada pedido sale fresco desde la parrilla,
@@ -606,9 +714,11 @@ function Inicio() {
                                 🍔
                             </div>
 
+
                             <h3>
                                 Ingredientes seleccionados
                             </h3>
+
 
                             <p>
                                 Solo usamos insumos de calidad para que
@@ -624,9 +734,11 @@ function Inicio() {
                                 🛵
                             </div>
 
+
                             <h3>
                                 Delivery rápido
                             </h3>
+
 
                             <p>
                                 Tu pedido llega en menos de 40 minutos
@@ -642,9 +754,11 @@ function Inicio() {
                                 💳
                             </div>
 
+
                             <h3>
                                 Pago fácil
                             </h3>
+
 
                             <p>
                                 Efectivo, débito, crédito y transferencia.
@@ -685,6 +799,7 @@ function Inicio() {
                 </div>
 
             </section>
+
 
         </>
     );

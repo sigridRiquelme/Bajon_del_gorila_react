@@ -8,7 +8,8 @@ import {
 } from "react-router-dom";
 
 import {
-    obtenerProductoPorCodigo
+    obtenerProductoPorCodigo,
+    obtenerPrecioFinal
 } from "../data/productos.js";
 
 import {
@@ -85,7 +86,7 @@ function DetalleProducto() {
         "Administrador";
 
 
-    // CAMBIO: SI EL PRODUCTO ESTA OCULTO NO LO MUESTRO
+    // SI EL PRODUCTO NO EXISTE NO LO MUESTRO
 
     if (
         !producto ||
@@ -128,6 +129,18 @@ function DetalleProducto() {
     }
 
 
+    const precioFinal =
+        obtenerPrecioFinal(
+            producto
+        );
+
+
+    const tienePromocion =
+        producto.promocion &&
+        producto.descuento >
+        0;
+
+
     const productoEnCarrito =
         carritoActual.find(
             (item) =>
@@ -151,9 +164,10 @@ function DetalleProducto() {
 
 
     const sinStock =
-        stockDisponible <= 0 ||
+        stockDisponible <=
+            0 ||
         producto.estado ===
-        "Sin stock";
+            "Sin stock";
 
 
     const aumentarCantidad = () => {
@@ -173,7 +187,8 @@ function DetalleProducto() {
     const disminuirCantidad = () => {
 
         if (
-            cantidad > 1
+            cantidad >
+            1
         ) {
 
             setCantidad(
@@ -183,13 +198,13 @@ function DetalleProducto() {
     };
 
 
+    // AGREGO EL PRODUCTO CON EL PRECIO FINAL
+
     const agregarProducto = () => {
 
         setMensaje("");
         setHayError(false);
 
-
-        // EL ADMIN NO PUEDE COMPRAR
 
         if (
             esAdministrador
@@ -199,7 +214,9 @@ function DetalleProducto() {
                 "La cuenta de administrador no puede realizar compras."
             );
 
-            setHayError(true);
+            setHayError(
+                true
+            );
 
             return;
         }
@@ -213,7 +230,9 @@ function DetalleProducto() {
                 "Este producto no tiene stock disponible."
             );
 
-            setHayError(true);
+            setHayError(
+                true
+            );
 
             return;
         }
@@ -228,10 +247,21 @@ function DetalleProducto() {
                 `Solo quedan ${stockDisponible} unidades disponibles.`
             );
 
-            setHayError(true);
+            setHayError(
+                true
+            );
 
             return;
         }
+
+
+        const productoCarrito = {
+
+            ...producto,
+
+            precio:
+                precioFinal
+        };
 
 
         for (
@@ -241,7 +271,7 @@ function DetalleProducto() {
         ) {
 
             agregarAlCarrito(
-                producto
+                productoCarrito
             );
         }
 
@@ -256,9 +286,9 @@ function DetalleProducto() {
         );
 
 
-        setHayError(false);
-
-        setCantidad(1);
+        setCantidad(
+            1
+        );
     };
 
 
@@ -291,6 +321,19 @@ function DetalleProducto() {
                             }
                         />
 
+
+                        {tienePromocion && (
+
+                            <span className="detalle-etiqueta-promocion">
+
+                                -{
+                                    producto.descuento
+                                }% OFF
+
+                            </span>
+
+                        )}
+
                     </div>
 
 
@@ -318,33 +361,69 @@ function DetalleProducto() {
                         </p>
 
 
-                        <div className="detalle-producto-precio">
+                        {tienePromocion ? (
 
-                            $
-                            {
-                                producto.precio.toLocaleString(
-                                    "es-CL"
-                                )
-                            }
+                            <div className="detalle-precio-promocion">
 
-                        </div>
+                                <span className="detalle-precio-anterior">
+
+                                    $
+                                    {
+                                        producto.precio.toLocaleString(
+                                            "es-CL"
+                                        )
+                                    }
+
+                                </span>
+
+
+                                <span className="detalle-producto-precio">
+
+                                    $
+                                    {
+                                        precioFinal.toLocaleString(
+                                            "es-CL"
+                                        )
+                                    }
+
+                                </span>
+
+                            </div>
+
+                        ) : (
+
+                            <div className="detalle-producto-precio">
+
+                                $
+                                {
+                                    producto.precio.toLocaleString(
+                                        "es-CL"
+                                    )
+                                }
+
+                            </div>
+
+                        )}
 
 
                         <div
                             className={
                                 sinStock
                                     ? "detalle-producto-stock sin-stock"
-                                    : stockDisponible <= 5
+                                    : stockDisponible <=
+                                        5
                                         ? "detalle-producto-stock stock-bajo"
                                         : "detalle-producto-stock"
                             }
                         >
 
-                            {sinStock
-                                ? "Sin stock disponible"
-                                : stockDisponible <= 5
-                                    ? `Últimas ${stockDisponible} unidades disponibles`
-                                    : `Stock disponible: ${stockDisponible}`
+                            {
+                                sinStock
+                                    ? "Sin stock disponible"
+                                    : stockDisponible <=
+                                        5
+                                        ? `Últimas ${stockDisponible} unidades disponibles`
+                                        : `Stock disponible: ${stockDisponible}`
                             }
 
                         </div>
@@ -387,7 +466,8 @@ function DetalleProducto() {
                                                 disminuirCantidad
                                             }
                                             disabled={
-                                                cantidad <= 1 ||
+                                                cantidad <=
+                                                    1 ||
                                                 sinStock
                                             }
                                         >
@@ -396,12 +476,11 @@ function DetalleProducto() {
 
 
                                         <strong>
-
-                                            {sinStock
-                                                ? 0
-                                                : cantidad
+                                            {
+                                                sinStock
+                                                    ? 0
+                                                    : cantidad
                                             }
-
                                         </strong>
 
 
@@ -413,7 +492,7 @@ function DetalleProducto() {
                                             disabled={
                                                 sinStock ||
                                                 cantidad >=
-                                                stockDisponible
+                                                    stockDisponible
                                             }
                                         >
                                             +
@@ -435,9 +514,10 @@ function DetalleProducto() {
                                     }
                                 >
 
-                                    {sinStock
-                                        ? "SIN STOCK"
-                                        : "AGREGAR AL CARRITO"
+                                    {
+                                        sinStock
+                                            ? "SIN STOCK"
+                                            : "AGREGAR AL CARRITO"
                                     }
 
                                 </button>

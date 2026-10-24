@@ -223,3 +223,49 @@
 .mensaje-alertas.error {
   color: #c62828;
 }
+
+/* PRODUCTOS EN PROMOCION */
+
+.seccion-promociones-productos {
+    min-height: 400px;
+
+    padding: 60px 0 80px;
+
+    background-color: var(--crema);
+}
+
+
+.promociones-vacias {
+    padding: 70px 20px;
+
+    border-radius: 14px;
+
+    background-color: white;
+
+    text-align: center;
+}
+
+
+.promociones-vacias span {
+    display: block;
+
+    margin-bottom: 15px;
+
+    font-size: 55px;
+}
+
+
+.promociones-vacias h2 {
+    margin: 0 0 10px;
+
+    font-family: "Anton", sans-serif;
+
+    color: var(--oscuro);
+}
+
+
+.promociones-vacias p {
+    margin: 0;
+
+    color: #777777;
+}

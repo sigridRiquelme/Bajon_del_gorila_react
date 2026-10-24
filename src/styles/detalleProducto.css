@@ -268,3 +268,53 @@
         font-size: 28px;
     }
 }
+
+/* PRECIO PROMOCIONAL */
+
+.detalle-producto-imagen {
+    position: relative;
+}
+
+
+.detalle-etiqueta-promocion {
+    position: absolute;
+
+    top: 20px;
+    left: 20px;
+
+    padding: 8px 12px;
+
+    border-radius: 6px;
+
+    background-color: var(--naranja);
+
+    color: white;
+
+    font-weight: 800;
+}
+
+
+.detalle-precio-promocion {
+    display: flex;
+    align-items: center;
+
+    gap: 15px;
+
+    margin-bottom: 12px;
+}
+
+
+.detalle-precio-anterior {
+    color: #999999;
+
+    font-size: 19px;
+
+    text-decoration: line-through;
+}
+
+
+.detalle-precio-promocion .detalle-producto-precio {
+    margin-bottom: 0;
+
+    color: var(--naranja);
+}

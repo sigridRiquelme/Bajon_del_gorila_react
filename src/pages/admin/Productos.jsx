@@ -59,15 +59,20 @@ function Productos() {
         nuevoProducto,
         setNuevoProducto
     ] = useState({
+
         nombre: "",
         categoria: "",
         precio: "",
         stock: "",
         descripcion: "",
+        promocion: false,
+        descuento: 0,
         estado: "Disponible",
         imagen: ""
     });
 
+
+    // ACTUALIZO LOS CAMPOS
 
     const handleChange = (
         e
@@ -80,17 +85,59 @@ function Productos() {
 
 
         setNuevoProducto({
+
             ...nuevoProducto,
-            [name]: value
+
+            [name]:
+                value
         });
 
 
         setErrores({
+
             ...errores,
-            [name]: ""
+
+            [name]:
+                ""
         });
     };
 
+
+    // ACTIVO O DESACTIVO PROMOCION
+
+    const cambiarPromocion = (
+        e
+    ) => {
+
+        const activa =
+            e.target.checked;
+
+
+        setNuevoProducto({
+
+            ...nuevoProducto,
+
+            promocion:
+                activa,
+
+            descuento:
+                activa
+                    ? nuevoProducto.descuento
+                    : 0
+        });
+
+
+        setErrores({
+
+            ...errores,
+
+            descuento:
+                ""
+        });
+    };
+
+
+    // CARGO UNA NUEVA IMAGEN
 
     const handleImagen = (
         e
@@ -100,7 +147,9 @@ function Productos() {
             e.target.files[0];
 
 
-        if (archivo) {
+        if (
+            archivo
+        ) {
 
             const lector =
                 new FileReader();
@@ -109,15 +158,20 @@ function Productos() {
             lector.onload = () => {
 
                 setNuevoProducto({
+
                     ...nuevoProducto,
+
                     imagen:
                         lector.result
                 });
 
 
                 setErrores({
+
                     ...errores,
-                    imagen: ""
+
+                    imagen:
+                        ""
                 });
             };
 
@@ -129,14 +183,19 @@ function Productos() {
     };
 
 
+    // VALIDO Y GUARDO EL PRODUCTO
+
     const guardarProducto = () => {
 
         const nuevosErrores = {};
 
 
+        // NOMBRE
+
         if (
             nuevoProducto.nombre
-                .trim() === ""
+                .trim() ===
+            ""
         ) {
 
             nuevosErrores.nombre =
@@ -145,13 +204,16 @@ function Productos() {
         } else if (
             nuevoProducto.nombre
                 .trim()
-                .length < 3
+                .length <
+            3
         ) {
 
             nuevosErrores.nombre =
                 "El nombre debe tener al menos 3 caracteres.";
         }
 
+
+        // CATEGORIA
 
         if (
             nuevoProducto.categoria ===
@@ -162,6 +224,8 @@ function Productos() {
                 "La categoría es obligatoria.";
         }
 
+
+        // PRECIO
 
         if (
             nuevoProducto.precio ===
@@ -174,13 +238,16 @@ function Productos() {
         } else if (
             Number(
                 nuevoProducto.precio
-            ) <= 0
+            ) <=
+            0
         ) {
 
             nuevosErrores.precio =
                 "El precio debe ser mayor a 0.";
         }
 
+
+        // STOCK
 
         if (
             nuevoProducto.stock ===
@@ -193,7 +260,8 @@ function Productos() {
         } else if (
             Number(
                 nuevoProducto.stock
-            ) < 0
+            ) <
+            0
         ) {
 
             nuevosErrores.stock =
@@ -201,11 +269,12 @@ function Productos() {
         }
 
 
-        // CAMBIO: AHORA TODOS LOS PRODUCTOS DEBEN TENER DESCRIPCION
+        // DESCRIPCION
 
         if (
             nuevoProducto.descripcion
-                .trim() === ""
+                .trim() ===
+            ""
         ) {
 
             nuevosErrores.descripcion =
@@ -214,13 +283,48 @@ function Productos() {
         } else if (
             nuevoProducto.descripcion
                 .trim()
-                .length < 10
+                .length <
+            10
         ) {
 
             nuevosErrores.descripcion =
                 "La descripción debe tener al menos 10 caracteres.";
         }
 
+
+        // DESCUENTO
+
+        if (
+            nuevoProducto.promocion
+        ) {
+
+            const descuento =
+                Number(
+                    nuevoProducto.descuento
+                );
+
+
+            if (
+                !descuento
+            ) {
+
+                nuevosErrores.descuento =
+                    "Ingresa el porcentaje de descuento.";
+
+            } else if (
+                descuento <
+                    1 ||
+                descuento >
+                    90
+            ) {
+
+                nuevosErrores.descuento =
+                    "El descuento debe estar entre 1% y 90%.";
+            }
+        }
+
+
+        // IMAGEN
 
         if (
             nuevoProducto.imagen ===
@@ -240,12 +344,15 @@ function Productos() {
         if (
             Object.keys(
                 nuevosErrores
-            ).length > 0
+            ).length >
+            0
         ) {
 
             return;
         }
 
+
+        // ACTUALIZO EL ESTADO SEGUN STOCK
 
         let estadoFinal =
             nuevoProducto.estado;
@@ -254,7 +361,8 @@ function Productos() {
         if (
             Number(
                 nuevoProducto.stock
-            ) === 0
+            ) ===
+            0
         ) {
 
             estadoFinal =
@@ -270,64 +378,61 @@ function Productos() {
         }
 
 
+        const datosProducto = {
+
+            ...nuevoProducto,
+
+            nombre:
+                nuevoProducto.nombre
+                    .trim(),
+
+            descripcion:
+                nuevoProducto.descripcion
+                    .trim(),
+
+            precio:
+                Number(
+                    nuevoProducto.precio
+                ),
+
+            stock:
+                Number(
+                    nuevoProducto.stock
+                ),
+
+            promocion:
+                nuevoProducto.promocion,
+
+            descuento:
+                nuevoProducto.promocion
+                    ? Number(
+                        nuevoProducto.descuento
+                    )
+                    : 0,
+
+            estado:
+                estadoFinal
+        };
+
+
+        // EDITO EL PRODUCTO
+
         if (
             productoEditando
         ) {
 
             actualizarProducto(
                 productoEditando.codigo,
-                {
-                    ...nuevoProducto,
-
-                    nombre:
-                        nuevoProducto.nombre
-                            .trim(),
-
-                    descripcion:
-                        nuevoProducto.descripcion
-                            .trim(),
-
-                    precio:
-                        Number(
-                            nuevoProducto.precio
-                        ),
-
-                    stock:
-                        Number(
-                            nuevoProducto.stock
-                        ),
-
-                    estado:
-                        estadoFinal
-                }
+                datosProducto
             );
 
         } else {
 
-            agregarProductoData({
-                ...nuevoProducto,
+            // AGREGO UN PRODUCTO NUEVO
 
-                nombre:
-                    nuevoProducto.nombre
-                        .trim(),
-
-                descripcion:
-                    nuevoProducto.descripcion
-                        .trim(),
-
-                precio:
-                    Number(
-                        nuevoProducto.precio
-                    ),
-
-                stock:
-                    Number(
-                        nuevoProducto.stock
-                    ),
-
-                estado:
-                    estadoFinal
-            });
+            agregarProductoData(
+                datosProducto
+            );
         }
 
 
@@ -336,22 +441,37 @@ function Productos() {
         );
 
 
+        // LIMPIO EL FORMULARIO
+
         setNuevoProducto({
+
             nombre: "",
             categoria: "",
             precio: "",
             stock: "",
             descripcion: "",
+            promocion: false,
+            descuento: 0,
             estado: "Disponible",
             imagen: ""
         });
 
 
         setErrores({});
-        setProductoEditando(null);
-        setMostrarFormulario(false);
+
+
+        setProductoEditando(
+            null
+        );
+
+
+        setMostrarFormulario(
+            false
+        );
     };
 
+
+    // FILTRO LOS PRODUCTOS
 
     const productosFiltrados =
         listaProductos.filter(
@@ -381,6 +501,8 @@ function Productos() {
         );
 
 
+    // ELIMINO EL PRODUCTO
+
     const eliminarProducto = (
         codigo
     ) => {
@@ -396,6 +518,8 @@ function Productos() {
     };
 
 
+    // CARGO EL PRODUCTO PARA EDITAR
+
     const editarProducto = (
         producto
     ) => {
@@ -406,21 +530,49 @@ function Productos() {
 
 
         setNuevoProducto({
-            ...producto,
+
+            nombre:
+                producto.nombre,
+
+            categoria:
+                producto.categoria,
+
+            precio:
+                producto.precio,
+
+            stock:
+                producto.stock,
 
             descripcion:
                 producto.descripcion ||
-                ""
+                "",
+
+            promocion:
+                producto.promocion ||
+                false,
+
+            descuento:
+                producto.descuento ||
+                0,
+
+            estado:
+                producto.estado,
+
+            imagen:
+                producto.imagen
         });
 
 
         setErrores({});
+
 
         setMostrarFormulario(
             true
         );
     };
 
+
+    // ABRO EL FORMULARIO VACIO
 
     const abrirFormulario = () => {
 
@@ -430,11 +582,14 @@ function Productos() {
 
 
         setNuevoProducto({
+
             nombre: "",
             categoria: "",
             precio: "",
             stock: "",
             descripcion: "",
+            promocion: false,
+            descuento: 0,
             estado: "Disponible",
             imagen: ""
         });
@@ -442,11 +597,14 @@ function Productos() {
 
         setErrores({});
 
+
         setMostrarFormulario(
             true
         );
     };
 
+
+    // CIERRO EL FORMULARIO
 
     const cerrarFormulario = () => {
 
@@ -454,19 +612,24 @@ function Productos() {
             false
         );
 
+
         setProductoEditando(
             null
         );
+
 
         setErrores({});
 
 
         setNuevoProducto({
+
             nombre: "",
             categoria: "",
             precio: "",
             stock: "",
             descripcion: "",
+            promocion: false,
+            descuento: 0,
             estado: "Disponible",
             imagen: ""
         });
@@ -485,6 +648,7 @@ function Productos() {
                     <h1>
                         PRODUCTOS
                     </h1>
+
 
                     <p>
                         {
@@ -586,11 +750,19 @@ function Productos() {
                             </th>
 
                             <th>
+                                DESCRIPCIÓN
+                            </th>
+
+                            <th>
                                 PRECIO
                             </th>
 
                             <th>
                                 STOCK
+                            </th>
+
+                            <th>
+                                PROMOCIÓN
                             </th>
 
                             <th>
@@ -627,11 +799,20 @@ function Productos() {
                                         categoria={
                                             producto.categoria
                                         }
+                                        descripcion={
+                                            producto.descripcion
+                                        }
                                         precio={
                                             producto.precio
                                         }
                                         stock={
                                             producto.stock
+                                        }
+                                        promocion={
+                                            producto.promocion
+                                        }
+                                        descuento={
+                                            producto.descuento
                                         }
                                         estado={
                                             producto.estado
@@ -654,7 +835,7 @@ function Productos() {
 
                             <tr>
 
-                                <td colSpan="7">
+                                <td colSpan="9">
                                     No se encontraron productos.
                                 </td>
 
@@ -672,6 +853,7 @@ function Productos() {
             <div className="contenedor-btn-agregar">
 
                 <button
+                    type="button"
                     className="btn-agregar"
                     onClick={
                         abrirFormulario
@@ -692,9 +874,10 @@ function Productos() {
 
                         <h2>
 
-                            {productoEditando
-                                ? "Editar producto"
-                                : "Agregar producto"
+                            {
+                                productoEditando
+                                    ? "Editar producto"
+                                    : "Agregar producto"
                             }
 
                         </h2>
@@ -711,7 +894,7 @@ function Productos() {
                                 id="nombre"
                                 type="text"
                                 name="nombre"
-                                placeholder="Ej: Hamburguesa Clásica"
+                                placeholder="Ej: Hamburguesa Gorila"
                                 value={
                                     nuevoProducto.nombre
                                 }
@@ -816,6 +999,45 @@ function Productos() {
 
                         <div className="campo-formulario">
 
+                            <label htmlFor="descripcion">
+                                Descripción
+                            </label>
+
+
+                            <textarea
+                                id="descripcion"
+                                name="descripcion"
+                                rows="4"
+                                placeholder="Describe el producto..."
+                                value={
+                                    nuevoProducto.descripcion
+                                }
+                                onChange={
+                                    handleChange
+                                }
+                                className={
+                                    errores.descripcion
+                                        ? "campo-error"
+                                        : ""
+                                }
+                            />
+
+
+                            {errores.descripcion && (
+
+                                <small className="mensaje-error">
+                                    {
+                                        errores.descripcion
+                                    }
+                                </small>
+
+                            )}
+
+                        </div>
+
+
+                        <div className="campo-formulario">
+
                             <label htmlFor="precio">
                                 Precio
                             </label>
@@ -825,7 +1047,7 @@ function Productos() {
                                 id="precio"
                                 type="number"
                                 name="precio"
-                                placeholder="Ej: 5990"
+                                min="1"
                                 value={
                                     nuevoProducto.precio
                                 }
@@ -864,7 +1086,7 @@ function Productos() {
                                 id="stock"
                                 type="number"
                                 name="stock"
-                                placeholder="Ej: 20"
+                                min="0"
                                 value={
                                     nuevoProducto.stock
                                 }
@@ -892,39 +1114,71 @@ function Productos() {
                         </div>
 
 
-                        <div className="campo-formulario">
+                        {/* PROMOCION */}
 
-                            <label htmlFor="descripcion">
-                                Descripción
+                        <div className="campo-promocion-producto">
+
+                            <label className="promocion-check">
+
+                                <input
+                                    type="checkbox"
+                                    checked={
+                                        nuevoProducto.promocion
+                                    }
+                                    onChange={
+                                        cambiarPromocion
+                                    }
+                                />
+
+
+                                <span>
+                                    Producto en promoción
+                                </span>
+
                             </label>
 
 
-                            <textarea
-                                id="descripcion"
-                                name="descripcion"
-                                rows="4"
-                                placeholder="Ej: Carne, queso cheddar, lechuga y tomate."
-                                value={
-                                    nuevoProducto.descripcion
-                                }
-                                onChange={
-                                    handleChange
-                                }
-                                className={
-                                    errores.descripcion
-                                        ? "campo-error"
-                                        : ""
-                                }
-                            />
+                            {nuevoProducto.promocion && (
+
+                                <div className="campo-formulario">
+
+                                    <label htmlFor="descuento">
+                                        Descuento %
+                                    </label>
 
 
-                            {errores.descripcion && (
+                                    <input
+                                        id="descuento"
+                                        type="number"
+                                        name="descuento"
+                                        min="1"
+                                        max="90"
+                                        placeholder="Ej: 20"
+                                        value={
+                                            nuevoProducto.descuento
+                                        }
+                                        onChange={
+                                            handleChange
+                                        }
+                                        className={
+                                            errores.descuento
+                                                ? "campo-error"
+                                                : ""
+                                        }
+                                    />
 
-                                <small className="mensaje-error">
-                                    {
-                                        errores.descripcion
-                                    }
-                                </small>
+
+                                    {errores.descuento && (
+
+                                        <small className="mensaje-error">
+                                            {
+                                                errores.descuento
+                                            }
+                                        </small>
+
+                                    )}
+
+                                </div>
 
                             )}
 
@@ -962,17 +1216,54 @@ function Productos() {
                         </div>
 
 
+                        {/* IMAGEN */}
+
                         <div className="campo-formulario">
 
-                            <label htmlFor="imagen">
-                                Imagen del producto
+                            <label>
+                                Imagen
+                            </label>
+
+
+                            {nuevoProducto.imagen && (
+
+                                <div className="imagen-actual-producto">
+
+                                    <span>
+                                        Imagen actual
+                                    </span>
+
+
+                                    <img
+                                        src={
+                                            nuevoProducto.imagen
+                                        }
+                                        alt={
+                                            nuevoProducto.nombre ||
+                                            "Imagen del producto"
+                                        }
+                                    />
+
+                                </div>
+
+                            )}
+
+
+                            <label
+                                htmlFor="imagen"
+                                className="label-nueva-imagen"
+                            >
+                                {
+                                    productoEditando
+                                        ? "Seleccionar nueva imagen"
+                                        : "Seleccionar imagen"
+                                }
                             </label>
 
 
                             <input
                                 id="imagen"
                                 type="file"
-                                name="imagen"
                                 accept="image/*"
                                 onChange={
                                     handleImagen
@@ -983,16 +1274,6 @@ function Productos() {
                                         : ""
                                 }
                             />
-
-
-                            {productoEditando &&
-                                nuevoProducto.imagen && (
-
-                                <small>
-                                    Puedes dejar la imagen actual si no seleccionas otra.
-                                </small>
-
-                            )}
 
 
                             {errores.imagen && (
@@ -1008,29 +1289,36 @@ function Productos() {
                         </div>
 
 
-                        <button
-                            className="btn-guardar"
-                            onClick={
-                                guardarProducto
-                            }
-                        >
+                        <div className="acciones-formulario">
 
-                            {productoEditando
-                                ? "Guardar cambios"
-                                : "Guardar producto"
-                            }
-
-                        </button>
+                            <button
+                                type="button"
+                                className="btn-cancelar"
+                                onClick={
+                                    cerrarFormulario
+                                }
+                            >
+                                CANCELAR
+                            </button>
 
 
-                        <button
-                            className="btn-cerrar"
-                            onClick={
-                                cerrarFormulario
-                            }
-                        >
-                            Cerrar
-                        </button>
+                            <button
+                                type="button"
+                                className="btn-guardar"
+                                onClick={
+                                    guardarProducto
+                                }
+                            >
+
+                                {
+                                    productoEditando
+                                        ? "GUARDAR CAMBIOS"
+                                        : "AGREGAR PRODUCTO"
+                                }
+
+                            </button>
+
+                        </div>
 
 
                     </div>

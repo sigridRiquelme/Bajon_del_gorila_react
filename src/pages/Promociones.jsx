@@ -1,127 +1,298 @@
-import { useState } from "react";
+import {
+    useState
+} from "react";
 
-import PromocionCard from "../components/PromocionCard.jsx";
-import { promociones } from "../data/catalogoPublico.js";
+import ProductoCard
+    from "../components/ProductoCard.jsx";
+
+import {
+    obtenerProductos
+} from "../data/productos.js";
+
+import {
+    obtenerUsuarioPorId
+} from "../data/usuarios.js";
+
+import {
+    agregarAlCarrito,
+    obtenerCarrito
+} from "../data/carrito.js";
 
 import "../styles/Menu.css";
 import "../styles/promociones.css";
 import "../styles/responsive.css";
 
+
 function Promociones() {
-  const [correo, setCorreo] = useState("");
-  const [mensaje, setMensaje] = useState("");
-  const [hayError, setHayError] = useState(false);
 
-  function manejarSuscripcion(evento) {
-    evento.preventDefault();
-
-    const correoLimpio = correo.trim();
-    const formatoCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (!formatoCorreo.test(correoLimpio)) {
-      setMensaje("Ingresa un correo válido.");
-      setHayError(true);
-      return;
-    }
-
-    setMensaje(
-      "¡Correo validado! La suscripción aún es una demostración."
+    const [
+        carritoActual,
+        setCarritoActual
+    ] = useState(
+        obtenerCarrito()
     );
-    setHayError(false);
-    setCorreo("");
-  }
 
-  return (
-    <>
-      <section className="cabecera-pagina cabecera-pagina--degradado cabecera-promociones">
-        <div className="contenedor">
-          <p className="antetitulo">
-            🔥 SOLO POR TIEMPO LIMITADO
-          </p>
 
-          <h1 className="titulo-seccion">
-            PROMOS PARA UN
-            <br />
-            BAJÓN BRUTAL
-          </h1>
+    const [
+        mensajeCarrito,
+        setMensajeCarrito
+    ] = useState("");
 
-          <p>
-            Ofertas que el gorila no deja pasar. Tampoco tú.
-          </p>
-        </div>
-      </section>
 
-      <section className="seccion-lista-promociones">
-        <div className="contenedor">
+    const [
+        hayErrorCarrito,
+        setHayErrorCarrito
+    ] = useState(false);
 
-          <div className="lista-promociones">
-            {promociones.map((promocion) => (
-              <PromocionCard
-                key={promocion.id}
-                promocion={promocion}
-              />
-            ))}
-          </div>
 
-          <div className="boletin">
-            <div className="texto-boletin">
-              <p className="antetitulo">
-                SÉ EL PRIMERO EN ENTERARTE
-              </p>
+    const usuarioActualId =
+        localStorage.getItem(
+            "usuarioActualId"
+        );
 
-              <h3 className="titulo-seccion">
-                ALERTAS DE BAJÓN 🔔
-              </h3>
 
-              <p>
-                Regístrate y recibe las mejores promos
-                antes que nadie.
-              </p>
-            </div>
+    const usuarioActual =
+        usuarioActualId !== null
+            ? obtenerUsuarioPorId(
+                Number(
+                    usuarioActualId
+                )
+            )
+            : null;
 
-            <form
-              className="formulario-boletin"
-              onSubmit={manejarSuscripcion}
-              noValidate
-            >
-              <input
-                className="campo-entrada"
-                type="email"
-                placeholder="tu@correo.cl"
-                aria-label="Correo electrónico"
-                value={correo}
-                onChange={(evento) => {
-                  setCorreo(evento.target.value);
-                  setMensaje("");
-                  setHayError(false);
-                }}
-                required
-              />
 
-              <button
-                className="boton boton-amarillo"
-                type="submit"
-              >
-                SUSCRIBIRME
-              </button>
-            </form>
-          </div>
+    const esAdministrador =
+        usuarioActual?.rol ===
+        "Administrador";
 
-          {mensaje && (
-            <p
-              className={`mensaje-alertas ${
-                hayError ? "error" : ""
-              }`}
-              role={hayError ? "alert" : "status"}
-            >
-              {mensaje}
-            </p>
-          )}
 
-        </div>
-      </section>
-    </>
-  );
+    // OBTENGO SOLO PRODUCTOS CON PROMOCION
+
+    const productosPromocion =
+        obtenerProductos()
+            .filter(
+                (producto) =>
+                    producto.promocion ===
+                        true &&
+                    producto.descuento >
+                        0 &&
+                    producto.estado !==
+                        "Oculto"
+            )
+            .map(
+                (producto) => {
+
+                    const productoEnCarrito =
+                        carritoActual.find(
+                            (item) =>
+                                item.codigo ===
+                                producto.codigo
+                        );
+
+
+                    const cantidadEnCarrito =
+                        productoEnCarrito
+                            ? productoEnCarrito.cantidad
+                            : 0;
+
+
+                    return {
+
+                        ...producto,
+
+                        stockDisponible:
+                            Math.max(
+                                producto.stock -
+                                cantidadEnCarrito,
+                                0
+                            ),
+
+                        valoracion:
+                            producto.valoracion ||
+                            4.8
+                    };
+                }
+            );
+
+
+    // AGREGO EL PRODUCTO AL CARRITO
+
+    const agregarProducto = (
+        producto,
+        cantidad
+    ) => {
+
+        setMensajeCarrito("");
+        setHayErrorCarrito(false);
+
+
+        if (
+            esAdministrador
+        ) {
+
+            setMensajeCarrito(
+                "La cuenta de administrador no puede realizar compras."
+            );
+
+            setHayErrorCarrito(
+                true
+            );
+
+            return;
+        }
+
+
+        if (
+            cantidad >
+            producto.stockDisponible
+        ) {
+
+            setMensajeCarrito(
+                `Solo puedes agregar ${producto.stockDisponible} unidades más de ${producto.nombre}.`
+            );
+
+            setHayErrorCarrito(
+                true
+            );
+
+            return;
+        }
+
+
+        for (
+            let i = 0;
+            i < cantidad;
+            i++
+        ) {
+
+            agregarAlCarrito(
+                producto
+            );
+        }
+
+
+        setCarritoActual(
+            obtenerCarrito()
+        );
+
+
+        setMensajeCarrito(
+            `${cantidad} ${producto.nombre} agregado al carrito.`
+        );
+    };
+
+
+    return (
+
+        <>
+
+            <section className="cabecera-pagina cabecera-pagina--degradado cabecera-promociones">
+
+                <div className="contenedor">
+
+                    <p className="antetitulo">
+                        🔥 OFERTAS DEL GORILA
+                    </p>
+
+
+                    <h1 className="titulo-seccion">
+
+                        PROMOS PARA UN
+
+                        <br />
+
+                        BAJÓN BRUTAL
+
+                    </h1>
+
+
+                    <p>
+                        Aprovecha nuestros productos con descuento antes de que se acaben.
+                    </p>
+
+                </div>
+
+            </section>
+
+
+            <section className="seccion-promociones-productos">
+
+                <div className="contenedor">
+
+
+                    {mensajeCarrito && (
+
+                        <div
+                            className={
+                                hayErrorCarrito
+                                    ? "mensaje-menu error"
+                                    : "mensaje-menu"
+                            }
+                        >
+                            {
+                                mensajeCarrito
+                            }
+                        </div>
+
+                    )}
+
+
+                    {productosPromocion.length >
+                    0 ? (
+
+                        <div className="grilla-productos">
+
+                            {productosPromocion.map(
+                                (producto) => (
+
+                                    <ProductoCard
+                                        key={
+                                            producto.codigo
+                                        }
+                                        producto={
+                                            producto
+                                        }
+                                        onAgregar={
+                                            esAdministrador
+                                                ? undefined
+                                                : agregarProducto
+                                        }
+                                    />
+
+                                )
+                            )}
+
+                        </div>
+
+                    ) : (
+
+                        <div className="promociones-vacias">
+
+                            <span>
+                                🦍
+                            </span>
+
+
+                            <h2>
+                                NO HAY PROMOCIONES ACTIVAS
+                            </h2>
+
+
+                            <p>
+                                El gorila está preparando nuevas ofertas. Vuelve pronto.
+                            </p>
+
+                        </div>
+
+                    )}
+
+                </div>
+
+            </section>
+
+        </>
+    );
 }
+
 
 export default Promociones;
