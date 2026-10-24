@@ -28,74 +28,152 @@ const usuariosIniciales = [
 
 const cargarUsuarios = () => {
 
-    const usuariosGuardados = localStorage.getItem("usuarios");
+    const usuariosGuardados =
+        localStorage.getItem(
+            "usuarios"
+        );
+
 
     if (usuariosGuardados) {
-        return JSON.parse(usuariosGuardados);
+
+        return JSON.parse(
+            usuariosGuardados
+        );
     }
+
 
     localStorage.setItem(
         "usuarios",
-        JSON.stringify(usuariosIniciales)
+        JSON.stringify(
+            usuariosIniciales
+        )
     );
 
-    return [...usuariosIniciales];
+
+    return [
+        ...usuariosIniciales
+    ];
 };
 
 
-let usuarios = cargarUsuarios();
+let usuarios =
+    cargarUsuarios();
+
+
+// CAMBIO: siempre trabajo con los usuarios guardados realmente
+
+const actualizarDesdeLocalStorage = () => {
+
+    const usuariosGuardados =
+        localStorage.getItem(
+            "usuarios"
+        );
+
+
+    if (usuariosGuardados) {
+
+        usuarios =
+            JSON.parse(
+                usuariosGuardados
+            );
+
+    } else {
+
+        usuarios = [
+            ...usuariosIniciales
+        ];
+
+
+        localStorage.setItem(
+            "usuarios",
+            JSON.stringify(
+                usuariosIniciales
+            )
+        );
+    }
+};
 
 
 const guardarUsuarios = () => {
+
     localStorage.setItem(
         "usuarios",
-        JSON.stringify(usuarios)
+        JSON.stringify(
+            usuarios
+        )
     );
 };
 
 
 export const obtenerUsuarios = () => {
 
-    return [...usuarios].sort((a, b) => {
+    actualizarDesdeLocalStorage();
 
-        if (a.id === 0) {
-            return -1;
+
+    return [...usuarios].sort(
+        (a, b) => {
+
+            if (a.id === 0) {
+                return -1;
+            }
+
+
+            if (b.id === 0) {
+                return 1;
+            }
+
+
+            return a.id - b.id;
         }
-
-        if (b.id === 0) {
-            return 1;
-        }
-
-        return a.id - b.id;
-    });
-};
-
-export const obtenerUsuarioPorId = (id) => {
-    return usuarios.find(
-        (usuario) => usuario.id === id
     );
 };
 
 
-export const agregarUsuario = (nuevoUsuario) => {
+export const obtenerUsuarioPorId = (
+    id
+) => {
+
+    actualizarDesdeLocalStorage();
+
+
+    return usuarios.find(
+        (usuario) =>
+            usuario.id === id
+    );
+};
+
+
+export const agregarUsuario = (
+    nuevoUsuario
+) => {
+
+    actualizarDesdeLocalStorage();
+
 
     const nuevoId =
         Math.max(
-            ...usuarios.map((usuario) => usuario.id),
+            ...usuarios.map(
+                (usuario) =>
+                    usuario.id
+            ),
             0
         ) + 1;
+
 
     const usuario = {
         ...nuevoUsuario,
         id: nuevoId
     };
 
+
     usuarios = [
         ...usuarios,
         usuario
     ];
 
+
     guardarUsuarios();
+
 
     return usuario;
 };
@@ -106,25 +184,39 @@ export const actualizarUsuario = (
     datosActualizados
 ) => {
 
-    usuarios = usuarios.map((usuario) =>
-        usuario.id === id
-            ? {
-                ...usuario,
-                ...datosActualizados,
-                id
-            }
-            : usuario
-    );
+    actualizarDesdeLocalStorage();
+
+
+    usuarios =
+        usuarios.map(
+            (usuario) =>
+                usuario.id === id
+                    ? {
+                        ...usuario,
+                        ...datosActualizados,
+                        id
+                    }
+                    : usuario
+        );
+
 
     guardarUsuarios();
 };
 
 
-export const eliminarUsuario = (id) => {
+export const eliminarUsuario = (
+    id
+) => {
 
-    usuarios = usuarios.filter(
-        (usuario) => usuario.id !== id
-    );
+    actualizarDesdeLocalStorage();
+
+
+    usuarios =
+        usuarios.filter(
+            (usuario) =>
+                usuario.id !== id
+        );
+
 
     guardarUsuarios();
 };

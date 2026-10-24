@@ -2,11 +2,21 @@ import { useState } from "react";
 
 import ProductoCard from "../components/ProductoCard.jsx";
 
-// CAMBIO: ahora saco los productos desde los mismos datos que usa el admin
-import { obtenerProductos } from "../data/productos.js";
+import {
+    obtenerProductos
+} from "../data/productos.js";
+
+import {
+    obtenerUsuarioPorId
+} from "../data/usuarios.js";
+
+import {
+    agregarAlCarrito,
+    obtenerCarrito
+} from "../data/carrito.js";
 
 import "../styles/Menu.css";
-import "../styles/Responsive.css";
+import "../styles/responsive.css";
 
 
 const categorias = [
@@ -26,88 +36,270 @@ function normalizarTexto(texto) {
     return texto
         .toLowerCase()
         .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "");
+        .replace(
+            /[\u0300-\u036f]/g,
+            ""
+        );
 }
 
 
 function Menu() {
 
-    const [busqueda, setBusqueda] = useState("");
-    const [categoria, setCategoria] = useState("Todos");
-    const [orden, setOrden] = useState("Más vendidos");
+    const [busqueda, setBusqueda] =
+        useState("");
+
+    const [categoria, setCategoria] =
+        useState("Todos");
+
+    const [orden, setOrden] =
+        useState("Más vendidos");
+
+    const [
+        mensajeCarrito,
+        setMensajeCarrito
+    ] = useState("");
+
+    const [
+        hayErrorCarrito,
+        setHayErrorCarrito
+    ] = useState(false);
+
+    const [
+        carritoActual,
+        setCarritoActual
+    ] = useState(
+        obtenerCarrito()
+    );
 
 
-    // CAMBIO: uso los productos del admin para que precio y stock sean los mismos
-    const productosMenu = obtenerProductos()
-        .filter(
-            (producto) =>
-                producto.estado !== "Oculto"
-        )
-        .map((producto) => ({
-            ...producto,
-
-            // ProductoCard usa id, pero en productos.js usamos codigo
-            id: producto.codigo,
-
-            // Por ahora algunos productos del admin no tienen estos datos
-            descripcion:
-                producto.descripcion ||
-                "Producto disponible en El Bajón del Gorila.",
-
-            valoracion:
-                producto.valoracion || 4.8
-        }));
+    const usuarioActualId =
+        localStorage.getItem(
+            "usuarioActualId"
+        );
 
 
-    const productosFiltrados = productosMenu
-
-        .filter((producto) => {
-
-            const coincideCategoria =
-                categoria === "Todos" ||
-                producto.categoria === categoria;
-
-
-            const textoProducto =
-                normalizarTexto(
-                    `${producto.nombre} ${producto.descripcion} ${producto.categoria}`
-                );
+    const usuarioActual =
+        usuarioActualId !== null
+            ? obtenerUsuarioPorId(
+                Number(
+                    usuarioActualId
+                )
+            )
+            : null;
 
 
-            const coincideBusqueda =
-                textoProducto.includes(
-                    normalizarTexto(
-                        busqueda.trim()
-                    )
-                );
+    const esAdministrador =
+        usuarioActual?.rol ===
+        "Administrador";
 
 
-            return (
-                coincideCategoria &&
-                coincideBusqueda
+    // USO LOS PRODUCTOS DEL ADMIN PARA QUE PRECIO Y STOCK SEAN LOS MISMOS
+
+    const productosMenu =
+        obtenerProductos()
+            .filter(
+                (producto) =>
+                    producto.estado !==
+                    "Oculto"
+            )
+            .map(
+                (producto) => {
+
+                    const productoEnCarrito =
+                        carritoActual.find(
+                            (item) =>
+                                item.codigo ===
+                                producto.codigo
+                        );
+
+
+                    const cantidadEnCarrito =
+                        productoEnCarrito
+                            ? productoEnCarrito.cantidad
+                            : 0;
+
+
+                    const stockDisponible =
+                        Math.max(
+                            producto.stock -
+                            cantidadEnCarrito,
+                            0
+                        );
+
+
+                    return {
+                        ...producto,
+
+                        id:
+                            producto.codigo,
+
+                        descripcion:
+                            producto.descripcion ||
+                            "Producto disponible en El Bajón del Gorila.",
+
+                        valoracion:
+                            producto.valoracion ||
+                            4.8,
+
+                        // CAMBIO: muestro lo que realmente queda disponible para agregar
+                        stockDisponible:
+                            stockDisponible
+                    };
+                }
             );
-        })
 
 
-        .sort((a, b) => {
+    // AGREGO LA CANTIDAD ELEGIDA DE UNA SOLA VEZ
 
-            if (orden === "Menor precio") {
+    const agregarProducto = (
+        producto,
+        cantidad
+    ) => {
 
-                return a.precio - b.precio;
-            }
-
-
-            if (orden === "Mayor precio") {
-
-                return b.precio - a.precio;
-            }
+        setMensajeCarrito("");
+        setHayErrorCarrito(false);
 
 
-            return (
-                b.valoracion -
-                a.valoracion
+        if (esAdministrador) {
+
+            setMensajeCarrito(
+                "La cuenta de administrador no puede realizar compras."
             );
-        });
+
+            setHayErrorCarrito(true);
+
+            return;
+        }
+
+
+        if (
+            producto.stockDisponible <= 0 ||
+            producto.estado ===
+            "Sin stock"
+        ) {
+
+            setMensajeCarrito(
+                "Este producto no tiene stock disponible."
+            );
+
+            setHayErrorCarrito(true);
+
+            return;
+        }
+
+
+        if (
+            cantidad >
+            producto.stockDisponible
+        ) {
+
+            setMensajeCarrito(
+                `Solo puedes agregar ${producto.stockDisponible} unidades más de ${producto.nombre}.`
+            );
+
+            setHayErrorCarrito(true);
+
+            return;
+        }
+
+
+        for (
+            let i = 0;
+            i < cantidad;
+            i++
+        ) {
+
+            agregarAlCarrito(
+                producto
+            );
+        }
+
+
+        const carritoActualizado =
+            obtenerCarrito();
+
+
+        setCarritoActual(
+            carritoActualizado
+        );
+
+
+        setMensajeCarrito(
+            `${cantidad} ${producto.nombre} agregado al carrito.`
+        );
+
+        setHayErrorCarrito(false);
+    };
+
+
+    const productosFiltrados =
+        productosMenu
+
+            .filter(
+                (producto) => {
+
+                    const coincideCategoria =
+                        categoria ===
+                            "Todos" ||
+                        producto.categoria ===
+                            categoria;
+
+
+                    const textoProducto =
+                        normalizarTexto(
+                            `${producto.nombre} ${producto.descripcion} ${producto.categoria}`
+                        );
+
+
+                    const coincideBusqueda =
+                        textoProducto.includes(
+                            normalizarTexto(
+                                busqueda.trim()
+                            )
+                        );
+
+
+                    return (
+                        coincideCategoria &&
+                        coincideBusqueda
+                    );
+                }
+            )
+
+
+            .sort(
+                (a, b) => {
+
+                    if (
+                        orden ===
+                        "Menor precio"
+                    ) {
+
+                        return (
+                            a.precio -
+                            b.precio
+                        );
+                    }
+
+
+                    if (
+                        orden ===
+                        "Mayor precio"
+                    ) {
+
+                        return (
+                            b.precio -
+                            a.precio
+                        );
+                    }
+
+
+                    return (
+                        b.valoracion -
+                        a.valoracion
+                    );
+                }
+            );
 
 
     return (
@@ -122,9 +314,11 @@ function Menu() {
                         🍔 NUESTRO MENÚ
                     </p>
 
+
                     <h1 className="titulo-seccion">
                         ELIGE TU BAJÓN
                     </h1>
+
 
                     <p>
                         Tenemos algo para cada nivel de hambre.
@@ -146,6 +340,7 @@ function Menu() {
                             ⌕
                         </span>
 
+
                         <input
                             className="campo-entrada"
                             type="search"
@@ -162,28 +357,33 @@ function Menu() {
                     </div>
 
 
-                    <div className="filtros-categoria">
+                    <select
+                        className="campo-entrada selector-categoria"
+                        value={categoria}
+                        onChange={(e) =>
+                            setCategoria(
+                                e.target.value
+                            )
+                        }
+                    >
 
-                        {categorias.map((item) => (
+                        {categorias.map(
+                            (item) => (
 
-                            <button
-                                key={item}
-                                type="button"
-                                className={`boton-filtro ${
-                                    categoria === item
-                                        ? "activo"
-                                        : ""
-                                }`}
-                                onClick={() =>
-                                    setCategoria(item)
-                                }
-                            >
-                                {item}
-                            </button>
+                                <option
+                                    key={item}
+                                    value={item}
+                                >
+                                    {item === "Todos"
+                                        ? "Todas las categorías"
+                                        : item
+                                    }
+                                </option>
 
-                        ))}
+                            )
+                        )}
 
-                    </div>
+                    </select>
 
 
                     <select
@@ -211,7 +411,6 @@ function Menu() {
 
                     </select>
 
-
                 </div>
 
             </section>
@@ -222,23 +421,42 @@ function Menu() {
                 <div className="contenedor">
 
 
+                    {mensajeCarrito && (
+
+                        <div
+                            className={
+                                hayErrorCarrito
+                                    ? "mensaje-menu error"
+                                    : "mensaje-menu"
+                            }
+                        >
+                            {mensajeCarrito}
+                        </div>
+
+                    )}
+
+
                     <p className="texto-resultados">
 
                         <strong>
-                            {productosFiltrados.length}
+                            {
+                                productosFiltrados.length
+                            }
                         </strong>
 
                         {" "}
                         productos encontrados
 
-                        {categoria !== "Todos" &&
+                        {categoria !==
+                            "Todos" &&
                             ` en ${categoria}`
                         }
 
                     </p>
 
 
-                    {productosFiltrados.length > 0 ? (
+                    {productosFiltrados.length >
+                    0 ? (
 
                         <div className="grilla-productos">
 
@@ -246,8 +464,17 @@ function Menu() {
                                 (producto) => (
 
                                     <ProductoCard
-                                        key={producto.id}
-                                        producto={producto}
+                                        key={
+                                            producto.id
+                                        }
+                                        producto={
+                                            producto
+                                        }
+                                        onAgregar={
+                                            esAdministrador
+                                                ? undefined
+                                                : agregarProducto
+                                        }
                                     />
 
                                 )
@@ -274,7 +501,6 @@ function Menu() {
                         </div>
 
                     )}
-
 
                 </div>
 

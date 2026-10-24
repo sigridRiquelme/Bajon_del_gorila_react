@@ -36,20 +36,51 @@ const cargarProductos = () => {
     const productosGuardados =
         localStorage.getItem("productos");
 
+
     if (productosGuardados) {
-        return JSON.parse(productosGuardados);
+
+        return JSON.parse(
+            productosGuardados
+        );
     }
+
 
     localStorage.setItem(
         "productos",
-        JSON.stringify(productosIniciales)
+        JSON.stringify(
+            productosIniciales
+        )
     );
 
-    return [...productosIniciales];
+
+    return [
+        ...productosIniciales
+    ];
 };
 
 
-let productos = cargarProductos();
+let productos =
+    cargarProductos();
+
+
+// CAMBIO: ACTUALIZO LOS PRODUCTOS CON LO QUE REALMENTE ESTA GUARDADO
+
+const actualizarDesdeLocalStorage = () => {
+
+    const productosGuardados =
+        localStorage.getItem(
+            "productos"
+        );
+
+
+    if (productosGuardados) {
+
+        productos =
+            JSON.parse(
+                productosGuardados
+            );
+    }
+};
 
 
 // GUARDAR PRODUCTOS
@@ -58,7 +89,9 @@ const guardarProductos = () => {
 
     localStorage.setItem(
         "productos",
-        JSON.stringify(productos)
+        JSON.stringify(
+            productos
+        )
     );
 };
 
@@ -66,33 +99,48 @@ const guardarProductos = () => {
 // LEER PRODUCTOS
 
 export const obtenerProductos = () => {
-    return [...productos];
+
+    actualizarDesdeLocalStorage();
+
+    return [
+        ...productos
+    ];
 };
 
 
 // AGREGAR PRODUCTO
 
-export const agregarProducto = (nuevoProducto) => {
+export const agregarProducto = (
+    nuevoProducto
+) => {
+
+    actualizarDesdeLocalStorage();
+
 
     const codigoNuevo =
         Math.max(
             ...productos.map(
-                (producto) => producto.codigo
+                (producto) =>
+                    producto.codigo
             ),
             0
         ) + 1;
+
 
     const producto = {
         ...nuevoProducto,
         codigo: codigoNuevo
     };
 
+
     productos = [
         ...productos,
         producto
     ];
 
+
     guardarProductos();
+
 
     return producto;
 };
@@ -105,15 +153,23 @@ export const actualizarProducto = (
     datosActualizados
 ) => {
 
-    productos = productos.map((producto) =>
-        producto.codigo === codigo
-            ? {
-                ...producto,
-                ...datosActualizados,
-                codigo: codigo
-            }
-            : producto
-    );
+    actualizarDesdeLocalStorage();
+
+
+    productos =
+        productos.map(
+            (producto) =>
+                producto.codigo === codigo
+
+                    ? {
+                        ...producto,
+                        ...datosActualizados,
+                        codigo: codigo
+                    }
+
+                    : producto
+        );
+
 
     guardarProductos();
 };
@@ -121,13 +177,20 @@ export const actualizarProducto = (
 
 // ELIMINAR PRODUCTO
 
-export const eliminarProducto = (codigo) => {
+export const eliminarProducto = (
+    codigo
+) => {
 
-    productos = productos.filter(
-        (producto) =>
-            producto.codigo !== codigo
-    );
+    actualizarDesdeLocalStorage();
+
+
+    productos =
+        productos.filter(
+            (producto) =>
+                producto.codigo !==
+                codigo
+        );
+
 
     guardarProductos();
 };
-

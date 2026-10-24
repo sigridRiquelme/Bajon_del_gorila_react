@@ -1,4 +1,5 @@
 import { useState } from "react";
+
 import {
     Link,
     useNavigate
@@ -8,10 +9,15 @@ import {
     obtenerUsuarios
 } from "../data/usuarios.js";
 
+import {
+    pasarCarritoInvitado
+} from "../data/carrito.js";
+
 
 function Login() {
 
-    const navigate = useNavigate();
+    const navigate =
+        useNavigate();
 
     const [correo, setCorreo] =
         useState("");
@@ -36,7 +42,7 @@ function Login() {
                 .toLowerCase();
 
 
-        // CAMPOS VACÍOS
+        // CAMPOS VACIOS
 
         if (
             correoLimpio === "" ||
@@ -58,7 +64,8 @@ function Login() {
                 (usuario) =>
                     usuario.correo
                         .toLowerCase()
-                        .trim() === correoLimpio
+                        .trim() ===
+                    correoLimpio
             );
 
 
@@ -74,7 +81,10 @@ function Login() {
 
         // VALIDAR CONTRASEÑA
 
-        if (usuario.password !== password) {
+        if (
+            usuario.password !==
+            password
+        ) {
 
             setError(
                 "La contraseña es incorrecta."
@@ -92,13 +102,25 @@ function Login() {
         );
 
 
-        // REDIRECCIÓN SEGÚN ROL
+        // REDIRECCION SEGUN ROL
 
-        if (usuario.rol === "Administrador") {
+        if (
+            usuario.rol ===
+            "Administrador"
+        ) {
 
-            navigate("/admin");
+            navigate(
+                "/admin"
+            );
 
         } else {
+
+            // CAMBIO: si tenia productos como invitado los paso a su cuenta
+
+            pasarCarritoInvitado(
+                usuario.id
+            );
+
 
             navigate("/");
         }
@@ -143,8 +165,11 @@ function Login() {
                     )}
 
 
-                    <form onSubmit={iniciarSesion}>
-
+                    <form
+                        onSubmit={
+                            iniciarSesion
+                        }
+                    >
 
                         <div className="mb-3">
 
@@ -154,6 +179,7 @@ function Login() {
                             >
                                 Correo electrónico
                             </label>
+
 
                             <input
                                 id="correo"
@@ -183,6 +209,7 @@ function Login() {
                                 Contraseña
                             </label>
 
+
                             <input
                                 id="password"
                                 type="password"
@@ -206,12 +233,12 @@ function Login() {
                             type="submit"
                             className="btn w-100 text-white fw-bold"
                             style={{
-                                backgroundColor: "#ff6500"
+                                backgroundColor:
+                                    "#ff6500"
                             }}
                         >
                             INGRESAR
                         </button>
-
 
                     </form>
 
@@ -225,7 +252,6 @@ function Login() {
                         </Link>
 
                     </p>
-
 
                 </div>
 

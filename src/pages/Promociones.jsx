@@ -5,7 +5,7 @@ import { promociones } from "../data/catalogoPublico.js";
 
 import "../styles/Menu.css";
 import "../styles/promociones.css";
-import "../styles/Responsive.css";
+import "../styles/responsive.css";
 
 function Promociones() {
   const [correo, setCorreo] = useState("");

@@ -5,9 +5,14 @@ import AdminLayout from "./layouts/AdminLayout.jsx";
 
 import Login from "./components/Login.jsx";
 import Registro from "./components/Registro.jsx";
+import Nosotros from "./components/Nosotros.jsx";
+import Contacto from "./components/Contacto.jsx";
 
+import Inicio from "./pages/Inicio.jsx";
 import Menu from "./pages/Menu.jsx";
 import Promociones from "./pages/Promociones.jsx";
+import PerfilCliente from "./pages/PerfilCliente.jsx";
+import Carrito from "./pages/Carrito.jsx";
 
 import Dashboard from "./pages/admin/Dashboard.jsx";
 import Productos from "./pages/admin/Productos.jsx";
@@ -32,10 +37,17 @@ function App() {
 
             <Route element={<PublicLayout />}>
 
-                <Route path="/login" element={<Login />} />
-                <Route path="/registro" element={<Registro />} />
+                <Route path="/" element={<Inicio />} />
                 <Route path="/menu" element={<Menu />} />
                 <Route path="/promociones" element={<Promociones />} />
+                <Route path="/nosotros" element={<Nosotros />} />
+                <Route path="/contacto" element={<Contacto />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/registro" element={<Registro />} />
+                <Route path="/perfil" element={<PerfilCliente />} />
+
+                {/* CARRITO */}
+                <Route path="/carrito" element={<Carrito />} />
 
             </Route>
 
