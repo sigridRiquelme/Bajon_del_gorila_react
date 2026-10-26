@@ -1,3 +1,4 @@
+
 import {
     useEffect,
     useState
@@ -5,7 +6,8 @@ import {
 
 import {
     Link,
-    NavLink
+    NavLink,
+    useLocation
 } from "react-router-dom";
 
 import {
@@ -20,6 +22,10 @@ import "../styles/Header.css";
 
 
 function Header() {
+
+    const location =
+        useLocation();
+
 
     const usuarioActualId =
         localStorage.getItem(
@@ -68,6 +74,7 @@ function Header() {
 
 
     // ACTUALIZO EL CONTADOR CUANDO CAMBIA EL CARRITO
+    // TAMBIEN CUANDO CAMBIO DE SESION O PESTAÑA
 
     useEffect(() => {
 
@@ -79,8 +86,17 @@ function Header() {
         };
 
 
+        actualizarContador();
+
+
         window.addEventListener(
             "carritoActualizado",
+            actualizarContador
+        );
+
+
+        window.addEventListener(
+            "storage",
             actualizarContador
         );
 
@@ -91,9 +107,15 @@ function Header() {
                 "carritoActualizado",
                 actualizarContador
             );
+
+
+            window.removeEventListener(
+                "storage",
+                actualizarContador
+            );
         };
 
-    }, []);
+    }, [location.pathname]);
 
 
     return (
