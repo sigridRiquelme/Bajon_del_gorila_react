@@ -1,5 +1,6 @@
 import {
-    useState
+    useState,
+    useEffect
 } from "react";
 
 import {
@@ -60,6 +61,46 @@ function Carrito() {
     ] = useState(
         obtenerCarrito()
     );
+
+    // ACTUALIZO EL CARRITO CUANDO HAY CAMBIOS EN OTRAS PESTAÑAS
+
+    useEffect(() => {
+
+        const actualizarCarrito = () => {
+
+            setCarrito(
+                obtenerCarrito()
+            );
+        };
+
+
+        window.addEventListener(
+            "storage",
+            actualizarCarrito
+        );
+
+
+        window.addEventListener(
+            "carritoActualizado",
+            actualizarCarrito
+        );
+
+
+        return () => {
+
+            window.removeEventListener(
+                "storage",
+                actualizarCarrito
+            );
+
+
+            window.removeEventListener(
+                "carritoActualizado",
+                actualizarCarrito
+            );
+        };
+
+    }, []);
 
 
     const [
@@ -369,7 +410,7 @@ function Carrito() {
 
 
                 {carrito.length ===
-                0 ? (
+                    0 ? (
 
                     <section className="carrito-vacio">
 
