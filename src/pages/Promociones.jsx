@@ -1,4 +1,5 @@
 import {
+    useEffect,
     useState
 } from "react";
 
@@ -6,12 +7,8 @@ import ProductoCard
     from "../components/ProductoCard.jsx";
 
 import {
-    obtenerProductos
-} from "../data/productos.js";
-
-import {
-    obtenerUsuarioPorId
-} from "../data/usuarios.js";
+    obtenerProductosApi
+} from "../api/productos.js";
 
 import {
     agregarAlCarrito,
@@ -24,6 +21,24 @@ import "../styles/responsive.css";
 
 
 function Promociones() {
+
+    const [
+        productos,
+        setProductos
+    ] = useState([]);
+
+
+    const [
+        cargando,
+        setCargando
+    ] = useState(true);
+
+
+    const [
+        errorCarga,
+        setErrorCarga
+    ] = useState("");
+
 
     const [
         carritoActual,
@@ -45,31 +60,75 @@ function Promociones() {
     ] = useState(false);
 
 
-    const usuarioActualId =
+    const rol =
         localStorage.getItem(
-            "usuarioActualId"
+            "usuarioRol"
         );
 
 
-    const usuarioActual =
-        usuarioActualId !== null
-            ? obtenerUsuarioPorId(
-                Number(
-                    usuarioActualId
-                )
-            )
-            : null;
-
-
     const esAdministrador =
-        usuarioActual?.rol ===
-        "Administrador";
+        rol ===
+        "ADMINISTRADOR";
 
 
-    // OBTENGO SOLO PRODUCTOS CON PROMOCION
+    const esVendedor =
+        rol ===
+        "VENDEDOR";
+
+
+    const puedeComprar =
+        !esAdministrador &&
+        !esVendedor;
+
+
+    useEffect(() => {
+
+        const cargarProductos = async () => {
+
+            try {
+
+                const datos =
+                    await obtenerProductosApi();
+
+
+                setProductos(
+                    datos
+                );
+
+
+                setErrorCarga(
+                    ""
+                );
+
+            } catch (
+                error
+            ) {
+
+                console.error(
+                    error
+                );
+
+
+                setErrorCarga(
+                    "No fue posible cargar las promociones."
+                );
+
+            } finally {
+
+                setCargando(
+                    false
+                );
+            }
+        };
+
+
+        cargarProductos();
+
+    }, []);
+
 
     const productosPromocion =
-        obtenerProductos()
+        productos
             .filter(
                 (producto) =>
                     producto.promocion ===
@@ -105,17 +164,11 @@ function Promociones() {
                                 producto.stock -
                                 cantidadEnCarrito,
                                 0
-                            ),
-
-                        valoracion:
-                            producto.valoracion ||
-                            4.8
+                            )
                     };
                 }
             );
 
-
-    // AGREGO EL PRODUCTO AL CARRITO
 
     const agregarProducto = (
         producto,
@@ -123,15 +176,35 @@ function Promociones() {
     ) => {
 
         setMensajeCarrito("");
-        setHayErrorCarrito(false);
+
+        setHayErrorCarrito(
+            false
+        );
 
 
         if (
-            esAdministrador
+            !puedeComprar
         ) {
 
             setMensajeCarrito(
-                "La cuenta de administrador no puede realizar compras."
+                "Esta cuenta no puede realizar compras."
+            );
+
+            setHayErrorCarrito(
+                true
+            );
+
+            return;
+        }
+
+
+        if (
+            producto.stockDisponible <=
+            0
+        ) {
+
+            setMensajeCarrito(
+                "Este producto no tiene stock disponible."
             );
 
             setHayErrorCarrito(
@@ -229,15 +302,36 @@ function Promociones() {
                                     : "mensaje-menu"
                             }
                         >
+
                             {
                                 mensajeCarrito
                             }
+
                         </div>
 
                     )}
 
 
-                    {productosPromocion.length >
+                    {errorCarga && (
+
+                        <div className="mensaje-menu error">
+
+                            {
+                                errorCarga
+                            }
+
+                        </div>
+
+                    )}
+
+
+                    {cargando ? (
+
+                        <p>
+                            Cargando promociones...
+                        </p>
+
+                    ) : productosPromocion.length >
                     0 ? (
 
                         <div className="grilla-productos">
@@ -253,9 +347,9 @@ function Promociones() {
                                             producto
                                         }
                                         onAgregar={
-                                            esAdministrador
-                                                ? undefined
-                                                : agregarProducto
+                                            puedeComprar
+                                                ? agregarProducto
+                                                : undefined
                                         }
                                     />
 

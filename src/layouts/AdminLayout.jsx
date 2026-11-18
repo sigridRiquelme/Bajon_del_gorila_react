@@ -5,35 +5,36 @@ import {
 
 import AdminSidebar from "../components/admin/AdminSidebar.jsx";
 
-import {
-    obtenerUsuarioPorId
-} from "../data/usuarios.js";
-
 import "../styles/admin.css";
 
 
 function AdminLayout() {
 
-    const usuarioActualId =
+    const token =
         localStorage.getItem(
-            "usuarioActualId"
+            "token"
         );
 
 
-    const usuarioActual =
-        usuarioActualId !== null
-            ? obtenerUsuarioPorId(
-                Number(usuarioActualId)
-            )
-            : null;
+    const rol =
+        localStorage.getItem(
+            "usuarioRol"
+        );
 
 
-    // SOLO EL ADMINISTRADOR PUEDE ENTRAR AL PANEL
+    const puedeEntrar =
+        token &&
+        (
+            rol ===
+            "ADMINISTRADOR"
+            ||
+            rol ===
+            "VENDEDOR"
+        );
+
 
     if (
-        !usuarioActual ||
-        usuarioActual.rol !==
-        "Administrador"
+        !puedeEntrar
     ) {
 
         return (

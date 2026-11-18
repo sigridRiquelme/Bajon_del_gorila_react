@@ -1,4 +1,3 @@
-
 import {
     useEffect,
     useState
@@ -9,10 +8,6 @@ import {
     NavLink,
     useLocation
 } from "react-router-dom";
-
-import {
-    obtenerUsuarioPorId
-} from "../data/usuarios.js";
 
 import {
     obtenerCantidadCarrito
@@ -27,41 +22,62 @@ function Header() {
         useLocation();
 
 
-    const usuarioActualId =
+    const token =
         localStorage.getItem(
-            "usuarioActualId"
+            "token"
         );
 
 
-    const usuarioActual =
-        usuarioActualId !== null
-            ? obtenerUsuarioPorId(
-                Number(usuarioActualId)
-            )
-            : null;
+    const rol =
+        localStorage.getItem(
+            "usuarioRol"
+        );
 
 
     const esAdministrador =
-        usuarioActual?.rol ===
-        "Administrador";
+        rol ===
+        "ADMINISTRADOR";
 
 
-    // CADA USUARIO ENTRA A SU PERFIL CORRESPONDIENTE
+    const esVendedor =
+        rol ===
+        "VENDEDOR";
 
-    let rutaCuenta = "/login";
 
-    if (usuarioActual) {
+    const esCliente =
+        rol ===
+        "CLIENTE";
 
-        if (esAdministrador) {
 
-            rutaCuenta =
-                "/admin/perfil";
+    // DEFINO A QUE PERFIL DEBE IR CADA USUARIO
 
-        } else {
+    let rutaCuenta =
+        "/login";
 
-            rutaCuenta =
-                "/perfil";
-        }
+
+    if (
+        token
+        &&
+        esCliente
+    ) {
+
+        rutaCuenta =
+            "/perfil";
+    }
+
+
+    if (
+        token
+        &&
+        (
+            esAdministrador
+            ||
+            esVendedor
+        )
+    ) {
+
+        rutaCuenta =
+            "/admin/perfil";
     }
 
 
@@ -73,8 +89,7 @@ function Header() {
     );
 
 
-    // ACTUALIZO EL CONTADOR CUANDO CAMBIA EL CARRITO
-    // TAMBIEN CUANDO CAMBIO DE SESION O PESTAÑA
+    // ACTUALIZO EL CONTADOR DEL CARRITO
 
     useEffect(() => {
 
@@ -115,7 +130,9 @@ function Header() {
             );
         };
 
-    }, [location.pathname]);
+    }, [
+        location.pathname
+    ]);
 
 
     return (
@@ -127,10 +144,12 @@ function Header() {
                 to="/"
                 aria-label="Ir al inicio"
             >
+
                 <img
                     src="/img/logo-bajon-2.png"
                     alt="El Bajón del Gorila"
                 />
+
             </Link>
 
 
@@ -143,17 +162,21 @@ function Header() {
                     Inicio
                 </NavLink>
 
+
                 <NavLink to="/menu">
                     Menú
                 </NavLink>
+
 
                 <NavLink to="/promociones">
                     Promociones
                 </NavLink>
 
+
                 <NavLink to="/nosotros">
                     Quiénes Somos
                 </NavLink>
+
 
                 <NavLink to="/contacto">
                     Contacto
@@ -164,35 +187,51 @@ function Header() {
 
             <div className="acciones-header">
 
+
                 <Link
-                    to={rutaCuenta}
+                    to={
+                        rutaCuenta
+                    }
                     className="icono-header"
                     aria-label="Mi cuenta"
                 >
+
                     <i className="bi bi-person"></i>
+
                 </Link>
 
 
-                {/* EL ADMIN NO PUEDE COMPRAR */}
+                {/* CLIENTES E INVITADOS PUEDEN USAR CARRITO */}
 
-                {!esAdministrador && (
+                {!esAdministrador
+                &&
+                !esVendedor && (
 
                     <Link
                         to="/carrito"
                         className="carrito-header"
                         aria-label="Carrito"
                     >
+
                         <i className="bi bi-bag"></i>
 
+
                         <span className="contador-header">
-                            {cantidadCarrito}
+
+                            {
+                                cantidadCarrito
+                            }
+
                         </span>
+
                     </Link>
 
                 )}
 
 
-                {esAdministrador ? (
+                {/* ADMINISTRADOR */}
+
+                {esAdministrador && (
 
                     <Link
                         to="/admin"
@@ -201,7 +240,28 @@ function Header() {
                         PANEL ADMIN
                     </Link>
 
-                ) : (
+                )}
+
+
+                {/* VENDEDOR */}
+
+                {esVendedor && (
+
+                    <Link
+                        to="/admin"
+                        className="btn-pedir-header"
+                    >
+                        PANEL VENDEDOR
+                    </Link>
+
+                )}
+
+
+                {/* CLIENTE O INVITADO */}
+
+                {!esAdministrador
+                &&
+                !esVendedor && (
 
                     <Link
                         to="/menu"
@@ -215,7 +275,6 @@ function Header() {
             </div>
 
         </header>
-
     );
 }
 

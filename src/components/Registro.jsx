@@ -8,9 +8,8 @@ import {
 } from "react-router-dom";
 
 import {
-    agregarUsuario,
-    obtenerUsuarios
-} from "../data/usuarios.js";
+    registrarUsuarioApi
+} from "../api/auth.js";
 
 
 function Registro() {
@@ -67,8 +66,6 @@ function Registro() {
     ] = useState("");
 
 
-    // VALIDO EL FORMULARIO
-
     const validarFormulario = () => {
 
         const nuevosErrores = {};
@@ -87,8 +84,6 @@ function Registro() {
         const direccionLimpia =
             direccion.trim();
 
-
-        // NOMBRE
 
         if (
             nombreLimpio ===
@@ -116,8 +111,6 @@ function Registro() {
         }
 
 
-        // CORREO
-
         const correoValido =
             /^[^\s@]+@(gmail\.com|duoc\.cl|duocuc\.cl)$/i;
 
@@ -138,30 +131,8 @@ function Registro() {
 
             nuevosErrores.correo =
                 "El correo debe ser Gmail, Duoc o Duoc UC.";
-
-        } else {
-
-            const correoExiste =
-                obtenerUsuarios().some(
-                    (usuario) =>
-                        usuario.correo
-                            .toLowerCase()
-                            .trim() ===
-                        correoLimpio
-                );
-
-
-            if (
-                correoExiste
-            ) {
-
-                nuevosErrores.correo =
-                    "Este correo ya está registrado.";
-            }
         }
 
-
-        // CONTRASEÑA
 
         if (
             password ===
@@ -173,7 +144,8 @@ function Registro() {
 
         } else if (
             password.length <
-            4 ||
+            4
+            ||
             password.length >
             10
         ) {
@@ -182,8 +154,6 @@ function Registro() {
                 "La contraseña debe tener entre 4 y 10 caracteres.";
         }
 
-
-        // CONFIRMAR CONTRASEÑA
 
         if (
             confirmPassword ===
@@ -203,8 +173,6 @@ function Registro() {
         }
 
 
-        // TELEFONO
-
         if (
             telefono ===
             ""
@@ -223,8 +191,6 @@ function Registro() {
                 "El teléfono debe tener formato +569 12345678.";
         }
 
-
-        // DIRECCION
 
         if (
             direccionLimpia ===
@@ -266,9 +232,7 @@ function Registro() {
     };
 
 
-    // REGISTRO AL CLIENTE
-
-    const registrarUsuario = (
+    const registrarUsuario = async (
         e
     ) => {
 
@@ -285,42 +249,72 @@ function Registro() {
         }
 
 
-        agregarUsuario({
+        try {
 
-            nombre:
-                nombre.trim(),
+            await registrarUsuarioApi({
+                nombre:
+                    nombre.trim(),
 
-            correo:
-                correo
-                    .trim()
-                    .toLowerCase(),
+                correo:
+                    correo
+                        .trim()
+                        .toLowerCase(),
 
-            password:
-                password,
+                password:
+                    password,
 
-            telefono:
-                telefono.trim(),
+                telefono:
+                    telefono.trim(),
 
-            direccion:
-                direccion.trim(),
-
-            rol:
-                "Cliente"
-        });
+                direccion:
+                    direccion.trim()
+            });
 
 
-        setMensaje(
-            "Usuario registrado correctamente."
-        );
+            setMensaje(
+                "Usuario registrado correctamente."
+            );
 
 
-        setNombre("");
-        setCorreo("");
-        setPassword("");
-        setConfirmPassword("");
-        setTelefono("");
-        setDireccion("");
-        setErrores({});
+            setNombre("");
+            setCorreo("");
+            setPassword("");
+            setConfirmPassword("");
+            setTelefono("");
+            setDireccion("");
+            setErrores({});
+
+        } catch (
+            error
+        ) {
+
+            const mensajeBackend =
+                error.response
+                    ?.data
+                    ?.mensaje;
+
+
+            if (
+                mensajeBackend ===
+                "EL CORREO YA ESTA REGISTRADO"
+            ) {
+
+                setErrores({
+                    correo:
+                        "Este correo ya está registrado."
+                });
+
+                return;
+            }
+
+
+            setErrores({
+                general:
+                    mensajeBackend
+                    ||
+                    "No fue posible registrar el usuario."
+            });
+        }
     };
 
 
@@ -387,6 +381,19 @@ function Registro() {
                     )}
 
 
+                    {errores.general && (
+
+                        <div className="alert alert-danger">
+
+                            {
+                                errores.general
+                            }
+
+                        </div>
+
+                    )}
+
+
                     <form
                         onSubmit={
                             registrarUsuario
@@ -432,9 +439,11 @@ function Registro() {
                             {errores.nombre && (
 
                                 <div className="invalid-feedback">
+
                                     {
                                         errores.nombre
                                     }
+
                                 </div>
 
                             )}
@@ -481,9 +490,11 @@ function Registro() {
                             {errores.correo && (
 
                                 <div className="invalid-feedback">
+
                                     {
                                         errores.correo
                                     }
+
                                 </div>
 
                             )}
@@ -492,7 +503,6 @@ function Registro() {
 
 
                         <div className="row">
-
 
                             <div className="col-12 col-md-6 mb-3">
 
@@ -533,9 +543,11 @@ function Registro() {
                                 {errores.password && (
 
                                     <div className="invalid-feedback">
+
                                         {
                                             errores.password
                                         }
+
                                     </div>
 
                                 )}
@@ -581,9 +593,11 @@ function Registro() {
                                 {errores.confirmPassword && (
 
                                     <div className="invalid-feedback">
+
                                         {
                                             errores.confirmPassword
                                         }
+
                                     </div>
 
                                 )}
@@ -660,9 +674,11 @@ function Registro() {
                                 {errores.telefono && (
 
                                     <div className="invalid-feedback">
+
                                         {
                                             errores.telefono
                                         }
+
                                     </div>
 
                                 )}
@@ -712,9 +728,11 @@ function Registro() {
                             {errores.direccion && (
 
                                 <div className="invalid-feedback">
+
                                     {
                                         errores.direccion
                                     }
+
                                 </div>
 
                             )}

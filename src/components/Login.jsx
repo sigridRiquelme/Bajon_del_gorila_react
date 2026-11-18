@@ -9,8 +9,8 @@ import {
 } from "react-router-dom";
 
 import {
-    obtenerUsuarios
-} from "../data/usuarios.js";
+    iniciarSesionApi
+} from "../api/auth.js";
 
 import {
     pasarCarritoInvitado
@@ -45,14 +45,12 @@ function Login() {
     ] = useState("");
 
 
-    // REVISO SI VENGO DESDE EL CHECKOUT
-
     const desdeCheckout =
         location.state?.desdeCheckout ===
         true;
 
 
-    const iniciarSesion = (
+    const iniciarSesion = async (
         e
     ) => {
 
@@ -67,11 +65,10 @@ function Login() {
                 .toLowerCase();
 
 
-        // VALIDO LOS CAMPOS
-
         if (
             correoLimpio ===
-            "" ||
+            ""
+            ||
             password ===
             ""
         ) {
@@ -84,119 +81,123 @@ function Login() {
         }
 
 
-        // BUSCO EL USUARIO
+        try {
 
-        const usuario =
-            obtenerUsuarios().find(
-                (usuario) =>
-                    usuario.correo
-                        .toLowerCase()
-                        .trim() ===
-                    correoLimpio
+            const respuesta =
+                await iniciarSesionApi(
+                    correoLimpio,
+                    password
+                );
+
+
+            const carritoInvitadoGuardado =
+                localStorage.getItem(
+                    "carrito_invitado"
+                );
+
+
+            const carritoInvitado =
+                carritoInvitadoGuardado
+                    ? JSON.parse(
+                        carritoInvitadoGuardado
+                    )
+                    : [];
+
+
+            const teniaCarritoInvitado =
+                carritoInvitado.length >
+                0;
+
+
+            // GUARDO SESION
+
+            localStorage.setItem(
+                "token",
+                respuesta.token
+            );
+
+            localStorage.setItem(
+                "usuarioActualId",
+                respuesta.idUsuario.toString()
+            );
+
+            localStorage.setItem(
+                "usuarioRol",
+                respuesta.rol
+            );
+
+            localStorage.setItem(
+                "usuarioNombre",
+                respuesta.nombre
+            );
+
+            localStorage.setItem(
+                "usuarioCorreo",
+                respuesta.correo
             );
 
 
-        if (
-            !usuario
-        ) {
+            // ADMIN Y VENDEDOR VAN AL PANEL
 
-            setError(
-                "El correo no está registrado."
-            );
+            if (
+                respuesta.rol ===
+                "ADMINISTRADOR"
+                ||
+                respuesta.rol ===
+                "VENDEDOR"
+            ) {
 
-            return;
-        }
+                navigate(
+                    "/admin"
+                );
 
-
-        // VALIDO LA CONTRASEÑA
-
-        if (
-            usuario.password !==
-            password
-        ) {
-
-            setError(
-                "La contraseña es incorrecta."
-            );
-
-            return;
-        }
+                return;
+            }
 
 
-        // REVISO SI TENIA CARRITO COMO INVITADO
+            // CARRITO INVITADO → CLIENTE
 
-        const carritoInvitadoGuardado =
-            localStorage.getItem(
-                "carrito_invitado"
+            pasarCarritoInvitado(
+                respuesta.idUsuario
             );
 
 
-        const carritoInvitado =
-            carritoInvitadoGuardado
-                ? JSON.parse(
-                    carritoInvitadoGuardado
-                )
-                : [];
+            if (
+                desdeCheckout
+                ||
+                teniaCarritoInvitado
+            ) {
 
+                navigate(
+                    "/checkout",
+                    {
+                        replace: true
+                    }
+                );
 
-        const teniaCarritoInvitado =
-            carritoInvitado.length >
-            0;
+                return;
+            }
 
-
-        // GUARDO EL USUARIO CONECTADO
-
-        localStorage.setItem(
-            "usuarioActualId",
-            usuario.id.toString()
-        );
-
-
-        // EL ADMIN VA A SU PANEL
-
-        if (
-            usuario.rol ===
-            "Administrador"
-        ) {
 
             navigate(
-                "/admin"
+                "/"
             );
 
-            return;
-        }
-
-
-        // PASO EL CARRITO INVITADO A SU CUENTA
-
-        pasarCarritoInvitado(
-            usuario.id
-        );
-
-
-        // SI VENIA DEL CHECKOUT SIGO LA COMPRA
-
-        if (
-            desdeCheckout ||
-            teniaCarritoInvitado
+        } catch (
+            error
         ) {
 
-            navigate(
-                "/checkout",
-                {
-                    replace: true
-                }
+            const mensaje =
+                error.response
+                    ?.data
+                    ?.mensaje;
+
+
+            setError(
+                mensaje ||
+                "No fue posible iniciar sesión."
             );
-
-            return;
         }
-
-
-        // LOGIN NORMAL
-
-        navigate(
-            "/"
-        );
     };
 
 
@@ -246,9 +247,11 @@ function Login() {
                     {error && (
 
                         <div className="alert alert-danger">
+
                             {
                                 error
                             }
+
                         </div>
 
                     )}

@@ -8,7 +8,7 @@ import {
 
 import {
     obtenerPrecioFinal
-} from "../data/productos.js";
+} from "../api/productos.js";
 
 
 function ProductoCard({
@@ -98,11 +98,10 @@ function ProductoCard({
         }
 
 
-        // ENVIO EL PRECIO PROMOCIONAL AL CARRITO
-
         onAgregar(
             {
                 ...producto,
+
                 precio:
                     precioFinal
             },
@@ -143,7 +142,9 @@ function ProductoCard({
                 {tienePromocion ? (
 
                     <span className="etiqueta etiqueta-naranja etiqueta-producto">
+
                         -{producto.descuento}% OFF
+
                     </span>
 
                 ) : producto.etiqueta && (
@@ -151,9 +152,11 @@ function ProductoCard({
                     <span
                         className={`etiqueta etiqueta-${producto.colorEtiqueta} etiqueta-producto`}
                     >
+
                         {
                             producto.etiqueta
                         }
+
                     </span>
 
                 )}
@@ -168,11 +171,13 @@ function ProductoCard({
                         )
                     }
                 >
+
                     {
                         esFavorito
                             ? "❤️"
                             : "🤍"
                     }
+
                 </button>
 
             </div>
@@ -181,9 +186,11 @@ function ProductoCard({
             <div className="cuerpo-producto">
 
                 <span className="categoria-producto">
+
                     {
                         producto.categoria
                     }
+
                 </span>
 
 
@@ -196,9 +203,11 @@ function ProductoCard({
                 >
 
                     <h3 className="titulo-producto">
+
                         {
                             producto.nombre
                         }
+
                     </h3>
 
                 </Link>
@@ -211,19 +220,23 @@ function ProductoCard({
                     </span>
 
                     <span className="numero-valoracion">
+
                         {
                             producto.valoracion ||
                             4.8
                         }
+
                     </span>
 
                 </div>
 
 
                 <p className="descripcion-producto">
+
                     {
                         producto.descripcion
                     }
+
                 </p>
 
 
@@ -319,11 +332,13 @@ function ProductoCard({
 
 
                         <span>
+
                             {
                                 sinStock
                                     ? 0
                                     : cantidad
                             }
+
                         </span>
 
 

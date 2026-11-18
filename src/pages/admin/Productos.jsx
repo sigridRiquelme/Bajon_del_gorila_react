@@ -1,4 +1,5 @@
 import {
+    useEffect,
     useState
 } from "react";
 
@@ -8,14 +9,59 @@ import ProductoFila
     from "../../components/admin/ProductoFila.jsx";
 
 import {
-    obtenerProductos,
-    agregarProducto as agregarProductoData,
-    actualizarProducto,
-    eliminarProducto as eliminarProductoData
-} from "../../data/productos.js";
+    actualizarProductoApi,
+    crearProductoApi,
+    eliminarProductoApi,
+    obtenerProductosApi
+} from "../../api/productos.js";
+
+import {
+    crearCategoriaApi,
+    obtenerCategoriasApi
+} from "../../api/categorias.js";
+
+
+const productoVacio = {
+
+    nombre: "",
+
+    categoriaId: "",
+
+    precio: "",
+
+    stock: "",
+
+    descripcion: "",
+
+    promocion: false,
+
+    descuento: 0,
+
+    estado: "Disponible",
+
+    imagen: ""
+};
 
 
 function Productos() {
+
+    const [
+        listaProductos,
+        setListaProductos
+    ] = useState([]);
+
+
+    const [
+        categorias,
+        setCategorias
+    ] = useState([]);
+
+
+    const [
+        cargando,
+        setCargando
+    ] = useState(true);
+
 
     const [
         busqueda,
@@ -27,14 +73,6 @@ function Productos() {
         categoria,
         setCategoria
     ] = useState("Todas");
-
-
-    const [
-        listaProductos,
-        setListaProductos
-    ] = useState(
-        obtenerProductos()
-    );
 
 
     const [
@@ -56,23 +94,115 @@ function Productos() {
 
 
     const [
+        mensaje,
+        setMensaje
+    ] = useState("");
+
+
+    const [
+        hayError,
+        setHayError
+    ] = useState(false);
+
+
+    const [
         nuevoProducto,
         setNuevoProducto
     ] = useState({
-
-        nombre: "",
-        categoria: "",
-        precio: "",
-        stock: "",
-        descripcion: "",
-        promocion: false,
-        descuento: 0,
-        estado: "Disponible",
-        imagen: ""
+        ...productoVacio
     });
 
 
-    // ACTUALIZO LOS CAMPOS
+    const [
+        nuevaCategoria,
+        setNuevaCategoria
+    ] = useState("");
+
+
+    const [
+        errorCategoria,
+        setErrorCategoria
+    ] = useState("");
+
+
+    const rol =
+        localStorage.getItem(
+            "usuarioRol"
+        );
+
+
+    const esAdministrador =
+        rol ===
+        "ADMINISTRADOR";
+
+
+    // CARGO PRODUCTOS Y CATEGORIAS
+
+    const cargarDatos = async () => {
+
+        try {
+
+            const [
+                productosApi,
+                categoriasApi
+            ] =
+                await Promise.all([
+                    obtenerProductosApi(),
+                    obtenerCategoriasApi()
+                ]);
+
+
+            setListaProductos(
+                productosApi
+            );
+
+
+            setCategorias(
+                categoriasApi
+            );
+
+
+            setHayError(
+                false
+            );
+
+
+        } catch (
+            error
+        ) {
+
+            console.error(
+                error
+            );
+
+
+            setMensaje(
+                "No fue posible cargar los productos."
+            );
+
+
+            setHayError(
+                true
+            );
+
+
+        } finally {
+
+            setCargando(
+                false
+            );
+        }
+    };
+
+
+    useEffect(() => {
+
+        cargarDatos();
+
+    }, []);
+
+
+    // ACTUALIZO CAMPOS
 
     const handleChange = (
         e
@@ -103,7 +233,7 @@ function Productos() {
     };
 
 
-    // ACTIVO O DESACTIVO PROMOCION
+    // PROMOCION
 
     const cambiarPromocion = (
         e
@@ -137,60 +267,100 @@ function Productos() {
     };
 
 
-    // CARGO UNA NUEVA IMAGEN
+    // CREAR CATEGORIA
 
-    const handleImagen = (
-        e
-    ) => {
+    const agregarCategoria = async () => {
 
-        const archivo =
-            e.target.files[0];
+        setErrorCategoria("");
+
+        setMensaje("");
+
+
+        const nombre =
+            nuevaCategoria.trim();
 
 
         if (
-            archivo
+            nombre.length <
+            2
         ) {
 
-            const lector =
-                new FileReader();
+            setErrorCategoria(
+                "Ingresa un nombre válido para la categoría."
+            );
+
+            return;
+        }
 
 
-            lector.onload = () => {
-
-                setNuevoProducto({
-
-                    ...nuevoProducto,
-
-                    imagen:
-                        lector.result
-                });
+        const categoriaExiste =
+            categorias.some(
+                (item) =>
+                    item.nombre
+                        .toLowerCase() ===
+                    nombre.toLowerCase()
+            );
 
 
-                setErrores({
+        if (
+            categoriaExiste
+        ) {
 
-                    ...errores,
+            setErrorCategoria(
+                "La categoría ya existe."
+            );
 
-                    imagen:
-                        ""
-                });
-            };
+            return;
+        }
 
 
-            lector.readAsDataURL(
-                archivo
+        try {
+
+            const categoriaCreada =
+                await crearCategoriaApi(
+                    nombre
+                );
+
+
+            setCategorias([
+                ...categorias,
+                categoriaCreada
+            ]);
+
+
+            setNuevaCategoria("");
+
+
+            setMensaje(
+                "Categoría creada correctamente."
+            );
+
+
+            setHayError(
+                false
+            );
+
+
+        } catch (
+            error
+        ) {
+
+            setErrorCategoria(
+                error.response
+                    ?.data
+                    ?.mensaje ||
+                "No fue posible crear la categoría."
             );
         }
     };
 
 
-    // VALIDO Y GUARDO EL PRODUCTO
+    // VALIDO PRODUCTO
 
-    const guardarProducto = () => {
+    const validarProducto = () => {
 
         const nuevosErrores = {};
 
-
-        // NOMBRE
 
         if (
             nuevoProducto.nombre
@@ -213,19 +383,15 @@ function Productos() {
         }
 
 
-        // CATEGORIA
-
         if (
-            nuevoProducto.categoria ===
+            nuevoProducto.categoriaId ===
             ""
         ) {
 
-            nuevosErrores.categoria =
+            nuevosErrores.categoriaId =
                 "La categoría es obligatoria.";
         }
 
-
-        // PRECIO
 
         if (
             nuevoProducto.precio ===
@@ -247,8 +413,6 @@ function Productos() {
         }
 
 
-        // STOCK
-
         if (
             nuevoProducto.stock ===
             ""
@@ -268,8 +432,6 @@ function Productos() {
                 "El stock no puede ser negativo.";
         }
 
-
-        // DESCRIPCION
 
         if (
             nuevoProducto.descripcion
@@ -292,8 +454,6 @@ function Productos() {
         }
 
 
-        // DESCUENTO
-
         if (
             nuevoProducto.promocion
         ) {
@@ -305,34 +465,15 @@ function Productos() {
 
 
             if (
-                !descuento
-            ) {
-
-                nuevosErrores.descuento =
-                    "Ingresa el porcentaje de descuento.";
-
-            } else if (
                 descuento <
                     1 ||
                 descuento >
-                    90
+                    100
             ) {
 
                 nuevosErrores.descuento =
-                    "El descuento debe estar entre 1% y 90%.";
+                    "El descuento debe estar entre 1% y 100%.";
             }
-        }
-
-
-        // IMAGEN
-
-        if (
-            nuevoProducto.imagen ===
-            ""
-        ) {
-
-            nuevosErrores.imagen =
-                "Debes seleccionar una imagen.";
         }
 
 
@@ -341,18 +482,29 @@ function Productos() {
         );
 
 
-        if (
+        return (
             Object.keys(
                 nuevosErrores
-            ).length >
+            ).length ===
             0
+        );
+    };
+
+
+    // GUARDO PRODUCTO
+
+    const guardarProducto = async () => {
+
+        setMensaje("");
+
+
+        if (
+            !validarProducto()
         ) {
 
             return;
         }
 
-
-        // ACTUALIZO EL ESTADO SEGUN STOCK
 
         let estadoFinal =
             nuevoProducto.estado;
@@ -369,7 +521,7 @@ function Productos() {
                 "Sin stock";
 
         } else if (
-            nuevoProducto.estado ===
+            estadoFinal ===
             "Sin stock"
         ) {
 
@@ -380,11 +532,14 @@ function Productos() {
 
         const datosProducto = {
 
-            ...nuevoProducto,
-
             nombre:
                 nuevoProducto.nombre
                     .trim(),
+
+            categoriaId:
+                Number(
+                    nuevoProducto.categoriaId
+                ),
 
             descripcion:
                 nuevoProducto.descripcion
@@ -411,53 +566,238 @@ function Productos() {
                     : 0,
 
             estado:
-                estadoFinal
+                estadoFinal,
+
+            imagen:
+                nuevoProducto.imagen
+                    .trim() ||
+                null
         };
 
 
-        // EDITO EL PRODUCTO
+        try {
 
-        if (
-            productoEditando
+            if (
+                productoEditando
+            ) {
+
+                await actualizarProductoApi(
+                    productoEditando.codigo,
+                    datosProducto
+                );
+
+
+                setMensaje(
+                    "Producto actualizado correctamente."
+                );
+
+            } else {
+
+                await crearProductoApi(
+                    datosProducto
+                );
+
+
+                setMensaje(
+                    "Producto creado correctamente."
+                );
+            }
+
+
+            setHayError(
+                false
+            );
+
+
+            await cargarDatos();
+
+
+            setNuevoProducto({
+                ...productoVacio
+            });
+
+
+            setErrores({});
+
+
+            setProductoEditando(
+                null
+            );
+
+
+            setMostrarFormulario(
+                false
+            );
+
+
+        } catch (
+            error
         ) {
 
-            actualizarProducto(
-                productoEditando.codigo,
-                datosProducto
+            console.error(
+                error
             );
 
-        } else {
 
-            // AGREGO UN PRODUCTO NUEVO
+            setMensaje(
+                error.response
+                    ?.data
+                    ?.mensaje ||
+                "No fue posible guardar el producto."
+            );
 
-            agregarProductoData(
-                datosProducto
+
+            setHayError(
+                true
             );
         }
+    };
 
 
-        setListaProductos(
-            obtenerProductos()
+    // ELIMINO PRODUCTO
+
+    const eliminarProducto = async (
+        codigo
+    ) => {
+
+        setMensaje("");
+
+
+        try {
+
+            await eliminarProductoApi(
+                codigo
+            );
+
+
+            setMensaje(
+                "Producto eliminado correctamente."
+            );
+
+
+            setHayError(
+                false
+            );
+
+
+            await cargarDatos();
+
+
+        } catch (
+            error
+        ) {
+
+            console.error(
+                error
+            );
+
+
+            setMensaje(
+                error.response
+                    ?.data
+                    ?.mensaje ||
+                "No fue posible eliminar el producto."
+            );
+
+
+            setHayError(
+                true
+            );
+        }
+    };
+
+
+    // CARGO PRODUCTO PARA EDITAR
+
+    const editarProducto = (
+        producto
+    ) => {
+
+        setProductoEditando(
+            producto
         );
 
 
-        // LIMPIO EL FORMULARIO
-
         setNuevoProducto({
 
-            nombre: "",
-            categoria: "",
-            precio: "",
-            stock: "",
-            descripcion: "",
-            promocion: false,
-            descuento: 0,
-            estado: "Disponible",
-            imagen: ""
+            nombre:
+                producto.nombre,
+
+            categoriaId:
+                producto.categoriaId,
+
+            precio:
+                producto.precio,
+
+            stock:
+                producto.stock,
+
+            descripcion:
+                producto.descripcion ||
+                "",
+
+            promocion:
+                producto.promocion ||
+                false,
+
+            descuento:
+                producto.descuento ||
+                0,
+
+            estado:
+                producto.estado,
+
+            imagen:
+                producto.imagenBackend ||
+                ""
         });
 
 
         setErrores({});
+
+
+        setMensaje("");
+
+
+        setMostrarFormulario(
+            true
+        );
+    };
+
+
+    // ABRO FORMULARIO
+
+    const abrirFormulario = () => {
+
+        setProductoEditando(
+            null
+        );
+
+
+        setNuevoProducto({
+            ...productoVacio
+        });
+
+
+        setErrores({});
+
+
+        setMensaje("");
+
+
+        setMostrarFormulario(
+            true
+        );
+    };
+
+
+    // CIERRO FORMULARIO
+
+    const cerrarFormulario = () => {
+
+        setMostrarFormulario(
+            false
+        );
 
 
         setProductoEditando(
@@ -465,13 +805,16 @@ function Productos() {
         );
 
 
-        setMostrarFormulario(
-            false
-        );
+        setErrores({});
+
+
+        setNuevoProducto({
+            ...productoVacio
+        });
     };
 
 
-    // FILTRO LOS PRODUCTOS
+    // FILTROS
 
     const productosFiltrados =
         listaProductos.filter(
@@ -501,141 +844,6 @@ function Productos() {
         );
 
 
-    // ELIMINO EL PRODUCTO
-
-    const eliminarProducto = (
-        codigo
-    ) => {
-
-        eliminarProductoData(
-            codigo
-        );
-
-
-        setListaProductos(
-            obtenerProductos()
-        );
-    };
-
-
-    // CARGO EL PRODUCTO PARA EDITAR
-
-    const editarProducto = (
-        producto
-    ) => {
-
-        setProductoEditando(
-            producto
-        );
-
-
-        setNuevoProducto({
-
-            nombre:
-                producto.nombre,
-
-            categoria:
-                producto.categoria,
-
-            precio:
-                producto.precio,
-
-            stock:
-                producto.stock,
-
-            descripcion:
-                producto.descripcion ||
-                "",
-
-            promocion:
-                producto.promocion ||
-                false,
-
-            descuento:
-                producto.descuento ||
-                0,
-
-            estado:
-                producto.estado,
-
-            imagen:
-                producto.imagen
-        });
-
-
-        setErrores({});
-
-
-        setMostrarFormulario(
-            true
-        );
-    };
-
-
-    // ABRO EL FORMULARIO VACIO
-
-    const abrirFormulario = () => {
-
-        setProductoEditando(
-            null
-        );
-
-
-        setNuevoProducto({
-
-            nombre: "",
-            categoria: "",
-            precio: "",
-            stock: "",
-            descripcion: "",
-            promocion: false,
-            descuento: 0,
-            estado: "Disponible",
-            imagen: ""
-        });
-
-
-        setErrores({});
-
-
-        setMostrarFormulario(
-            true
-        );
-    };
-
-
-    // CIERRO EL FORMULARIO
-
-    const cerrarFormulario = () => {
-
-        setMostrarFormulario(
-            false
-        );
-
-
-        setProductoEditando(
-            null
-        );
-
-
-        setErrores({});
-
-
-        setNuevoProducto({
-
-            nombre: "",
-            categoria: "",
-            precio: "",
-            stock: "",
-            descripcion: "",
-            promocion: false,
-            descuento: 0,
-            estado: "Disponible",
-            imagen: ""
-        });
-    };
-
-
     return (
 
         <main className="productos-admin">
@@ -651,14 +859,90 @@ function Productos() {
 
 
                     <p>
+
                         {
-                            productosFiltrados.length
-                        } productos
+                            cargando
+                                ? "Cargando..."
+                                : `${productosFiltrados.length} productos`
+                        }
+
                     </p>
 
                 </div>
 
             </header>
+
+
+            {mensaje && (
+
+                <div
+                    className={
+                        hayError
+                            ? "mensaje-menu error"
+                            : "mensaje-menu"
+                    }
+                >
+
+                    {
+                        mensaje
+                    }
+
+                </div>
+
+            )}
+
+
+            {/* CATEGORIAS SOLO ADMIN */}
+
+            {esAdministrador && (
+
+                <section className="filtros-productos">
+
+                    <input
+                        type="text"
+                        placeholder="Nueva categoría..."
+                        value={
+                            nuevaCategoria
+                        }
+                        onChange={(e) => {
+
+                            setNuevaCategoria(
+                                e.target.value
+                            );
+
+                            setErrorCategoria(
+                                ""
+                            );
+                        }}
+                    />
+
+
+                    <button
+                        type="button"
+                        className="btn-agregar"
+                        onClick={
+                            agregarCategoria
+                        }
+                    >
+                        + AGREGAR CATEGORÍA
+                    </button>
+
+
+                    {errorCategoria && (
+
+                        <small className="mensaje-error">
+
+                            {
+                                errorCategoria
+                            }
+
+                        </small>
+
+                    )}
+
+                </section>
+
+            )}
 
 
             <section className="filtros-productos">
@@ -692,37 +976,25 @@ function Productos() {
                         Todas las categorías
                     </option>
 
-                    <option value="Hamburguesas">
-                        Hamburguesas
-                    </option>
 
-                    <option value="Completos">
-                        Completos
-                    </option>
+                    {categorias.map(
+                        (item) => (
 
-                    <option value="Churrascos">
-                        Churrascos
-                    </option>
+                            <option
+                                key={
+                                    item.id
+                                }
+                                value={
+                                    item.nombre
+                                }
+                            >
+                                {
+                                    item.nombre
+                                }
+                            </option>
 
-                    <option value="Papas">
-                        Papas
-                    </option>
-
-                    <option value="Fajitas">
-                        Fajitas
-                    </option>
-
-                    <option value="Combos">
-                        Combos
-                    </option>
-
-                    <option value="Bebidas">
-                        Bebidas
-                    </option>
-
-                    <option value="Otros">
-                        Otros
-                    </option>
+                        )
+                    )}
 
                 </select>
 
@@ -780,7 +1052,8 @@ function Productos() {
 
                     <tbody>
 
-                        {productosFiltrados.length >
+                        {!cargando &&
+                        productosFiltrados.length >
                         0 ? (
 
                             productosFiltrados.map(
@@ -790,53 +1063,79 @@ function Productos() {
                                         key={
                                             producto.codigo
                                         }
+
                                         codigo={
                                             producto.codigo
                                         }
+
                                         nombre={
                                             producto.nombre
                                         }
+
                                         categoria={
                                             producto.categoria
                                         }
+
+                                        categoriaId={
+                                            producto.categoriaId
+                                        }
+
                                         descripcion={
                                             producto.descripcion
                                         }
+
                                         precio={
                                             producto.precio
                                         }
+
                                         stock={
                                             producto.stock
                                         }
+
                                         promocion={
                                             producto.promocion
                                         }
+
                                         descuento={
                                             producto.descuento
                                         }
+
                                         estado={
                                             producto.estado
                                         }
+
                                         imagen={
                                             producto.imagen
                                         }
+
+                                        imagenBackend={
+                                            producto.imagenBackend
+                                        }
+
                                         onEliminar={
                                             eliminarProducto
                                         }
+
                                         onEditar={
                                             editarProducto
+                                        }
+
+                                        puedeEditar={
+                                            esAdministrador
                                         }
                                     />
 
                                 )
                             )
 
-                        ) : (
+                        ) : !cargando && (
 
                             <tr>
 
                                 <td colSpan="9">
+
                                     No se encontraron productos.
+
                                 </td>
 
                             </tr>
@@ -850,22 +1149,27 @@ function Productos() {
             </section>
 
 
-            <div className="contenedor-btn-agregar">
+            {esAdministrador && (
 
-                <button
-                    type="button"
-                    className="btn-agregar"
-                    onClick={
-                        abrirFormulario
-                    }
-                >
-                    + AGREGAR PRODUCTO
-                </button>
+                <div className="contenedor-btn-agregar">
 
-            </div>
+                    <button
+                        type="button"
+                        className="btn-agregar"
+                        onClick={
+                            abrirFormulario
+                        }
+                    >
+                        + AGREGAR PRODUCTO
+                    </button>
+
+                </div>
+
+            )}
 
 
-            {mostrarFormulario && (
+            {mostrarFormulario &&
+            esAdministrador && (
 
                 <div className="modal-producto-fondo">
 
@@ -912,9 +1216,11 @@ function Productos() {
                             {errores.nombre && (
 
                                 <small className="mensaje-error">
+
                                     {
                                         errores.nombre
                                     }
+
                                 </small>
 
                             )}
@@ -924,22 +1230,22 @@ function Productos() {
 
                         <div className="campo-formulario">
 
-                            <label htmlFor="categoria">
+                            <label htmlFor="categoriaId">
                                 Categoría
                             </label>
 
 
                             <select
-                                id="categoria"
-                                name="categoria"
+                                id="categoriaId"
+                                name="categoriaId"
                                 value={
-                                    nuevoProducto.categoria
+                                    nuevoProducto.categoriaId
                                 }
                                 onChange={
                                     handleChange
                                 }
                                 className={
-                                    errores.categoria
+                                    errores.categoriaId
                                         ? "campo-error"
                                         : ""
                                 }
@@ -949,47 +1255,37 @@ function Productos() {
                                     Seleccione categoría
                                 </option>
 
-                                <option value="Hamburguesas">
-                                    Hamburguesas
-                                </option>
 
-                                <option value="Completos">
-                                    Completos
-                                </option>
+                                {categorias.map(
+                                    (item) => (
 
-                                <option value="Churrascos">
-                                    Churrascos
-                                </option>
+                                        <option
+                                            key={
+                                                item.id
+                                            }
+                                            value={
+                                                item.id
+                                            }
+                                        >
+                                            {
+                                                item.nombre
+                                            }
+                                        </option>
 
-                                <option value="Papas">
-                                    Papas
-                                </option>
-
-                                <option value="Fajitas">
-                                    Fajitas
-                                </option>
-
-                                <option value="Combos">
-                                    Combos
-                                </option>
-
-                                <option value="Bebidas">
-                                    Bebidas
-                                </option>
-
-                                <option value="Otros">
-                                    Otros
-                                </option>
+                                    )
+                                )}
 
                             </select>
 
 
-                            {errores.categoria && (
+                            {errores.categoriaId && (
 
                                 <small className="mensaje-error">
+
                                     {
-                                        errores.categoria
+                                        errores.categoriaId
                                     }
+
                                 </small>
 
                             )}
@@ -1026,9 +1322,11 @@ function Productos() {
                             {errores.descripcion && (
 
                                 <small className="mensaje-error">
+
                                     {
                                         errores.descripcion
                                     }
+
                                 </small>
 
                             )}
@@ -1065,9 +1363,11 @@ function Productos() {
                             {errores.precio && (
 
                                 <small className="mensaje-error">
+
                                     {
                                         errores.precio
                                     }
+
                                 </small>
 
                             )}
@@ -1104,17 +1404,17 @@ function Productos() {
                             {errores.stock && (
 
                                 <small className="mensaje-error">
+
                                     {
                                         errores.stock
                                     }
+
                                 </small>
 
                             )}
 
                         </div>
 
-
-                        {/* PROMOCION */}
 
                         <div className="campo-promocion-producto">
 
@@ -1152,8 +1452,7 @@ function Productos() {
                                         type="number"
                                         name="descuento"
                                         min="1"
-                                        max="90"
-                                        placeholder="Ej: 20"
+                                        max="100"
                                         value={
                                             nuevoProducto.descuento
                                         }
@@ -1171,9 +1470,11 @@ function Productos() {
                                     {errores.descuento && (
 
                                         <small className="mensaje-error">
+
                                             {
                                                 errores.descuento
                                             }
+
                                         </small>
 
                                     )}
@@ -1216,75 +1517,30 @@ function Productos() {
                         </div>
 
 
-                        {/* IMAGEN */}
-
                         <div className="campo-formulario">
 
-                            <label>
-                                Imagen
-                            </label>
-
-
-                            {nuevoProducto.imagen && (
-
-                                <div className="imagen-actual-producto">
-
-                                    <span>
-                                        Imagen actual
-                                    </span>
-
-
-                                    <img
-                                        src={
-                                            nuevoProducto.imagen
-                                        }
-                                        alt={
-                                            nuevoProducto.nombre ||
-                                            "Imagen del producto"
-                                        }
-                                    />
-
-                                </div>
-
-                            )}
-
-
-                            <label
-                                htmlFor="imagen"
-                                className="label-nueva-imagen"
-                            >
-                                {
-                                    productoEditando
-                                        ? "Seleccionar nueva imagen"
-                                        : "Seleccionar imagen"
-                                }
+                            <label htmlFor="imagen">
+                                Ruta de imagen
                             </label>
 
 
                             <input
                                 id="imagen"
-                                type="file"
-                                accept="image/*"
-                                onChange={
-                                    handleImagen
+                                type="text"
+                                name="imagen"
+                                placeholder="Opcional. Ej: /img/hamburguesa.png"
+                                value={
+                                    nuevoProducto.imagen
                                 }
-                                className={
-                                    errores.imagen
-                                        ? "campo-error"
-                                        : ""
+                                onChange={
+                                    handleChange
                                 }
                             />
 
 
-                            {errores.imagen && (
-
-                                <small className="mensaje-error">
-                                    {
-                                        errores.imagen
-                                    }
-                                </small>
-
-                            )}
+                            <small>
+                                Por ahora la imagen es opcional.
+                            </small>
 
                         </div>
 
@@ -1319,7 +1575,6 @@ function Productos() {
                             </button>
 
                         </div>
-
 
                     </div>
 

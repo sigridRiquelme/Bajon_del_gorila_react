@@ -1,4 +1,5 @@
 import {
+    useEffect,
     useState
 } from "react";
 
@@ -8,13 +9,13 @@ import {
 } from "react-router-dom";
 
 import {
-    obtenerUsuarioPorId,
-    actualizarUsuario
-} from "../data/usuarios.js";
+    actualizarMiPerfilApi,
+    obtenerMiPerfilApi
+} from "../api/auth.js";
 
 import {
-    obtenerPedidos
-} from "../data/pedidos.js";
+    obtenerMisPedidosApi
+} from "../api/pedidos.js";
 
 import "../styles/perfilCliente.css";
 
@@ -25,30 +26,34 @@ function PerfilCliente() {
         useNavigate();
 
 
-    // OBTENGO EL USUARIO ACTUAL
-
-    const usuarioActualId =
+    const token =
         localStorage.getItem(
-            "usuarioActualId"
+            "token"
         );
 
 
-    const usuarioActual =
-        usuarioActualId !== null
-            ? obtenerUsuarioPorId(
-                Number(
-                    usuarioActualId
-                )
-            )
-            : null;
+    const rol =
+        localStorage.getItem(
+            "usuarioRol"
+        );
 
 
     const [
         usuario,
         setUsuario
-    ] = useState(
-        usuarioActual
-    );
+    ] = useState(null);
+
+
+    const [
+        pedidosUsuario,
+        setPedidosUsuario
+    ] = useState([]);
+
+
+    const [
+        cargando,
+        setCargando
+    ] = useState(true);
 
 
     const [
@@ -60,33 +65,31 @@ function PerfilCliente() {
     const [
         nombre,
         setNombre
-    ] = useState(
-        usuarioActual?.nombre || ""
-    );
+    ] = useState("");
 
 
     const [
         correo,
         setCorreo
-    ] = useState(
-        usuarioActual?.correo || ""
-    );
+    ] = useState("");
 
 
     const [
         telefono,
         setTelefono
-    ] = useState(
-        usuarioActual?.telefono || ""
-    );
+    ] = useState("");
 
 
     const [
         direccion,
         setDireccion
-    ] = useState(
-        usuarioActual?.direccion || ""
-    );
+    ] = useState("");
+
+
+    const [
+        password,
+        setPassword
+    ] = useState("");
 
 
     const [
@@ -107,10 +110,122 @@ function PerfilCliente() {
     ] = useState(null);
 
 
-    // SI NO HAY SESION VUELVO AL LOGIN
+    useEffect(() => {
+
+        const cargarPerfil = async () => {
+
+            try {
+
+                const [
+                    datosUsuario,
+                    pedidos
+                ] =
+                    await Promise.all([
+                        obtenerMiPerfilApi(),
+                        obtenerMisPedidosApi()
+                    ]);
+
+
+                setUsuario(
+                    datosUsuario
+                );
+
+
+                setNombre(
+                    datosUsuario.nombre || ""
+                );
+
+                setCorreo(
+                    datosUsuario.correo || ""
+                );
+
+                setTelefono(
+                    datosUsuario.telefono || ""
+                );
+
+                setDireccion(
+                    datosUsuario.direccion || ""
+                );
+
+
+                setPedidosUsuario(
+                    [...pedidos].sort(
+                        (a, b) =>
+                            b.codigo -
+                            a.codigo
+                    )
+                );
+
+            } catch (
+                error
+            ) {
+
+                console.error(
+                    error
+                );
+
+
+                localStorage.removeItem(
+                    "token"
+                );
+
+                localStorage.removeItem(
+                    "usuarioActualId"
+                );
+
+                localStorage.removeItem(
+                    "usuarioRol"
+                );
+
+                localStorage.removeItem(
+                    "usuarioNombre"
+                );
+
+                localStorage.removeItem(
+                    "usuarioCorreo"
+                );
+
+
+                navigate(
+                    "/login",
+                    {
+                        replace: true
+                    }
+                );
+
+            } finally {
+
+                setCargando(
+                    false
+                );
+            }
+        };
+
+
+        if (
+            token &&
+            rol ===
+            "CLIENTE"
+        ) {
+
+            cargarPerfil();
+
+        } else {
+
+            setCargando(
+                false
+            );
+        }
+
+    }, [
+        token,
+        rol,
+        navigate
+    ]);
+
 
     if (
-        !usuarioActual
+        !token
     ) {
 
         return (
@@ -122,11 +237,12 @@ function PerfilCliente() {
     }
 
 
-    // EL ADMIN TIENE SU PROPIO PERFIL
-
     if (
-        usuarioActual.rol ===
-        "Administrador"
+        rol ===
+        "ADMINISTRADOR"
+        ||
+        rol ===
+        "VENDEDOR"
     ) {
 
         return (
@@ -138,23 +254,48 @@ function PerfilCliente() {
     }
 
 
-    // MUESTRO SOLO LOS PEDIDOS DEL CLIENTE
+    if (
+        rol !==
+        "CLIENTE"
+    ) {
 
-    const pedidosUsuario =
-        obtenerPedidos()
-            .filter(
-                (pedido) =>
-                    pedido.usuarioId ===
-                    usuario.id
-            )
-            .sort(
-                (a, b) =>
-                    b.codigo -
-                    a.codigo
-            );
+        return (
+            <Navigate
+                to="/login"
+                replace
+            />
+        );
+    }
 
 
-    // VALIDO LOS DATOS DEL PERFIL
+    if (
+        cargando
+    ) {
+
+        return (
+
+            <main className="pagina-perfil-cliente">
+
+                <div className="perfil-cliente-contenedor">
+
+                    <p>
+                        Cargando perfil...
+                    </p>
+
+                </div>
+
+            </main>
+        );
+    }
+
+
+    if (
+        !usuario
+    ) {
+
+        return null;
+    }
+
 
     const validarDatos = () => {
 
@@ -210,7 +351,8 @@ function PerfilCliente() {
 
 
         if (
-            direccion.trim() !== "" &&
+            direccion.trim() !== ""
+            &&
             direccion.trim().length <
             10
         ) {
@@ -230,6 +372,23 @@ function PerfilCliente() {
         }
 
 
+        if (
+            password !== ""
+            &&
+            (
+                password.length <
+                4
+                ||
+                password.length >
+                10
+            )
+        ) {
+
+            nuevosErrores.password =
+                "La contraseña debe tener entre 4 y 10 caracteres.";
+        }
+
+
         setErrores(
             nuevosErrores
         );
@@ -238,14 +397,13 @@ function PerfilCliente() {
         return (
             Object.keys(
                 nuevosErrores
-            ).length === 0
+            ).length ===
+            0
         );
     };
 
 
-    // GUARDO LOS CAMBIOS DEL PERFIL
-
-    const guardarCambios = () => {
+    const guardarCambios = async () => {
 
         setMensaje("");
 
@@ -258,46 +416,90 @@ function PerfilCliente() {
         }
 
 
-        actualizarUsuario(
-            usuario.id,
-            {
-                nombre:
-                    nombre.trim(),
+        try {
 
-                correo:
-                    correo.trim(),
+            const usuarioActualizado =
+                await actualizarMiPerfilApi({
 
-                telefono:
-                    telefono.trim(),
+                    nombre:
+                        nombre.trim(),
 
-                direccion:
-                    direccion.trim()
-            }
-        );
+                    correo:
+                        correo
+                            .trim()
+                            .toLowerCase(),
+
+                    telefono:
+                        telefono.trim(),
+
+                    direccion:
+                        direccion.trim(),
+
+                    password:
+                        password
+                });
 
 
-        const usuarioActualizado =
-            obtenerUsuarioPorId(
-                usuario.id
+            setUsuario(
+                usuarioActualizado
             );
 
 
-        setUsuario(
-            usuarioActualizado
-        );
+            localStorage.setItem(
+                "usuarioNombre",
+                usuarioActualizado.nombre
+            );
+
+            localStorage.setItem(
+                "usuarioCorreo",
+                usuarioActualizado.correo
+            );
 
 
-        setEditando(false);
-        setErrores({});
+            setPassword("");
+
+            setEditando(false);
+
+            setErrores({});
 
 
-        setMensaje(
-            "Datos actualizados correctamente."
-        );
+            setMensaje(
+                "Datos actualizados correctamente."
+            );
+
+        } catch (
+            error
+        ) {
+
+            const mensajeBackend =
+                error.response
+                    ?.data
+                    ?.mensaje;
+
+
+            if (
+                mensajeBackend ===
+                "EL CORREO YA ESTA REGISTRADO"
+            ) {
+
+                setErrores({
+                    correo:
+                        "Este correo ya está registrado."
+                });
+
+                return;
+            }
+
+
+            setErrores({
+                general:
+                    mensajeBackend
+                    ||
+                    "No fue posible actualizar los datos."
+            });
+        }
     };
 
-
-    // CANCELO LA EDICION
 
     const cancelarEdicion = () => {
 
@@ -317,18 +519,36 @@ function PerfilCliente() {
             usuario.direccion || ""
         );
 
+        setPassword("");
+
         setErrores({});
+
         setMensaje("");
+
         setEditando(false);
     };
 
 
-    // CIERRO LA SESION
-
     const cerrarSesion = () => {
 
         localStorage.removeItem(
+            "token"
+        );
+
+        localStorage.removeItem(
             "usuarioActualId"
+        );
+
+        localStorage.removeItem(
+            "usuarioRol"
+        );
+
+        localStorage.removeItem(
+            "usuarioNombre"
+        );
+
+        localStorage.removeItem(
+            "usuarioCorreo"
         );
 
 
@@ -337,8 +557,6 @@ function PerfilCliente() {
         );
     };
 
-
-    // ABRO O CIERRO EL DETALLE DE LA BOLETA
 
     const mostrarPedido = (
         codigo
@@ -404,9 +622,24 @@ function PerfilCliente() {
                 {mensaje && (
 
                     <div className="perfil-mensaje-exito">
+
                         {
                             mensaje
                         }
+
+                    </div>
+
+                )}
+
+
+                {errores.general && (
+
+                    <div className="alert alert-danger">
+
+                        {
+                            errores.general
+                        }
+
                     </div>
 
                 )}
@@ -515,10 +748,13 @@ function PerfilCliente() {
                                     </span>
 
                                     <strong>
+
                                         {
-                                            usuario.direccion ||
+                                            usuario.direccion
+                                            ||
                                             "Sin dirección registrada"
                                         }
+
                                     </strong>
 
                                 </div>
@@ -575,9 +811,11 @@ function PerfilCliente() {
                                     {errores.nombre && (
 
                                         <small className="perfil-error">
+
                                             {
                                                 errores.nombre
                                             }
+
                                         </small>
 
                                     )}
@@ -615,9 +853,11 @@ function PerfilCliente() {
                                     {errores.correo && (
 
                                         <small className="perfil-error">
+
                                             {
                                                 errores.correo
                                             }
+
                                         </small>
 
                                     )}
@@ -655,9 +895,11 @@ function PerfilCliente() {
                                     {errores.telefono && (
 
                                         <small className="perfil-error">
+
                                             {
                                                 errores.telefono
                                             }
+
                                         </small>
 
                                     )}
@@ -695,9 +937,54 @@ function PerfilCliente() {
                                     {errores.direccion && (
 
                                         <small className="perfil-error">
+
                                             {
                                                 errores.direccion
                                             }
+
+                                        </small>
+
+                                    )}
+
+                                </div>
+
+
+                                <div className="perfil-campo">
+
+                                    <label htmlFor="password">
+                                        Nueva contraseña
+                                    </label>
+
+
+                                    <input
+                                        id="password"
+                                        type="password"
+                                        value={
+                                            password
+                                        }
+                                        placeholder="Dejar vacío para mantener la actual"
+                                        onChange={(e) => {
+
+                                            setPassword(
+                                                e.target.value
+                                            );
+
+                                            setErrores({
+                                                ...errores,
+                                                password: ""
+                                            });
+                                        }}
+                                    />
+
+
+                                    {errores.password && (
+
+                                        <small className="perfil-error">
+
+                                            {
+                                                errores.password
+                                            }
+
                                         </small>
 
                                     )}
@@ -775,9 +1062,6 @@ function PerfilCliente() {
                                 {pedidosUsuario.map(
                                     (pedido) => {
 
-
-                                        // CALCULO NETO E IVA SI ES UN PEDIDO ANTIGUO
-
                                         const netoPedido =
                                             pedido.neto ??
                                             Math.round(
@@ -825,10 +1109,12 @@ function PerfilCliente() {
                                                         </span>
 
                                                         <strong>
+
                                                             #
                                                             {
                                                                 pedido.codigo
                                                             }
+
                                                         </strong>
 
                                                     </div>
@@ -924,7 +1210,8 @@ function PerfilCliente() {
                                                                 <strong>
 
                                                                     {
-                                                                        pedido.hora ||
+                                                                        pedido.hora
+                                                                        ||
                                                                         "No registrada"
                                                                     }
 
@@ -942,7 +1229,8 @@ function PerfilCliente() {
                                                                 <strong>
 
                                                                     {
-                                                                        pedido.medioPago ||
+                                                                        pedido.medioPago
+                                                                        ||
                                                                         "No registrado"
                                                                     }
 
@@ -984,9 +1272,7 @@ function PerfilCliente() {
                                                                                 )
                                                                             }
 
-                                                                            {" "}
-                                                                            ×
-                                                                            {" "}
+                                                                            {" × "}
 
                                                                             {
                                                                                 producto.cantidad
@@ -1040,10 +1326,9 @@ function PerfilCliente() {
                                                             </div>
 
 
-                                                            {/* SI ES DELIVERY MUESTRO EL COSTO */}
-
-                                                            {pedido.tipoEntrega ===
-                                                            "Delivery" && (
+                                                            {pedido.tipoEntrega
+                                                                ?.toUpperCase() ===
+                                                                "DELIVERY" && (
 
                                                                 <div>
 
@@ -1070,10 +1355,9 @@ function PerfilCliente() {
                                                             )}
 
 
-                                                            {/* SI ES RETIRO LO INDICO EN LA BOLETA */}
-
-                                                            {pedido.tipoEntrega ===
-                                                            "Retiro en local" && (
+                                                            {pedido.tipoEntrega
+                                                                ?.toUpperCase() ===
+                                                                "RETIRO" && (
 
                                                                 <div>
 

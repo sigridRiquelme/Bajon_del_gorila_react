@@ -1,14 +1,18 @@
-import { useState } from "react";
+import {
+    useEffect,
+    useState
+} from "react";
 
-import ProductoCard from "../components/ProductoCard.jsx";
+import ProductoCard
+    from "../components/ProductoCard.jsx";
 
 import {
-    obtenerProductos
-} from "../data/productos.js";
+    obtenerProductosApi
+} from "../api/productos.js";
 
 import {
-    obtenerUsuarioPorId
-} from "../data/usuarios.js";
+    obtenerCategoriasApi
+} from "../api/categorias.js";
 
 import {
     agregarAlCarrito,
@@ -19,19 +23,9 @@ import "../styles/Menu.css";
 import "../styles/responsive.css";
 
 
-const categorias = [
-    "Todos",
-    "Hamburguesas",
-    "Completos",
-    "Churrascos",
-    "Fajitas",
-    "Papas",
-    "Combos",
-    "Bebidas"
-];
-
-
-function normalizarTexto(texto) {
+function normalizarTexto(
+    texto
+) {
 
     return texto
         .toLowerCase()
@@ -45,24 +39,61 @@ function normalizarTexto(texto) {
 
 function Menu() {
 
-    const [busqueda, setBusqueda] =
-        useState("");
+    const [
+        productos,
+        setProductos
+    ] = useState([]);
 
-    const [categoria, setCategoria] =
-        useState("Todos");
 
-    const [orden, setOrden] =
-        useState("Más vendidos");
+    const [
+        categorias,
+        setCategorias
+    ] = useState([]);
+
+
+    const [
+        cargando,
+        setCargando
+    ] = useState(true);
+
+
+    const [
+        errorCarga,
+        setErrorCarga
+    ] = useState("");
+
+
+    const [
+        busqueda,
+        setBusqueda
+    ] = useState("");
+
+
+    const [
+        categoria,
+        setCategoria
+    ] = useState("Todos");
+
+
+    const [
+        orden,
+        setOrden
+    ] = useState(
+        "Más vendidos"
+    );
+
 
     const [
         mensajeCarrito,
         setMensajeCarrito
     ] = useState("");
 
+
     const [
         hayErrorCarrito,
         setHayErrorCarrito
     ] = useState(false);
+
 
     const [
         carritoActual,
@@ -72,31 +103,86 @@ function Menu() {
     );
 
 
-    const usuarioActualId =
+    const rol =
         localStorage.getItem(
-            "usuarioActualId"
+            "usuarioRol"
         );
 
 
-    const usuarioActual =
-        usuarioActualId !== null
-            ? obtenerUsuarioPorId(
-                Number(
-                    usuarioActualId
-                )
-            )
-            : null;
-
-
     const esAdministrador =
-        usuarioActual?.rol ===
-        "Administrador";
+        rol ===
+        "ADMINISTRADOR";
 
 
-    // USO LOS PRODUCTOS DEL ADMIN PARA QUE PRECIO Y STOCK SEAN LOS MISMOS
+    const esVendedor =
+        rol ===
+        "VENDEDOR";
+
+
+    const puedeComprar =
+        !esAdministrador &&
+        !esVendedor;
+
+
+    useEffect(() => {
+
+        const cargarDatos = async () => {
+
+            try {
+
+                const [
+                    productosApi,
+                    categoriasApi
+                ] =
+                    await Promise.all([
+                        obtenerProductosApi(),
+                        obtenerCategoriasApi()
+                    ]);
+
+
+                setProductos(
+                    productosApi
+                );
+
+
+                setCategorias(
+                    categoriasApi
+                );
+
+
+                setErrorCarga(
+                    ""
+                );
+
+            } catch (
+                error
+            ) {
+
+                console.error(
+                    error
+                );
+
+
+                setErrorCarga(
+                    "No fue posible cargar los productos."
+                );
+
+            } finally {
+
+                setCargando(
+                    false
+                );
+            }
+        };
+
+
+        cargarDatos();
+
+    }, []);
+
 
     const productosMenu =
-        obtenerProductos()
+        productos
             .filter(
                 (producto) =>
                     producto.estado !==
@@ -128,28 +214,17 @@ function Menu() {
 
 
                     return {
+
                         ...producto,
 
                         id:
                             producto.codigo,
 
-                        descripcion:
-                            producto.descripcion ||
-                            "Producto disponible en El Bajón del Gorila.",
-
-                        valoracion:
-                            producto.valoracion ||
-                            4.8,
-
-                        // CAMBIO: muestro lo que realmente queda disponible para agregar
-                        stockDisponible:
-                            stockDisponible
+                        stockDisponible
                     };
                 }
             );
 
-
-    // AGREGO LA CANTIDAD ELEGIDA DE UNA SOLA VEZ
 
     const agregarProducto = (
         producto,
@@ -157,32 +232,42 @@ function Menu() {
     ) => {
 
         setMensajeCarrito("");
-        setHayErrorCarrito(false);
+
+        setHayErrorCarrito(
+            false
+        );
 
 
-        if (esAdministrador) {
+        if (
+            !puedeComprar
+        ) {
 
             setMensajeCarrito(
-                "La cuenta de administrador no puede realizar compras."
+                "Esta cuenta no puede realizar compras."
             );
 
-            setHayErrorCarrito(true);
+            setHayErrorCarrito(
+                true
+            );
 
             return;
         }
 
 
         if (
-            producto.stockDisponible <= 0 ||
+            producto.stockDisponible <=
+                0 ||
             producto.estado ===
-            "Sin stock"
+                "Sin stock"
         ) {
 
             setMensajeCarrito(
                 "Este producto no tiene stock disponible."
             );
 
-            setHayErrorCarrito(true);
+            setHayErrorCarrito(
+                true
+            );
 
             return;
         }
@@ -197,7 +282,9 @@ function Menu() {
                 `Solo puedes agregar ${producto.stockDisponible} unidades más de ${producto.nombre}.`
             );
 
-            setHayErrorCarrito(true);
+            setHayErrorCarrito(
+                true
+            );
 
             return;
         }
@@ -227,8 +314,6 @@ function Menu() {
         setMensajeCarrito(
             `${cantidad} ${producto.nombre} agregado al carrito.`
         );
-
-        setHayErrorCarrito(false);
     };
 
 
@@ -265,7 +350,6 @@ function Menu() {
                     );
                 }
             )
-
 
             .sort(
                 (a, b) => {
@@ -346,7 +430,9 @@ function Menu() {
                             type="search"
                             placeholder="Buscar productos…"
                             aria-label="Buscar productos"
-                            value={busqueda}
+                            value={
+                                busqueda
+                            }
                             onChange={(e) =>
                                 setBusqueda(
                                     e.target.value
@@ -359,7 +445,9 @@ function Menu() {
 
                     <select
                         className="campo-entrada selector-categoria"
-                        value={categoria}
+                        value={
+                            categoria
+                        }
                         onChange={(e) =>
                             setCategoria(
                                 e.target.value
@@ -367,16 +455,24 @@ function Menu() {
                         }
                     >
 
+                        <option value="Todos">
+                            Todas las categorías
+                        </option>
+
+
                         {categorias.map(
                             (item) => (
 
                                 <option
-                                    key={item}
-                                    value={item}
+                                    key={
+                                        item.id
+                                    }
+                                    value={
+                                        item.nombre
+                                    }
                                 >
-                                    {item === "Todos"
-                                        ? "Todas las categorías"
-                                        : item
+                                    {
+                                        item.nombre
                                     }
                                 </option>
 
@@ -389,7 +485,9 @@ function Menu() {
                     <select
                         className="campo-entrada selector-orden"
                         aria-label="Ordenar productos"
-                        value={orden}
+                        value={
+                            orden
+                        }
                         onChange={(e) =>
                             setOrden(
                                 e.target.value
@@ -430,75 +528,104 @@ function Menu() {
                                     : "mensaje-menu"
                             }
                         >
-                            {mensajeCarrito}
+                            {
+                                mensajeCarrito
+                            }
                         </div>
 
                     )}
 
 
-                    <p className="texto-resultados">
+                    {errorCarga && (
 
-                        <strong>
+                        <div className="mensaje-menu error">
+
                             {
-                                productosFiltrados.length
+                                errorCarga
                             }
-                        </strong>
-
-                        {" "}
-                        productos encontrados
-
-                        {categoria !==
-                            "Todos" &&
-                            ` en ${categoria}`
-                        }
-
-                    </p>
-
-
-                    {productosFiltrados.length >
-                    0 ? (
-
-                        <div className="grilla-productos">
-
-                            {productosFiltrados.map(
-                                (producto) => (
-
-                                    <ProductoCard
-                                        key={
-                                            producto.id
-                                        }
-                                        producto={
-                                            producto
-                                        }
-                                        onAgregar={
-                                            esAdministrador
-                                                ? undefined
-                                                : agregarProducto
-                                        }
-                                    />
-
-                                )
-                            )}
 
                         </div>
+
+                    )}
+
+
+                    {cargando ? (
+
+                        <p className="texto-resultados">
+                            Cargando productos...
+                        </p>
 
                     ) : (
 
-                        <div className="estado-vacio mostrar">
+                        <>
 
-                            <div className="emoji">
-                                🦍
-                            </div>
+                            <p className="texto-resultados">
 
-                            <h3>
-                                NO ENCONTRAMOS ESO
-                            </h3>
+                                <strong>
+                                    {
+                                        productosFiltrados.length
+                                    }
+                                </strong>
 
-                            <p>
-                                Intenta con otra búsqueda o categoría.
+                                {" "}
+                                productos encontrados
+
+                                {categoria !==
+                                    "Todos" &&
+                                    ` en ${categoria}`
+                                }
+
                             </p>
 
-                        </div>
+
+                            {productosFiltrados.length >
+                            0 ? (
+
+                                <div className="grilla-productos">
+
+                                    {productosFiltrados.map(
+                                        (producto) => (
+
+                                            <ProductoCard
+                                                key={
+                                                    producto.codigo
+                                                }
+                                                producto={
+                                                    producto
+                                                }
+                                                onAgregar={
+                                                    puedeComprar
+                                                        ? agregarProducto
+                                                        : undefined
+                                                }
+                                            />
+
+                                        )
+                                    )}
+
+                                </div>
+
+                            ) : (
+
+                                <div className="estado-vacio mostrar">
+
+                                    <div className="emoji">
+                                        🦍
+                                    </div>
+
+                                    <h3>
+                                        NO ENCONTRAMOS ESO
+                                    </h3>
+
+                                    <p>
+                                        Intenta con otra búsqueda o categoría.
+                                    </p>
+
+                                </div>
+
+                            )}
+
+                        </>
 
                     )}
 

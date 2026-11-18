@@ -2,6 +2,7 @@ export default function ProductoFila({
     codigo,
     nombre,
     categoria,
+    categoriaId,
     descripcion,
     precio,
     stock,
@@ -9,8 +10,10 @@ export default function ProductoFila({
     descuento,
     estado,
     imagen,
+    imagenBackend,
     onEliminar,
-    onEditar
+    onEditar,
+    puedeEditar
 }) {
 
     return (
@@ -22,7 +25,8 @@ export default function ProductoFila({
 
                 <img
                     src={
-                        imagen
+                        imagen ||
+                        "/img/logo-bajon-2.png"
                     }
                     alt={
                         nombre
@@ -48,9 +52,11 @@ export default function ProductoFila({
 
 
             <td className="descripcion-tabla-producto">
+
                 {
                     descripcion
                 }
+
             </td>
 
 
@@ -88,7 +94,9 @@ export default function ProductoFila({
                 ) : (
 
                     <span className="producto-sin-promo">
+
                         Sin promoción
+
                     </span>
 
                 )}
@@ -113,9 +121,11 @@ export default function ProductoFila({
                                 : "estado-oculto"
                     }`}
                 >
+
                     {
                         estado
                     }
+
                 </span>
 
             </td>
@@ -123,46 +133,58 @@ export default function ProductoFila({
 
             <td>
 
-                <div className="acciones-producto">
+                {puedeEditar ? (
+
+                    <div className="acciones-producto">
 
 
-                    <button
-                        type="button"
-                        className="btn-editar"
-                        onClick={() =>
-                            onEditar({
+                        <button
+                            type="button"
+                            className="btn-editar"
+                            onClick={() =>
+                                onEditar({
 
-                                codigo,
-                                nombre,
-                                categoria,
-                                descripcion,
-                                precio,
-                                stock,
-                                promocion,
-                                descuento,
-                                estado,
-                                imagen
-                            })
-                        }
-                    >
-                        Editar
-                    </button>
-
-
-                    <button
-                        type="button"
-                        className="btn-eliminar"
-                        onClick={() =>
-                            onEliminar(
-                                codigo
-                            )
-                        }
-                    >
-                        Eliminar
-                    </button>
+                                    codigo,
+                                    nombre,
+                                    categoria,
+                                    categoriaId,
+                                    descripcion,
+                                    precio,
+                                    stock,
+                                    promocion,
+                                    descuento,
+                                    estado,
+                                    imagen,
+                                    imagenBackend
+                                })
+                            }
+                        >
+                            Editar
+                        </button>
 
 
-                </div>
+                        <button
+                            type="button"
+                            className="btn-eliminar"
+                            onClick={() =>
+                                onEliminar(
+                                    codigo
+                                )
+                            }
+                        >
+                            Eliminar
+                        </button>
+
+
+                    </div>
+
+                ) : (
+
+                    <span>
+                        Solo lectura
+                    </span>
+
+                )}
 
             </td>
 
