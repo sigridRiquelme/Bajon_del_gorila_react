@@ -1,22 +1,28 @@
 import {
+    useEffect,
     useState
 } from "react";
 
 import "../../styles/usuarios.css";
 
 import {
-    obtenerUsuarioPorId,
-    obtenerUsuarios,
-    actualizarUsuario
-} from "../../data/usuarios.js";
+    actualizarMiPerfilApi,
+    obtenerMiPerfilApi
+} from "../../api/auth.js";
 
 
 function PerfilAdmin() {
 
-    const administrador =
-        obtenerUsuarioPorId(
-            0
-        );
+    const [
+        usuario,
+        setUsuario
+    ] = useState(null);
+
+
+    const [
+        cargando,
+        setCargando
+    ] = useState(true);
 
 
     const [
@@ -30,21 +36,11 @@ function PerfilAdmin() {
         setDatosFormulario
     ] = useState({
 
-        nombre:
-            administrador?.nombre ||
-            "",
-
-        correo:
-            administrador?.correo ||
-            "",
-
-        telefono:
-            administrador?.telefono ||
-            "",
-
-        direccion:
-            administrador?.direccion ||
-            ""
+        nombre: "",
+        correo: "",
+        telefono: "",
+        direccion: "",
+        password: ""
     });
 
 
@@ -60,7 +56,85 @@ function PerfilAdmin() {
     ] = useState("");
 
 
-    // CAMBIO LOS DATOS DEL FORMULARIO
+    const [
+        hayError,
+        setHayError
+    ] = useState(false);
+
+
+    const cargarPerfil = async () => {
+
+        try {
+
+            const datos =
+                await obtenerMiPerfilApi();
+
+
+            setUsuario(
+                datos
+            );
+
+
+            setDatosFormulario({
+
+                nombre:
+                    datos.nombre ||
+                    "",
+
+                correo:
+                    datos.correo ||
+                    "",
+
+                telefono:
+                    datos.telefono ||
+                    "",
+
+                direccion:
+                    datos.direccion ||
+                    "",
+
+                password:
+                    ""
+            });
+
+
+            setHayError(
+                false
+            );
+
+        } catch (
+            error
+        ) {
+
+            console.error(
+                error
+            );
+
+
+            setMensaje(
+                "No fue posible cargar el perfil."
+            );
+
+
+            setHayError(
+                true
+            );
+
+        } finally {
+
+            setCargando(
+                false
+            );
+        }
+    };
+
+
+    useEffect(() => {
+
+        cargarPerfil();
+
+    }, []);
+
 
     const manejarCambio = (
         e
@@ -73,14 +147,20 @@ function PerfilAdmin() {
 
 
         setDatosFormulario({
+
             ...datosFormulario,
-            [name]: value
+
+            [name]:
+                value
         });
 
 
         setErrores({
+
             ...errores,
-            [name]: ""
+
+            [name]:
+                ""
         });
 
 
@@ -88,15 +168,14 @@ function PerfilAdmin() {
     };
 
 
-    // VALIDO LOS DATOS
-
     const validarFormulario = () => {
 
         const nuevosErrores = {};
 
 
         const nombre =
-            datosFormulario.nombre.trim();
+            datosFormulario.nombre
+                .trim();
 
 
         const correo =
@@ -106,100 +185,44 @@ function PerfilAdmin() {
 
 
         const telefono =
-            datosFormulario.telefono.trim();
+            datosFormulario.telefono
+                .trim();
 
 
         const direccion =
-            datosFormulario.direccion.trim();
+            datosFormulario.direccion
+                .trim();
 
-
-        // NOMBRE
 
         if (
-            nombre ===
-            ""
-        ) {
-
-            nuevosErrores.nombre =
-                "El nombre es obligatorio.";
-
-        } else if (
             nombre.length <
             3
         ) {
 
             nuevosErrores.nombre =
                 "El nombre debe tener al menos 3 caracteres.";
-
-        } else if (
-            nombre.length >
-            50
-        ) {
-
-            nuevosErrores.nombre =
-                "El nombre no puede superar los 50 caracteres.";
         }
 
 
-        // CORREO
-
         const correoValido =
-            /^[^\s@]+@(gmail\.com|duoc\.cl|duocuc\.cl)$/i;
+            /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 
         if (
-            correo ===
-            ""
-        ) {
-
-            nuevosErrores.correo =
-                "El correo es obligatorio.";
-
-        } else if (
             !correoValido.test(
                 correo
             )
         ) {
 
             nuevosErrores.correo =
-                "El correo debe ser Gmail, Duoc o Duoc UC.";
-
-        } else {
-
-            const correoRepetido =
-                obtenerUsuarios().some(
-                    (usuario) =>
-                        usuario.id !==
-                            0 &&
-                        usuario.correo
-                            .toLowerCase()
-                            .trim() ===
-                            correo
-                );
-
-
-            if (
-                correoRepetido
-            ) {
-
-                nuevosErrores.correo =
-                    "Este correo ya está registrado.";
-            }
+                "Ingresa un correo válido.";
         }
 
 
-        // TELEFONO
-
         if (
-            telefono ===
-            ""
-        ) {
-
-            nuevosErrores.telefono =
-                "El teléfono es obligatorio.";
-
-        } else if (
-            !/^\+569 \d{8}$/.test(
+            telefono !==
+                "" &&
+            !/^\+569\s?\d{8}$/.test(
                 telefono
             )
         ) {
@@ -209,31 +232,27 @@ function PerfilAdmin() {
         }
 
 
-        // DIRECCION
+        if (
+            direccion !==
+                "" &&
+            direccion.length <
+                5
+        ) {
+
+            nuevosErrores.direccion =
+                "La dirección debe tener al menos 5 caracteres.";
+        }
+
 
         if (
-            direccion ===
-            ""
+            datosFormulario.password !==
+                "" &&
+            datosFormulario.password.length <
+                6
         ) {
 
-            nuevosErrores.direccion =
-                "La dirección es obligatoria.";
-
-        } else if (
-            direccion.length <
-            10
-        ) {
-
-            nuevosErrores.direccion =
-                "La dirección debe tener al menos 10 caracteres.";
-
-        } else if (
-            direccion.length >
-            100
-        ) {
-
-            nuevosErrores.direccion =
-                "La dirección no puede superar los 100 caracteres.";
+            nuevosErrores.password =
+                "La nueva contraseña debe tener al menos 6 caracteres.";
         }
 
 
@@ -251,9 +270,7 @@ function PerfilAdmin() {
     };
 
 
-    // GUARDO LOS CAMBIOS
-
-    const guardarCambios = (
+    const guardarCambios = async (
         e
     ) => {
 
@@ -268,11 +285,13 @@ function PerfilAdmin() {
         }
 
 
-        actualizarUsuario(
-            0,
-            {
+        try {
+
+            const datosActualizar = {
+
                 nombre:
-                    datosFormulario.nombre.trim(),
+                    datosFormulario.nombre
+                        .trim(),
 
                 correo:
                     datosFormulario.correo
@@ -280,50 +299,144 @@ function PerfilAdmin() {
                         .toLowerCase(),
 
                 telefono:
-                    datosFormulario.telefono.trim(),
+                    datosFormulario.telefono
+                        .trim(),
 
                 direccion:
-                    datosFormulario.direccion.trim()
+                    datosFormulario.direccion
+                        .trim()
+            };
+
+
+            if (
+                datosFormulario.password !==
+                ""
+            ) {
+
+                datosActualizar.password =
+                    datosFormulario.password;
             }
-        );
 
 
-        setModoEdicion(
-            false
-        );
+            const actualizado =
+                await actualizarMiPerfilApi(
+                    datosActualizar
+                );
 
 
-        setMensaje(
-            "Los datos del perfil fueron actualizados correctamente."
-        );
+            setUsuario(
+                actualizado
+            );
+
+
+            localStorage.setItem(
+                "usuarioNombre",
+                actualizado.nombre
+            );
+
+
+            localStorage.setItem(
+                "usuarioCorreo",
+                actualizado.correo
+            );
+
+
+            setDatosFormulario({
+
+                nombre:
+                    actualizado.nombre ||
+                    "",
+
+                correo:
+                    actualizado.correo ||
+                    "",
+
+                telefono:
+                    actualizado.telefono ||
+                    "",
+
+                direccion:
+                    actualizado.direccion ||
+                    "",
+
+                password:
+                    ""
+            });
+
+
+            setModoEdicion(
+                false
+            );
+
+
+            setMensaje(
+                "Los datos del perfil fueron actualizados correctamente."
+            );
+
+
+            setHayError(
+                false
+            );
+
+        } catch (
+            error
+        ) {
+
+            console.error(
+                error
+            );
+
+
+            setMensaje(
+                error.response
+                    ?.data
+                    ?.mensaje ||
+                "No fue posible actualizar el perfil."
+            );
+
+
+            setHayError(
+                true
+            );
+        }
     };
 
 
-    // CANCELO LA EDICION
-
     const cancelarEdicion = () => {
+
+        if (
+            !usuario
+        ) {
+
+            return;
+        }
+
 
         setDatosFormulario({
 
             nombre:
-                administrador?.nombre ||
+                usuario.nombre ||
                 "",
 
             correo:
-                administrador?.correo ||
+                usuario.correo ||
                 "",
 
             telefono:
-                administrador?.telefono ||
+                usuario.telefono ||
                 "",
 
             direccion:
-                administrador?.direccion ||
+                usuario.direccion ||
+                "",
+
+            password:
                 ""
         });
 
 
         setErrores({});
+
         setMensaje("");
 
         setModoEdicion(
@@ -333,24 +446,51 @@ function PerfilAdmin() {
 
 
     if (
-        !administrador
+        cargando
     ) {
 
         return (
 
-            <main>
+            <main className="reporte-admin">
+
+                <p>
+                    Cargando perfil...
+                </p>
+
+            </main>
+        );
+    }
+
+
+    if (
+        !usuario
+    ) {
+
+        return (
+
+            <main className="reporte-admin">
 
                 <h1>
                     Perfil
                 </h1>
 
                 <p>
-                    No se encontró el usuario administrador.
+                    No fue posible cargar la información de tu cuenta.
                 </p>
 
             </main>
         );
     }
+
+
+    const rolVisible =
+        usuario.rol ===
+        "ADMINISTRADOR"
+            ? "Administrador"
+            : usuario.rol ===
+                "VENDEDOR"
+                ? "Vendedor"
+                : "Cliente";
 
 
     return (
@@ -364,7 +504,7 @@ function PerfilAdmin() {
                 </h1>
 
                 <p className="text-secondary">
-                    Información de tu cuenta de administrador
+                    Información de tu cuenta
                 </p>
 
             </div>
@@ -387,15 +527,19 @@ function PerfilAdmin() {
                         <div>
 
                             <h2 className="h5 mb-1">
+
                                 {
-                                    administrador.nombre
+                                    usuario.nombre
                                 }
+
                             </h2>
 
                             <span className="badge bg-dark">
+
                                 {
-                                    administrador.rol
+                                    rolVisible
                                 }
+
                             </span>
 
                         </div>
@@ -405,10 +549,18 @@ function PerfilAdmin() {
 
                     {mensaje && (
 
-                        <div className="alert alert-success">
+                        <div
+                            className={
+                                hayError
+                                    ? "alert alert-danger"
+                                    : "alert alert-success"
+                            }
+                        >
+
                             {
                                 mensaje
                             }
+
                         </div>
 
                     )}
@@ -426,10 +578,12 @@ function PerfilAdmin() {
                                 </label>
 
                                 <p className="fw-semibold mb-0">
+
                                     #
                                     {
-                                        administrador.id
+                                        usuario.idUsuario
                                     }
+
                                 </p>
 
                             </div>
@@ -442,9 +596,11 @@ function PerfilAdmin() {
                                 </label>
 
                                 <p className="fw-semibold mb-0">
+
                                     {
-                                        administrador.rol
+                                        rolVisible
                                     }
+
                                 </p>
 
                             </div>
@@ -457,9 +613,11 @@ function PerfilAdmin() {
                                 </label>
 
                                 <p className="fw-semibold mb-0">
+
                                     {
-                                        administrador.nombre
+                                        usuario.nombre
                                     }
+
                                 </p>
 
                             </div>
@@ -472,9 +630,11 @@ function PerfilAdmin() {
                                 </label>
 
                                 <p className="fw-semibold mb-0">
+
                                     {
-                                        administrador.correo
+                                        usuario.correo
                                     }
+
                                 </p>
 
                             </div>
@@ -487,9 +647,12 @@ function PerfilAdmin() {
                                 </label>
 
                                 <p className="fw-semibold mb-0">
+
                                     {
-                                        administrador.telefono
+                                        usuario.telefono ||
+                                        "Sin teléfono registrado"
                                     }
+
                                 </p>
 
                             </div>
@@ -502,10 +665,12 @@ function PerfilAdmin() {
                                 </label>
 
                                 <p className="fw-semibold mb-0">
+
                                     {
-                                        administrador.direccion ||
+                                        usuario.direccion ||
                                         "Sin dirección registrada"
                                     }
+
                                 </p>
 
                             </div>
@@ -558,7 +723,6 @@ function PerfilAdmin() {
                                         id="nombre"
                                         name="nombre"
                                         type="text"
-                                        maxLength="50"
                                         className={`form-control ${
                                             errores.nombre
                                                 ? "is-invalid"
@@ -629,71 +793,36 @@ function PerfilAdmin() {
 
                                 <div className="col-12 col-md-6">
 
-                                    <label htmlFor="telefono">
+                                    <label
+                                        htmlFor="telefono"
+                                        className="form-label"
+                                    >
                                         Teléfono
                                     </label>
 
 
-                                    <div className="telefono-input">
-
-                                        <span className="prefijo-telefono">
-                                            +569
-                                        </span>
-
-
-                                        <input
-                                            id="telefono"
-                                            type="text"
-                                            inputMode="numeric"
-                                            maxLength="8"
-                                            value={
-                                                datosFormulario.telefono
-                                                    .replace(
-                                                        "+569 ",
-                                                        ""
-                                                    )
-                                            }
-                                            onChange={(e) => {
-
-                                                const soloNumeros =
-                                                    e.target.value
-                                                        .replace(
-                                                            /\D/g,
-                                                            ""
-                                                        )
-                                                        .slice(
-                                                            0,
-                                                            8
-                                                        );
-
-
-                                                setDatosFormulario({
-                                                    ...datosFormulario,
-
-                                                    telefono:
-                                                        soloNumeros.length >
-                                                        0
-                                                            ? `+569 ${soloNumeros}`
-                                                            : ""
-                                                });
-
-
-                                                setErrores({
-                                                    ...errores,
-                                                    telefono: ""
-                                                });
-
-
-                                                setMensaje("");
-                                            }}
-                                        />
-
-                                    </div>
+                                    <input
+                                        id="telefono"
+                                        name="telefono"
+                                        type="text"
+                                        className={`form-control ${
+                                            errores.telefono
+                                                ? "is-invalid"
+                                                : ""
+                                        }`}
+                                        placeholder="+569 12345678"
+                                        value={
+                                            datosFormulario.telefono
+                                        }
+                                        onChange={
+                                            manejarCambio
+                                        }
+                                    />
 
 
                                     {errores.telefono && (
 
-                                        <div className="mensaje-error">
+                                        <div className="invalid-feedback">
                                             {
                                                 errores.telefono
                                             }
@@ -718,7 +847,6 @@ function PerfilAdmin() {
                                         id="direccion"
                                         name="direccion"
                                         type="text"
-                                        maxLength="100"
                                         className={`form-control ${
                                             errores.direccion
                                                 ? "is-invalid"
@@ -748,6 +876,48 @@ function PerfilAdmin() {
 
                                 <div className="col-12 col-md-6">
 
+                                    <label
+                                        htmlFor="password"
+                                        className="form-label"
+                                    >
+                                        Nueva contraseña
+                                    </label>
+
+
+                                    <input
+                                        id="password"
+                                        name="password"
+                                        type="password"
+                                        className={`form-control ${
+                                            errores.password
+                                                ? "is-invalid"
+                                                : ""
+                                        }`}
+                                        placeholder="Dejar vacío para mantener la actual"
+                                        value={
+                                            datosFormulario.password
+                                        }
+                                        onChange={
+                                            manejarCambio
+                                        }
+                                    />
+
+
+                                    {errores.password && (
+
+                                        <div className="invalid-feedback">
+                                            {
+                                                errores.password
+                                            }
+                                        </div>
+
+                                    )}
+
+                                </div>
+
+
+                                <div className="col-12 col-md-6">
+
                                     <label className="form-label">
                                         Rol
                                     </label>
@@ -757,7 +927,7 @@ function PerfilAdmin() {
                                         type="text"
                                         className="form-control"
                                         value={
-                                            administrador.rol
+                                            rolVisible
                                         }
                                         disabled
                                     />

@@ -1,6 +1,6 @@
 import {
-    useState,
-    useEffect
+    useEffect,
+    useState
 } from "react";
 
 import {
@@ -10,18 +10,14 @@ import {
 } from "react-router-dom";
 
 import {
-    obtenerCarrito,
     cambiarCantidad,
-    eliminarDelCarrito
+    eliminarDelCarrito,
+    obtenerCarrito
 } from "../../data/carrito.js";
 
 import {
-    obtenerProductos
-} from "../../data/productos.js";
-
-import {
-    obtenerUsuarioPorId
-} from "../../data/usuarios.js";
+    obtenerProductosApi
+} from "../../api/productos.js";
 
 import "../../styles/carrito.css";
 
@@ -32,27 +28,20 @@ function Carrito() {
         useNavigate();
 
 
-    // OBTENGO EL USUARIO SI HAY SESION
-
-    const usuarioActualId =
+    const rol =
         localStorage.getItem(
-            "usuarioActualId"
+            "usuarioRol"
         );
 
 
-    const usuarioActual =
-        usuarioActualId !== null
-            ? obtenerUsuarioPorId(
-                Number(
-                    usuarioActualId
-                )
-            )
-            : null;
-
-
     const esAdministrador =
-        usuarioActual?.rol ===
-        "Administrador";
+        rol ===
+        "ADMINISTRADOR";
+
+
+    const esVendedor =
+        rol ===
+        "VENDEDOR";
 
 
     const [
@@ -62,7 +51,54 @@ function Carrito() {
         obtenerCarrito()
     );
 
-    // ACTUALIZO EL CARRITO CUANDO HAY CAMBIOS EN OTRAS PESTAÑAS
+
+    const [
+        productos,
+        setProductos
+    ] = useState([]);
+
+
+    const [
+        mensaje,
+        setMensaje
+    ] = useState("");
+
+
+    const [
+        hayError,
+        setHayError
+    ] = useState(false);
+
+
+    useEffect(() => {
+
+        const cargarProductos = async () => {
+
+            try {
+
+                const datos =
+                    await obtenerProductosApi();
+
+
+                setProductos(
+                    datos
+                );
+
+            } catch (
+                error
+            ) {
+
+                console.error(
+                    error
+                );
+            }
+        };
+
+
+        cargarProductos();
+
+    }, []);
+
 
     useEffect(() => {
 
@@ -103,22 +139,9 @@ function Carrito() {
     }, []);
 
 
-    const [
-        mensaje,
-        setMensaje
-    ] = useState("");
-
-
-    const [
-        hayError,
-        setHayError
-    ] = useState(false);
-
-
-    // EL ADMIN NO PUEDE COMPRAR
-
     if (
-        esAdministrador
+        esAdministrador ||
+        esVendedor
     ) {
 
         return (
@@ -130,15 +153,15 @@ function Carrito() {
     }
 
 
-    // BUSCO EL STOCK ACTUAL
-
     const obtenerStockActual = (
         codigo
     ) => {
 
         const producto =
-            obtenerProductos().find(
-                (producto) =>
+            productos.find(
+                (
+                    producto
+                ) =>
                     producto.codigo ===
                     codigo
             );
@@ -155,7 +178,10 @@ function Carrito() {
     ) => {
 
         setMensaje("");
-        setHayError(false);
+
+        setHayError(
+            false
+        );
 
 
         const stockActual =
@@ -173,7 +199,11 @@ function Carrito() {
                 `Solo hay ${stockActual} unidades disponibles de ${item.nombre}.`
             );
 
-            setHayError(true);
+
+            setHayError(
+                true
+            );
+
 
             return;
         }
@@ -197,7 +227,10 @@ function Carrito() {
     ) => {
 
         setMensaje("");
-        setHayError(false);
+
+        setHayError(
+            false
+        );
 
 
         if (
@@ -214,6 +247,7 @@ function Carrito() {
             setCarrito(
                 carritoActualizado
             );
+
 
             return;
         }
@@ -251,11 +285,12 @@ function Carrito() {
             "Producto eliminado del carrito."
         );
 
-        setHayError(false);
+
+        setHayError(
+            false
+        );
     };
 
-
-    // CALCULO LOS TOTALES
 
     const totalPedido =
         carrito.reduce(
@@ -282,12 +317,13 @@ function Carrito() {
         neto;
 
 
-    // CLIENTE O INVITADO PUEDEN CONTINUAR
-
     const continuarCompra = () => {
 
         setMensaje("");
-        setHayError(false);
+
+        setHayError(
+            false
+        );
 
 
         if (
@@ -299,7 +335,11 @@ function Carrito() {
                 "Tu carrito está vacío."
             );
 
-            setHayError(true);
+
+            setHayError(
+                true
+            );
+
 
             return;
         }
@@ -410,7 +450,7 @@ function Carrito() {
 
 
                 {carrito.length ===
-                    0 ? (
+                0 ? (
 
                     <section className="carrito-vacio">
 
@@ -446,7 +486,9 @@ function Carrito() {
                         <section className="carrito-productos">
 
                             {carrito.map(
-                                (item) => (
+                                (
+                                    item
+                                ) => (
 
                                     <article
                                         key={

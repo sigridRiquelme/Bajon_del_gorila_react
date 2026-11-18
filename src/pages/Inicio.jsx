@@ -1,4 +1,5 @@
 import {
+    useEffect,
     useState
 } from "react";
 
@@ -10,13 +11,9 @@ import ProductoCard
     from "../components/ProductoCard.jsx";
 
 import {
-    obtenerProductos,
-    obtenerPrecioFinal
-} from "../data/productos.js";
-
-import {
-    obtenerUsuarioPorId
-} from "../data/usuarios.js";
+    obtenerPrecioFinal,
+    obtenerProductosApi
+} from "../api/productos.js";
 
 import {
     agregarAlCarrito,
@@ -42,6 +39,18 @@ function Inicio() {
 
 
     const [
+        productos,
+        setProductos
+    ] = useState([]);
+
+
+    const [
+        cargando,
+        setCargando
+    ] = useState(true);
+
+
+    const [
         carritoActual,
         setCarritoActual
     ] = useState(
@@ -61,35 +70,69 @@ function Inicio() {
     ] = useState(false);
 
 
-    // OBTENGO EL USUARIO ACTUAL
-
-    const usuarioActualId =
+    const rol =
         localStorage.getItem(
-            "usuarioActualId"
+            "usuarioRol"
         );
 
 
-    const usuarioActual =
-        usuarioActualId !== null
-            ? obtenerUsuarioPorId(
-                Number(
-                    usuarioActualId
-                )
-            )
-            : null;
-
-
     const esAdministrador =
-        usuarioActual?.rol ===
-        "Administrador";
+        rol ===
+        "ADMINISTRADOR";
 
 
-    // USO LOS PRODUCTOS DEL ADMIN
+    const esVendedor =
+        rol ===
+        "VENDEDOR";
+
+
+    const puedeComprar =
+        !esAdministrador &&
+        !esVendedor;
+
+
+    useEffect(() => {
+
+        const cargarProductos = async () => {
+
+            try {
+
+                const datos =
+                    await obtenerProductosApi();
+
+
+                setProductos(
+                    datos
+                );
+
+            } catch (
+                error
+            ) {
+
+                console.error(
+                    error
+                );
+
+            } finally {
+
+                setCargando(
+                    false
+                );
+            }
+        };
+
+
+        cargarProductos();
+
+    }, []);
+
 
     const productosDestacados =
-        obtenerProductos()
+        productos
             .filter(
-                (producto) =>
+                (
+                    producto
+                ) =>
                     producto.estado !==
                     "Oculto"
             )
@@ -98,11 +141,15 @@ function Inicio() {
                 4
             )
             .map(
-                (producto) => {
+                (
+                    producto
+                ) => {
 
                     const productoEnCarrito =
                         carritoActual.find(
-                            (item) =>
+                            (
+                                item
+                            ) =>
                                 item.codigo ===
                                 producto.codigo
                         );
@@ -140,11 +187,11 @@ function Inicio() {
             );
 
 
-    // OBTENGO LA PRIMERA PROMOCION ACTIVA
-
     const promocionDestacada =
-        obtenerProductos().find(
-            (producto) =>
+        productos.find(
+            (
+                producto
+            ) =>
                 producto.promocion ===
                     true &&
                 producto.descuento >
@@ -162,25 +209,24 @@ function Inicio() {
             : 0;
 
 
-    // AGREGO EL PRODUCTO AL CARRITO
-
     const agregarProducto = (
         producto,
         cantidad
     ) => {
 
         setMensajeCarrito("");
-        setHayErrorCarrito(false);
 
+        setHayErrorCarrito(
+            false
+        );
 
-        // EL ADMIN NO PUEDE COMPRAR
 
         if (
-            esAdministrador
+            !puedeComprar
         ) {
 
             setMensajeCarrito(
-                "La cuenta de administrador no puede realizar compras."
+                "Esta cuenta no puede realizar compras."
             );
 
 
@@ -405,7 +451,9 @@ function Inicio() {
                 <div className="contenedor lista-categorias">
 
                     {categorias.map(
-                        (categoria) => (
+                        (
+                            categoria
+                        ) => (
 
                             <Link
                                 key={
@@ -481,13 +529,21 @@ function Inicio() {
                     )}
 
 
-                    {productosDestacados.length >
+                    {cargando ? (
+
+                        <p>
+                            Cargando productos...
+                        </p>
+
+                    ) : productosDestacados.length >
                     0 ? (
 
                         <div className="grilla-productos">
 
                             {productosDestacados.map(
-                                (producto) => (
+                                (
+                                    producto
+                                ) => (
 
                                     <ProductoCard
                                         key={
@@ -497,9 +553,9 @@ function Inicio() {
                                             producto
                                         }
                                         onAgregar={
-                                            esAdministrador
-                                                ? undefined
-                                                : agregarProducto
+                                            puedeComprar
+                                                ? agregarProducto
+                                                : undefined
                                         }
                                     />
 
@@ -534,8 +590,6 @@ function Inicio() {
 
             </section>
 
-
-            {/* PROMOCION DESTACADA */}
 
             {promocionDestacada && (
 
@@ -611,7 +665,6 @@ function Inicio() {
                                     }%
 
                                 </span>
-
 
                             </div>
 
@@ -793,13 +846,12 @@ function Inicio() {
                         className="boton boton-amarillo"
                         to="/menu"
                     >
-                        PEDIR AHORA 🍔
+                        HACER UN PEDIDO →
                     </Link>
 
                 </div>
 
             </section>
-
 
         </>
     );
