@@ -1,26 +1,33 @@
 import {
+    useEffect,
     useState
 } from "react";
 
 import "../../styles/reportes.css";
 
 import {
-    obtenerPedidos
-} from "../../data/pedidos.js";
-
-import {
-    obtenerProductos
-} from "../../data/productos.js";
+    obtenerPedidosConDetallesApi
+} from "../../api/pedidos.js";
 
 
 function ReporteProductosVendidos() {
 
-    const pedidos =
-        obtenerPedidos();
+    const [
+        pedidos,
+        setPedidos
+    ] = useState([]);
 
 
-    const productos =
-        obtenerProductos();
+    const [
+        cargando,
+        setCargando
+    ] = useState(true);
+
+
+    const [
+        error,
+        setError
+    ] = useState("");
 
 
     const [
@@ -35,7 +42,51 @@ function ReporteProductosVendidos() {
     ] = useState("");
 
 
-    // SEPARO LA FECHA DEL PEDIDO
+    useEffect(() => {
+
+        const cargarPedidos = async () => {
+
+            try {
+
+                const datos =
+                    await obtenerPedidosConDetallesApi();
+
+
+                setPedidos(
+                    datos
+                );
+
+
+                setError(
+                    ""
+                );
+
+            } catch (
+                error
+            ) {
+
+                console.error(
+                    error
+                );
+
+
+                setError(
+                    "No fue posible cargar el reporte de productos vendidos."
+                );
+
+            } finally {
+
+                setCargando(
+                    false
+                );
+            }
+        };
+
+
+        cargarPedidos();
+
+    }, []);
+
 
     const obtenerPartesFecha = (
         fecha
@@ -72,8 +123,6 @@ function ReporteProductosVendidos() {
     };
 
 
-    // FILTRO LOS PEDIDOS POR FECHA
-
     const pedidosFiltrados =
         pedidos.filter(
             (pedido) => {
@@ -100,9 +149,10 @@ function ReporteProductosVendidos() {
                     dia,
                     mes,
                     anio
-                } = obtenerPartesFecha(
-                    pedido.fecha
-                );
+                } =
+                    obtenerPartesFecha(
+                        pedido.fecha
+                    );
 
 
                 if (
@@ -186,42 +236,36 @@ function ReporteProductosVendidos() {
     const categoriasVendidas = {};
 
 
-    // AGRUPO LOS PRODUCTOS VENDIDOS
-
     pedidosFiltrados.forEach(
-        (pedido) => {
+        (
+            pedido
+        ) => {
 
             pedido.productos.forEach(
-                (productoPedido) => {
+                (
+                    producto
+                ) => {
 
-                    const productoBase =
-                        productos.find(
-                            (producto) =>
-                                producto.codigo ===
-                                productoPedido.codigoProducto
-                        );
-
-
-                    const categoria =
-                        productoBase?.categoria ||
-                        "Sin categoría";
+                    const claveProducto =
+                        producto.codigoProducto ??
+                        producto.nombre;
 
 
                     if (
                         !productosVendidos[
-                            productoPedido.codigoProducto
+                            claveProducto
                         ]
                     ) {
 
                         productosVendidos[
-                            productoPedido.codigoProducto
+                            claveProducto
                         ] = {
 
                             codigo:
-                                productoPedido.codigoProducto,
+                                claveProducto,
 
                             nombre:
-                                productoPedido.nombre,
+                                producto.nombre,
 
                             cantidad:
                                 0,
@@ -233,16 +277,21 @@ function ReporteProductosVendidos() {
 
 
                     productosVendidos[
-                        productoPedido.codigoProducto
+                        claveProducto
                     ].cantidad +=
-                        productoPedido.cantidad;
+                        producto.cantidad;
 
 
                     productosVendidos[
-                        productoPedido.codigoProducto
+                        claveProducto
                     ].ingresos +=
-                        productoPedido.precio *
-                        productoPedido.cantidad;
+                        producto.precio *
+                        producto.cantidad;
+
+
+                    const categoria =
+                        producto.categoria ||
+                        "Sin categoría";
 
 
                     if (
@@ -270,14 +319,14 @@ function ReporteProductosVendidos() {
                     categoriasVendidas[
                         categoria
                     ].cantidad +=
-                        productoPedido.cantidad;
+                        producto.cantidad;
 
 
                     categoriasVendidas[
                         categoria
                     ].ingresos +=
-                        productoPedido.precio *
-                        productoPedido.cantidad;
+                        producto.precio *
+                        producto.cantidad;
                 }
             );
         }
@@ -288,7 +337,10 @@ function ReporteProductosVendidos() {
         Object.values(
             productosVendidos
         ).sort(
-            (a, b) =>
+            (
+                a,
+                b
+            ) =>
                 b.cantidad -
                 a.cantidad
         );
@@ -298,13 +350,14 @@ function ReporteProductosVendidos() {
         Object.values(
             categoriasVendidas
         ).sort(
-            (a, b) =>
+            (
+                a,
+                b
+            ) =>
                 b.cantidad -
                 a.cantidad
         );
 
-
-    // CALCULO LOS TOTALES
 
     const totalUnidades =
         listaProductos.reduce(
@@ -336,8 +389,6 @@ function ReporteProductosVendidos() {
             ? listaProductos[0]
             : null;
 
-
-    // CAMBIO EL TIPO DE FILTRO
 
     const cambiarTipoFiltro = (
         e
@@ -377,6 +428,19 @@ function ReporteProductosVendidos() {
             </div>
 
 
+            {error && (
+
+                <div className="alert alert-danger">
+
+                    {
+                        error
+                    }
+
+                </div>
+
+            )}
+
+
             <section className="card border-0 shadow-sm mb-4">
 
                 <div className="card-body">
@@ -387,7 +451,6 @@ function ReporteProductosVendidos() {
 
 
                     <div className="row g-3">
-
 
                         <div className="col-12 col-md-4">
 
@@ -542,7 +605,6 @@ function ReporteProductosVendidos() {
 
                         )}
 
-
                     </div>
 
                 </div>
@@ -550,326 +612,337 @@ function ReporteProductosVendidos() {
             </section>
 
 
-            <div className="row g-3 mb-4">
+            {cargando ? (
+
+                <p>
+                    Cargando reporte...
+                </p>
+
+            ) : (
+
+                <>
+
+                    <div className="row g-3 mb-4">
 
 
-                <div className="col-12 col-md-4">
+                        <div className="col-12 col-md-4">
 
-                    <div className="card reporte-card-bootstrap h-100">
+                            <div className="card reporte-card-bootstrap h-100">
 
-                        <div className="card-body">
+                                <div className="card-body">
 
-                            <div className="reporte-icono">
+                                    <div className="reporte-icono">
+                                        <i className="bi bi-trophy"></i>
+                                    </div>
 
-                                <i className="bi bi-trophy"></i>
+
+                                    <p className="card-text text-secondary">
+                                        Producto más vendido
+                                    </p>
+
+
+                                    <h3 className="fw-bold mb-0 fs-5">
+
+                                        {
+                                            productoMasVendido
+                                                ? productoMasVendido.nombre
+                                                : "Sin ventas"
+                                        }
+
+                                    </h3>
+
+                                </div>
 
                             </div>
 
-
-                            <p className="card-text text-secondary">
-                                Producto más vendido
-                            </p>
+                        </div>
 
 
-                            <h3 className="fw-bold mb-0 fs-5">
+                        <div className="col-12 col-md-4">
 
-                                {
-                                    productoMasVendido
-                                        ? productoMasVendido.nombre
-                                        : "Sin ventas"
-                                }
+                            <div className="card reporte-card-bootstrap h-100">
 
-                            </h3>
+                                <div className="card-body">
+
+                                    <div className="reporte-icono">
+                                        <i className="bi bi-box-seam"></i>
+                                    </div>
+
+
+                                    <p className="card-text text-secondary">
+                                        Unidades vendidas
+                                    </p>
+
+
+                                    <h3 className="fw-bold mb-0">
+
+                                        {
+                                            totalUnidades
+                                        }
+
+                                    </h3>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div className="col-12 col-md-4">
+
+                            <div className="card reporte-card-bootstrap h-100">
+
+                                <div className="card-body">
+
+                                    <div className="reporte-icono">
+                                        <i className="bi bi-cash-stack"></i>
+                                    </div>
+
+
+                                    <p className="card-text text-secondary">
+                                        Ingresos generados
+                                    </p>
+
+
+                                    <h3 className="fw-bold mb-0">
+
+                                        $
+                                        {
+                                            totalIngresos.toLocaleString(
+                                                "es-CL"
+                                            )
+                                        }
+
+                                    </h3>
+
+                                </div>
+
+                            </div>
 
                         </div>
 
                     </div>
 
-                </div>
 
-
-                <div className="col-12 col-md-4">
-
-                    <div className="card reporte-card-bootstrap h-100">
+                    <section className="card border-0 shadow-sm mb-4">
 
                         <div className="card-body">
 
-                            <div className="reporte-icono">
-
-                                <i className="bi bi-box-seam"></i>
-
-                            </div>
+                            <h2 className="h5 mb-3">
+                                Artículos vendidos
+                            </h2>
 
 
-                            <p className="card-text text-secondary">
-                                Unidades vendidas
-                            </p>
+                            <div className="table-responsive">
+
+                                <table className="table table-striped table-hover align-middle">
+
+                                    <thead className="table-dark">
+
+                                        <tr>
+
+                                            <th>
+                                                PRODUCTO
+                                            </th>
+
+                                            <th>
+                                                CANTIDAD VENDIDA
+                                            </th>
+
+                                            <th>
+                                                INGRESOS GENERADOS
+                                            </th>
+
+                                        </tr>
+
+                                    </thead>
 
 
-                            <h3 className="fw-bold mb-0">
-                                {
-                                    totalUnidades
-                                }
-                            </h3>
+                                    <tbody>
 
-                        </div>
+                                        {listaProductos.length >
+                                        0 ? (
 
-                    </div>
+                                            listaProductos.map(
+                                                (
+                                                    producto
+                                                ) => (
 
-                </div>
+                                                    <tr
+                                                        key={
+                                                            producto.codigo
+                                                        }
+                                                    >
 
+                                                        <td className="fw-semibold">
 
-                <div className="col-12 col-md-4">
+                                                            {
+                                                                producto.nombre
+                                                            }
 
-                    <div className="card reporte-card-bootstrap h-100">
+                                                        </td>
 
-                        <div className="card-body">
+                                                        <td>
 
-                            <div className="reporte-icono">
+                                                            {
+                                                                producto.cantidad
+                                                            }
 
-                                <i className="bi bi-cash-stack"></i>
+                                                        </td>
 
-                            </div>
+                                                        <td className="fw-semibold">
 
+                                                            $
+                                                            {
+                                                                producto.ingresos.toLocaleString(
+                                                                    "es-CL"
+                                                                )
+                                                            }
 
-                            <p className="card-text text-secondary">
-                                Ingresos generados
-                            </p>
+                                                        </td>
 
+                                                    </tr>
 
-                            <h3 className="fw-bold mb-0">
+                                                )
+                                            )
 
-                                $
+                                        ) : (
 
-                                {
-                                    totalIngresos.toLocaleString(
-                                        "es-CL"
-                                    )
-                                }
+                                            <tr>
 
-                            </h3>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-            </div>
-
-
-            <section className="card border-0 shadow-sm mb-4">
-
-                <div className="card-body">
-
-                    <h2 className="h5 mb-3">
-                        Artículos vendidos
-                    </h2>
-
-
-                    <div className="table-responsive">
-
-                        <table className="table table-striped table-hover align-middle">
-
-
-                            <thead className="table-dark">
-
-                                <tr>
-
-                                    <th>
-                                        PRODUCTO
-                                    </th>
-
-                                    <th>
-                                        CANTIDAD VENDIDA
-                                    </th>
-
-                                    <th>
-                                        INGRESOS GENERADOS
-                                    </th>
-
-                                </tr>
-
-                            </thead>
-
-
-                            <tbody>
-
-                                {listaProductos.length >
-                                0 ? (
-
-                                    listaProductos.map(
-                                        (producto) => (
-
-                                            <tr
-                                                key={
-                                                    producto.codigo
-                                                }
-                                            >
-
-                                                <td className="fw-semibold">
-                                                    {
-                                                        producto.nombre
-                                                    }
-                                                </td>
-
-
-                                                <td>
-                                                    {
-                                                        producto.cantidad
-                                                    }
-                                                </td>
-
-
-                                                <td className="fw-semibold">
-
-                                                    $
-
-                                                    {
-                                                        producto.ingresos.toLocaleString(
-                                                            "es-CL"
-                                                        )
-                                                    }
-
+                                                <td
+                                                    colSpan="3"
+                                                    className="text-center text-secondary py-4"
+                                                >
+                                                    No hay productos vendidos para el filtro seleccionado.
                                                 </td>
 
                                             </tr>
 
-                                        )
-                                    )
+                                        )}
 
-                                ) : (
+                                    </tbody>
 
-                                    <tr>
+                                </table>
 
-                                        <td
-                                            colSpan="3"
-                                            className="text-center text-secondary py-4"
-                                        >
-                                            No hay productos vendidos para el filtro seleccionado.
-                                        </td>
+                            </div>
 
-                                    </tr>
+                        </div>
 
-                                )}
-
-                            </tbody>
-
-                        </table>
-
-                    </div>
-
-                </div>
-
-            </section>
+                    </section>
 
 
-            <section className="card border-0 shadow-sm">
+                    <section className="card border-0 shadow-sm">
 
-                <div className="card-body">
+                        <div className="card-body">
 
-                    <h2 className="h5 mb-3">
-                        Ventas por categoría
-                    </h2>
-
-
-                    <div className="table-responsive">
-
-                        <table className="table table-striped table-hover align-middle">
+                            <h2 className="h5 mb-3">
+                                Ventas por categoría
+                            </h2>
 
 
-                            <thead className="table-dark">
+                            <div className="table-responsive">
 
-                                <tr>
+                                <table className="table table-striped table-hover align-middle">
 
-                                    <th>
-                                        CATEGORÍA
-                                    </th>
+                                    <thead className="table-dark">
 
-                                    <th>
-                                        CANTIDAD VENDIDA
-                                    </th>
+                                        <tr>
 
-                                    <th>
-                                        INGRESOS GENERADOS
-                                    </th>
+                                            <th>
+                                                CATEGORÍA
+                                            </th>
 
-                                </tr>
+                                            <th>
+                                                CANTIDAD VENDIDA
+                                            </th>
 
-                            </thead>
+                                            <th>
+                                                INGRESOS GENERADOS
+                                            </th>
 
+                                        </tr>
 
-                            <tbody>
-
-                                {listaCategorias.length >
-                                0 ? (
-
-                                    listaCategorias.map(
-                                        (categoria) => (
-
-                                            <tr
-                                                key={
-                                                    categoria.nombre
-                                                }
-                                            >
-
-                                                <td className="fw-semibold">
-                                                    {
-                                                        categoria.nombre
-                                                    }
-                                                </td>
+                                    </thead>
 
 
-                                                <td>
-                                                    {
-                                                        categoria.cantidad
-                                                    }
-                                                </td>
+                                    <tbody>
 
+                                        {listaCategorias.length >
+                                        0 ? (
 
-                                                <td className="fw-semibold">
+                                            listaCategorias.map(
+                                                (
+                                                    categoria
+                                                ) => (
 
-                                                    $
+                                                    <tr
+                                                        key={
+                                                            categoria.nombre
+                                                        }
+                                                    >
 
-                                                    {
-                                                        categoria.ingresos.toLocaleString(
-                                                            "es-CL"
-                                                        )
-                                                    }
+                                                        <td className="fw-semibold">
 
+                                                            {
+                                                                categoria.nombre
+                                                            }
+
+                                                        </td>
+
+                                                        <td>
+
+                                                            {
+                                                                categoria.cantidad
+                                                            }
+
+                                                        </td>
+
+                                                        <td className="fw-semibold">
+
+                                                            $
+                                                            {
+                                                                categoria.ingresos.toLocaleString(
+                                                                    "es-CL"
+                                                                )
+                                                            }
+
+                                                        </td>
+
+                                                    </tr>
+
+                                                )
+                                            )
+
+                                        ) : (
+
+                                            <tr>
+
+                                                <td
+                                                    colSpan="3"
+                                                    className="text-center text-secondary py-4"
+                                                >
+                                                    No hay categorías con ventas para el filtro seleccionado.
                                                 </td>
 
                                             </tr>
 
-                                        )
-                                    )
+                                        )}
 
-                                ) : (
+                                    </tbody>
 
-                                    <tr>
+                                </table>
 
-                                        <td
-                                            colSpan="3"
-                                            className="text-center text-secondary py-4"
-                                        >
-                                            No hay categorías con ventas para el filtro seleccionado.
-                                        </td>
+                            </div>
 
-                                    </tr>
+                        </div>
 
-                                )}
+                    </section>
 
-                            </tbody>
+                </>
 
-                        </table>
-
-                    </div>
-
-                </div>
-
-            </section>
-
+            )}
 
         </main>
     );

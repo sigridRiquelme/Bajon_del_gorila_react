@@ -1,35 +1,105 @@
-import { useState } from "react";
+import {
+    useEffect,
+    useState
+} from "react";
+
 import "../../styles/reportes.css";
 
 import {
-    obtenerPedidos
-} from "../../data/pedidos.js";
-
-import {
-    obtenerUsuarioPorId
-} from "../../data/usuarios.js";
+    obtenerPedidosConDetallesApi
+} from "../../api/pedidos.js";
 
 
 function ReporteVentas() {
 
-    const pedidos = obtenerPedidos();
-
-    const [tipoFiltro, setTipoFiltro] =
-        useState("todo");
-
-    const [fechaFiltro, setFechaFiltro] =
-        useState("");
+    const [
+        pedidos,
+        setPedidos
+    ] = useState([]);
 
 
-    // CAMBIO: convierto las fechas de las boletas para poder filtrarlas bien
+    const [
+        cargando,
+        setCargando
+    ] = useState(true);
 
-    const obtenerPartesFecha = (fecha) => {
+
+    const [
+        error,
+        setError
+    ] = useState("");
+
+
+    const [
+        tipoFiltro,
+        setTipoFiltro
+    ] = useState("todo");
+
+
+    const [
+        fechaFiltro,
+        setFechaFiltro
+    ] = useState("");
+
+
+    useEffect(() => {
+
+        const cargarPedidos = async () => {
+
+            try {
+
+                const datos =
+                    await obtenerPedidosConDetallesApi();
+
+
+                setPedidos(
+                    datos
+                );
+
+
+                setError(
+                    ""
+                );
+
+            } catch (
+                error
+            ) {
+
+                console.error(
+                    error
+                );
+
+
+                setError(
+                    "No fue posible cargar el reporte de ventas."
+                );
+
+            } finally {
+
+                setCargando(
+                    false
+                );
+            }
+        };
+
+
+        cargarPedidos();
+
+    }, []);
+
+
+    const obtenerPartesFecha = (
+        fecha
+    ) => {
 
         const partes =
             fecha.split("/");
 
 
-        if (partes.length !== 3) {
+        if (
+            partes.length !==
+            3
+        ) {
 
             return {
                 dia: "",
@@ -40,9 +110,15 @@ function ReporteVentas() {
 
 
         return {
-            dia: partes[0],
-            mes: partes[1],
-            anio: partes[2]
+
+            dia:
+                partes[0],
+
+            mes:
+                partes[1],
+
+            anio:
+                partes[2]
         };
     };
 
@@ -61,7 +137,8 @@ function ReporteVentas() {
 
 
                 if (
-                    fechaFiltro === ""
+                    fechaFiltro ===
+                    ""
                 ) {
 
                     return false;
@@ -72,9 +149,10 @@ function ReporteVentas() {
                     dia,
                     mes,
                     anio
-                } = obtenerPartesFecha(
-                    pedido.fecha
-                );
+                } =
+                    obtenerPartesFecha(
+                        pedido.fecha
+                    );
 
 
                 if (
@@ -93,9 +171,12 @@ function ReporteVentas() {
 
 
                     return (
-                        dia === diaFiltro &&
-                        mes === mesFiltro &&
-                        anio === anioFiltro
+                        dia ===
+                            diaFiltro &&
+                        mes ===
+                            mesFiltro &&
+                        anio ===
+                            anioFiltro
                     );
                 }
 
@@ -115,8 +196,10 @@ function ReporteVentas() {
 
 
                     return (
-                        mes === mesFiltro &&
-                        anio === anioFiltro
+                        mes ===
+                            mesFiltro &&
+                        anio ===
+                            anioFiltro
                     );
                 }
 
@@ -154,7 +237,10 @@ function ReporteVentas() {
 
     const totalVendido =
         pedidosFiltrados.reduce(
-            (total, pedido) =>
+            (
+                total,
+                pedido
+            ) =>
                 total +
                 pedido.total,
             0
@@ -162,7 +248,8 @@ function ReporteVentas() {
 
 
     const promedioVenta =
-        cantidadVentas > 0
+        cantidadVentas >
+        0
             ? totalVendido /
                 cantidadVentas
             : 0;
@@ -184,8 +271,12 @@ function ReporteVentas() {
                     fechas[
                         pedido.fecha
                     ] = {
-                        cantidad: 0,
-                        total: 0
+
+                        cantidad:
+                            0,
+
+                        total:
+                            0
                     };
                 }
 
@@ -202,6 +293,7 @@ function ReporteVentas() {
 
 
                 return fechas;
+
             },
             {}
         );
@@ -215,23 +307,10 @@ function ReporteVentas() {
             e.target.value
         );
 
-        setFechaFiltro("");
-    };
 
-
-    const obtenerNombreCliente = (
-        pedido
-    ) => {
-
-        const usuario =
-            obtenerUsuarioPorId(
-                pedido.usuarioId
-            );
-
-
-        return usuario
-            ? usuario.nombre
-            : pedido.cliente;
+        setFechaFiltro(
+            ""
+        );
     };
 
 
@@ -240,18 +319,7 @@ function ReporteVentas() {
         <main className="reporte-admin">
 
 
-            <div
-                className="
-                    d-flex
-                    justify-content-between
-                    flex-wrap
-                    flex-md-nowrap
-                    align-items-center
-                    pb-2
-                    mb-4
-                    border-bottom
-                "
-            >
+            <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-4 border-bottom">
 
                 <div>
 
@@ -267,6 +335,19 @@ function ReporteVentas() {
                 </div>
 
             </div>
+
+
+            {error && (
+
+                <div className="alert alert-danger">
+
+                    {
+                        error
+                    }
+
+                </div>
+
+            )}
 
 
             <section className="card border-0 shadow-sm mb-4">
@@ -323,7 +404,7 @@ function ReporteVentas() {
 
 
                         {tipoFiltro ===
-                            "dia" && (
+                        "dia" && (
 
                             <div className="col-12 col-md-4">
 
@@ -355,7 +436,7 @@ function ReporteVentas() {
 
 
                         {tipoFiltro ===
-                            "mes" && (
+                        "mes" && (
 
                             <div className="col-12 col-md-4">
 
@@ -387,7 +468,7 @@ function ReporteVentas() {
 
 
                         {tipoFiltro ===
-                            "anio" && (
+                        "anio" && (
 
                             <div className="col-12 col-md-4">
 
@@ -440,319 +521,342 @@ function ReporteVentas() {
             </section>
 
 
-            <div className="row g-3 mb-4">
+            {cargando ? (
+
+                <p>
+                    Cargando reporte...
+                </p>
+
+            ) : (
+
+                <>
+
+                    <div className="row g-3 mb-4">
 
 
-                <div className="col-12 col-md-4">
+                        <div className="col-12 col-md-4">
 
-                    <div className="card reporte-card-bootstrap h-100">
+                            <div className="card reporte-card-bootstrap h-100">
 
-                        <div className="card-body">
+                                <div className="card-body">
 
-                            <div className="reporte-icono">
-
-                                <i className="bi bi-receipt"></i>
-
-                            </div>
+                                    <div className="reporte-icono">
+                                        <i className="bi bi-receipt"></i>
+                                    </div>
 
 
-                            <p className="card-text text-secondary">
-                                Ventas realizadas
-                            </p>
+                                    <p className="card-text text-secondary">
+                                        Ventas realizadas
+                                    </p>
 
 
-                            <h3 className="fw-bold mb-0">
-                                {cantidadVentas}
-                            </h3>
+                                    <h3 className="fw-bold mb-0">
 
-                        </div>
+                                        {
+                                            cantidadVentas
+                                        }
 
-                    </div>
+                                    </h3>
 
-                </div>
-
-
-                <div className="col-12 col-md-4">
-
-                    <div className="card reporte-card-bootstrap h-100">
-
-                        <div className="card-body">
-
-                            <div className="reporte-icono">
-
-                                <i className="bi bi-cash-stack"></i>
+                                </div>
 
                             </div>
 
-
-                            <p className="card-text text-secondary">
-                                Total vendido
-                            </p>
-
-
-                            <h3 className="fw-bold mb-0">
-
-                                $
-                                {totalVendido.toLocaleString(
-                                    "es-CL"
-                                )}
-
-                            </h3>
-
                         </div>
 
-                    </div>
 
-                </div>
+                        <div className="col-12 col-md-4">
+
+                            <div className="card reporte-card-bootstrap h-100">
+
+                                <div className="card-body">
+
+                                    <div className="reporte-icono">
+                                        <i className="bi bi-cash-stack"></i>
+                                    </div>
 
 
-                <div className="col-12 col-md-4">
+                                    <p className="card-text text-secondary">
+                                        Total vendido
+                                    </p>
 
-                    <div className="card reporte-card-bootstrap h-100">
 
-                        <div className="card-body">
+                                    <h3 className="fw-bold mb-0">
 
-                            <div className="reporte-icono">
+                                        $
+                                        {
+                                            totalVendido.toLocaleString(
+                                                "es-CL"
+                                            )
+                                        }
 
-                                <i className="bi bi-calculator"></i>
+                                    </h3>
+
+                                </div>
 
                             </div>
 
-
-                            <p className="card-text text-secondary">
-                                Promedio por venta
-                            </p>
-
-
-                            <h3 className="fw-bold mb-0">
-
-                                $
-                                {promedioVenta.toLocaleString(
-                                    "es-CL",
-                                    {
-                                        maximumFractionDigits: 0
-                                    }
-                                )}
-
-                            </h3>
-
                         </div>
 
-                    </div>
 
-                </div>
+                        <div className="col-12 col-md-4">
 
-            </div>
+                            <div className="card reporte-card-bootstrap h-100">
 
+                                <div className="card-body">
 
-            <section className="card border-0 shadow-sm mb-4">
-
-                <div className="card-body">
-
-                    <h2 className="h5 mb-3">
-                        Ventas por fecha
-                    </h2>
+                                    <div className="reporte-icono">
+                                        <i className="bi bi-calculator"></i>
+                                    </div>
 
 
-                    <div className="table-responsive">
-
-                        <table className="table table-striped table-hover align-middle">
-
-                            <thead className="table-dark">
-
-                                <tr>
-                                    <th>FECHA</th>
-                                    <th>CANTIDAD DE VENTAS</th>
-                                    <th>TOTAL VENDIDO</th>
-                                </tr>
-
-                            </thead>
+                                    <p className="card-text text-secondary">
+                                        Promedio por venta
+                                    </p>
 
 
-                            <tbody>
+                                    <h3 className="fw-bold mb-0">
 
-                                {Object.entries(
-                                    ventasPorFecha
-                                ).length > 0 ? (
-
-                                    Object.entries(
-                                        ventasPorFecha
-                                    ).map(
-                                        (
-                                            [
-                                                fecha,
-                                                datos
-                                            ]
-                                        ) => (
-
-                                            <tr
-                                                key={
-                                                    fecha
-                                                }
-                                            >
-
-                                                <td>
-                                                    {fecha}
-                                                </td>
-
-
-                                                <td>
-                                                    {datos.cantidad}
-                                                </td>
-
-
-                                                <td className="fw-semibold">
-
-                                                    $
-                                                    {datos.total.toLocaleString(
-                                                        "es-CL"
-                                                    )}
-
-                                                </td>
-
-                                            </tr>
-
-                                        )
-                                    )
-
-                                ) : (
-
-                                    <tr>
-
-                                        <td
-                                            colSpan="3"
-                                            className="text-center text-secondary py-4"
-                                        >
-                                            No hay ventas para el filtro seleccionado.
-                                        </td>
-
-                                    </tr>
-
-                                )}
-
-                            </tbody>
-
-                        </table>
-
-                    </div>
-
-                </div>
-
-            </section>
-
-
-            <section className="card border-0 shadow-sm">
-
-                <div className="card-body">
-
-                    <h2 className="h5 mb-3">
-                        Detalle de ventas
-                    </h2>
-
-
-                    <div className="table-responsive">
-
-                        <table className="table table-striped table-hover align-middle">
-
-                            <thead className="table-dark">
-
-                                <tr>
-                                    <th>BOLETA</th>
-                                    <th>CLIENTE</th>
-                                    <th>FECHA</th>
-                                    <th>PRODUCTOS</th>
-                                    <th>TOTAL</th>
-                                </tr>
-
-                            </thead>
-
-
-                            <tbody>
-
-                                {pedidosFiltrados.length >
-                                0 ? (
-
-                                    pedidosFiltrados.map(
-                                        (
-                                            pedido
-                                        ) => (
-
-                                            <tr
-                                                key={
-                                                    pedido.codigo
-                                                }
-                                            >
-
-                                                <td>
-                                                    #{pedido.codigo}
-                                                </td>
-
-
-                                                <td>
-                                                    {obtenerNombreCliente(
-                                                        pedido
-                                                    )}
-                                                </td>
-
-
-                                                <td>
-                                                    {pedido.fecha}
-                                                </td>
-
-
-                                                <td>
-
-                                                    {pedido.productos.reduce(
-                                                        (
-                                                            total,
-                                                            producto
-                                                        ) =>
-                                                            total +
-                                                            producto.cantidad,
+                                        $
+                                        {
+                                            promedioVenta.toLocaleString(
+                                                "es-CL",
+                                                {
+                                                    maximumFractionDigits:
                                                         0
-                                                    )}
+                                                }
+                                            )
+                                        }
 
-                                                </td>
+                                    </h3>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
 
 
-                                                <td className="fw-semibold">
+                    <section className="card border-0 shadow-sm mb-4">
 
-                                                    $
-                                                    {pedido.total.toLocaleString(
-                                                        "es-CL"
-                                                    )}
+                        <div className="card-body">
 
+                            <h2 className="h5 mb-3">
+                                Ventas por fecha
+                            </h2>
+
+
+                            <div className="table-responsive">
+
+                                <table className="table table-striped table-hover align-middle">
+
+                                    <thead className="table-dark">
+
+                                        <tr>
+                                            <th>FECHA</th>
+                                            <th>CANTIDAD DE VENTAS</th>
+                                            <th>TOTAL VENDIDO</th>
+                                        </tr>
+
+                                    </thead>
+
+
+                                    <tbody>
+
+                                        {Object.entries(
+                                            ventasPorFecha
+                                        ).length >
+                                        0 ? (
+
+                                            Object.entries(
+                                                ventasPorFecha
+                                            ).map(
+                                                ([
+                                                    fecha,
+                                                    datos
+                                                ]) => (
+
+                                                    <tr
+                                                        key={
+                                                            fecha
+                                                        }
+                                                    >
+
+                                                        <td>
+                                                            {
+                                                                fecha
+                                                            }
+                                                        </td>
+
+                                                        <td>
+                                                            {
+                                                                datos.cantidad
+                                                            }
+                                                        </td>
+
+                                                        <td className="fw-semibold">
+
+                                                            $
+                                                            {
+                                                                datos.total.toLocaleString(
+                                                                    "es-CL"
+                                                                )
+                                                            }
+
+                                                        </td>
+
+                                                    </tr>
+
+                                                )
+                                            )
+
+                                        ) : (
+
+                                            <tr>
+
+                                                <td
+                                                    colSpan="3"
+                                                    className="text-center text-secondary py-4"
+                                                >
+                                                    No hay ventas para el filtro seleccionado.
                                                 </td>
 
                                             </tr>
 
-                                        )
-                                    )
+                                        )}
 
-                                ) : (
+                                    </tbody>
 
-                                    <tr>
+                                </table>
 
-                                        <td
-                                            colSpan="5"
-                                            className="text-center text-secondary py-4"
-                                        >
-                                            No hay ventas para el filtro seleccionado.
-                                        </td>
+                            </div>
 
-                                    </tr>
+                        </div>
 
-                                )}
+                    </section>
 
-                            </tbody>
 
-                        </table>
+                    <section className="card border-0 shadow-sm">
 
-                    </div>
+                        <div className="card-body">
 
-                </div>
+                            <h2 className="h5 mb-3">
+                                Detalle de ventas
+                            </h2>
 
-            </section>
+
+                            <div className="table-responsive">
+
+                                <table className="table table-striped table-hover align-middle">
+
+                                    <thead className="table-dark">
+
+                                        <tr>
+                                            <th>BOLETA</th>
+                                            <th>CLIENTE</th>
+                                            <th>FECHA</th>
+                                            <th>PRODUCTOS</th>
+                                            <th>TOTAL</th>
+                                        </tr>
+
+                                    </thead>
+
+
+                                    <tbody>
+
+                                        {pedidosFiltrados.length >
+                                        0 ? (
+
+                                            pedidosFiltrados.map(
+                                                (
+                                                    pedido
+                                                ) => (
+
+                                                    <tr
+                                                        key={
+                                                            pedido.codigo
+                                                        }
+                                                    >
+
+                                                        <td>
+                                                            #{pedido.codigo}
+                                                        </td>
+
+                                                        <td>
+                                                            {
+                                                                pedido.cliente ||
+                                                                "Invitado"
+                                                            }
+                                                        </td>
+
+                                                        <td>
+                                                            {
+                                                                pedido.fecha
+                                                            }
+                                                        </td>
+
+                                                        <td>
+
+                                                            {
+                                                                pedido.productos.reduce(
+                                                                    (
+                                                                        total,
+                                                                        producto
+                                                                    ) =>
+                                                                        total +
+                                                                        producto.cantidad,
+                                                                    0
+                                                                )
+                                                            }
+
+                                                        </td>
+
+                                                        <td className="fw-semibold">
+
+                                                            $
+                                                            {
+                                                                pedido.total.toLocaleString(
+                                                                    "es-CL"
+                                                                )
+                                                            }
+
+                                                        </td>
+
+                                                    </tr>
+
+                                                )
+                                            )
+
+                                        ) : (
+
+                                            <tr>
+
+                                                <td
+                                                    colSpan="5"
+                                                    className="text-center text-secondary py-4"
+                                                >
+                                                    No hay ventas para el filtro seleccionado.
+                                                </td>
+
+                                            </tr>
+
+                                        )}
+
+                                    </tbody>
+
+                                </table>
+
+                            </div>
+
+                        </div>
+
+                    </section>
+
+                </>
+
+            )}
 
         </main>
     );

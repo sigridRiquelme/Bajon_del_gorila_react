@@ -1,17 +1,75 @@
 import api from "./api.js";
 
 
-const transformarPedidoCliente = (
-    elemento
+const transformarTipoEntrega = (
+    tipoEntrega
 ) => {
 
-    const pedido =
-        elemento.pedido;
+    if (
+        tipoEntrega ===
+        "DELIVERY"
+    ) {
+
+        return "Delivery";
+    }
 
 
-    const detalles =
-        elemento.detalles || [];
+    if (
+        tipoEntrega ===
+        "RETIRO"
+    ) {
 
+        return "Retiro en local";
+    }
+
+
+    return tipoEntrega;
+};
+
+
+const transformarDetalles = (
+    detalles
+) => {
+
+    return detalles.map(
+        (detalle) => ({
+
+            codigoProducto:
+                detalle.producto
+                    ?.idProducto ??
+                null,
+
+            nombre:
+                detalle.nombreProducto,
+
+            categoria:
+                detalle.producto
+                    ?.categoria
+                    ?.nombre ||
+                "Sin categoría",
+
+            cantidad:
+                detalle.cantidad,
+
+            precio:
+                detalle.precioUnitario,
+
+            subtotal:
+                detalle.subtotal,
+
+            imagen:
+                detalle.producto
+                    ?.imagen ||
+                ""
+        })
+    );
+};
+
+
+const transformarPedido = (
+    pedido,
+    detalles = []
+) => {
 
     return {
 
@@ -39,10 +97,9 @@ const transformarPedidoCliente = (
             pedido.hora,
 
         tipoEntrega:
-            pedido.tipoEntrega ===
-            "DELIVERY"
-                ? "Delivery"
-                : "Retiro en local",
+            transformarTipoEntrega(
+                pedido.tipoEntrega
+            ),
 
         direccion:
             pedido.direccion,
@@ -72,32 +129,21 @@ const transformarPedidoCliente = (
             pedido.total,
 
         productos:
-            detalles.map(
-                (detalle) => ({
-
-                    codigoProducto:
-                        detalle.producto
-                            ?.idProducto,
-
-                    nombre:
-                        detalle.nombreProducto,
-
-                    cantidad:
-                        detalle.cantidad,
-
-                    precio:
-                        detalle.precioUnitario,
-
-                    subtotal:
-                        detalle.subtotal,
-
-                    imagen:
-                        detalle.producto
-                            ?.imagen ||
-                        ""
-                })
+            transformarDetalles(
+                detalles
             )
     };
+};
+
+
+const transformarPedidoCliente = (
+    elemento
+) => {
+
+    return transformarPedido(
+        elemento.pedido,
+        elemento.detalles || []
+    );
 };
 
 
@@ -112,6 +158,143 @@ export const obtenerMisPedidosApi = async () => {
     return respuesta.data.map(
         transformarPedidoCliente
     );
+};
+
+
+export const obtenerPedidosApi = async () => {
+
+    const respuesta =
+        await api.get(
+            "/pedidos"
+        );
+
+
+    return respuesta.data.map(
+        (pedido) =>
+            transformarPedido(
+                pedido
+            )
+    );
+};
+
+
+export const obtenerDetallePedidoApi = async (
+    idPedido
+) => {
+
+    const [
+        respuestaPedido,
+        respuestaDetalles
+    ] =
+        await Promise.all([
+
+            api.get(
+                `/pedidos/${idPedido}`
+            ),
+
+            api.get(
+                `/pedidos/${idPedido}/detalles`
+            )
+        ]);
+
+
+    return transformarPedido(
+        respuestaPedido.data,
+        respuestaDetalles.data
+    );
+};
+
+
+export const obtenerPedidosConDetallesApi = async () => {
+
+    const pedidos =
+        await obtenerPedidosApi();
+
+
+    const pedidosCompletos =
+        await Promise.all(
+
+            pedidos.map(
+                async (
+                    pedido
+                ) => {
+
+                    const respuestaDetalles =
+                        await api.get(
+                            `/pedidos/${pedido.codigo}/detalles`
+                        );
+
+
+                    return transformarPedido(
+                        {
+                            idPedido:
+                                pedido.codigo,
+
+                            usuario:
+                                pedido.usuarioId !==
+                                null
+                                    ? {
+                                        idUsuario:
+                                            pedido.usuarioId
+                                    }
+                                    : null,
+
+                            cliente:
+                                pedido.cliente,
+
+                            correo:
+                                pedido.correo,
+
+                            telefono:
+                                pedido.telefono,
+
+                            fecha:
+                                pedido.fecha,
+
+                            hora:
+                                pedido.hora,
+
+                            tipoEntrega:
+                                pedido.tipoEntrega ===
+                                "Delivery"
+                                    ? "DELIVERY"
+                                    : "RETIRO",
+
+                            direccion:
+                                pedido.direccion,
+
+                            comuna:
+                                pedido.comuna,
+
+                            referencia:
+                                pedido.referencia,
+
+                            medioPago:
+                                pedido.medioPago,
+
+                            subtotal:
+                                pedido.subtotal,
+
+                            costoDelivery:
+                                pedido.costoDelivery,
+
+                            neto:
+                                pedido.neto,
+
+                            iva:
+                                pedido.iva,
+
+                            total:
+                                pedido.total
+                        },
+                        respuestaDetalles.data
+                    );
+                }
+            )
+        );
+
+
+    return pedidosCompletos;
 };
 
 
