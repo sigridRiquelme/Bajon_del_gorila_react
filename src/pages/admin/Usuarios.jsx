@@ -1,20 +1,34 @@
 import {
+    useEffect,
     useState
 } from "react";
 
 import "../../styles/usuarios.css";
 
-import UsuarioFila from "../../components/admin/UsuarioFila.jsx";
+import UsuarioFila
+    from "../../components/admin/UsuarioFila.jsx";
 
 import {
-    obtenerUsuarios,
-    actualizarUsuario,
-    eliminarUsuario as eliminarUsuarioData
-} from "../../data/usuarios.js";
+    cambiarRolUsuarioApi,
+    crearUsuarioAdministrativoApi,
+    eliminarUsuarioApi,
+    obtenerUsuariosApi
+} from "../../api/usuarios.js";
 
 import {
-    obtenerPedidos
-} from "../../data/pedidos.js";
+    obtenerPedidosConDetallesApi
+} from "../../api/pedidos.js";
+
+
+const usuarioNuevoVacio = {
+
+    nombre: "",
+    correo: "",
+    password: "",
+    telefono: "",
+    direccion: "",
+    rol: "Vendedor"
+};
 
 
 function Usuarios() {
@@ -22,9 +36,19 @@ function Usuarios() {
     const [
         listaUsuarios,
         setListaUsuarios
-    ] = useState(
-        obtenerUsuarios()
-    );
+    ] = useState([]);
+
+
+    const [
+        pedidos,
+        setPedidos
+    ] = useState([]);
+
+
+    const [
+        cargando,
+        setCargando
+    ] = useState(true);
 
 
     const [
@@ -40,9 +64,15 @@ function Usuarios() {
 
 
     const [
-        usuarioEditando,
-        setUsuarioEditando
+        usuarioEditandoRol,
+        setUsuarioEditandoRol
     ] = useState(null);
+
+
+    const [
+        nuevoRol,
+        setNuevoRol
+    ] = useState("Cliente");
 
 
     const [
@@ -52,15 +82,17 @@ function Usuarios() {
 
 
     const [
-        mostrarDetalle,
-        setMostrarDetalle
+        mostrarFormulario,
+        setMostrarFormulario
     ] = useState(false);
 
 
     const [
-        mostrarFormulario,
-        setMostrarFormulario
-    ] = useState(false);
+        datosNuevoUsuario,
+        setDatosNuevoUsuario
+    ] = useState({
+        ...usuarioNuevoVacio
+    });
 
 
     const [
@@ -70,23 +102,120 @@ function Usuarios() {
 
 
     const [
-        datosFormulario,
-        setDatosFormulario
-    ] = useState({
-
-        nombre: "",
-        correo: "",
-        telefono: "",
-        direccion: "",
-        rol: "Cliente"
-    });
+        mensaje,
+        setMensaje
+    ] = useState("");
 
 
-    // FILTRO LOS USUARIOS
+    const [
+        hayError,
+        setHayError
+    ] = useState(false);
+
+
+    const usuarioActualId =
+        Number(
+            localStorage.getItem(
+                "usuarioActualId"
+            )
+        );
+
+
+    const cargarDatos = async () => {
+
+        try {
+
+            const [
+                usuariosApi,
+                pedidosApi
+            ] =
+                await Promise.all([
+
+                    obtenerUsuariosApi(),
+                    obtenerPedidosConDetallesApi()
+                ]);
+
+
+            setListaUsuarios(
+                usuariosApi.sort(
+                    (
+                        a,
+                        b
+                    ) => {
+
+                        if (
+                            a.administradorPrincipal
+                        ) {
+
+                            return -1;
+                        }
+
+
+                        if (
+                            b.administradorPrincipal
+                        ) {
+
+                            return 1;
+                        }
+
+
+                        return (
+                            a.id -
+                            b.id
+                        );
+                    }
+                )
+            );
+
+
+            setPedidos(
+                pedidosApi
+            );
+
+
+            setHayError(
+                false
+            );
+
+        } catch (
+            error
+        ) {
+
+            console.error(
+                error
+            );
+
+
+            setMensaje(
+                "No fue posible cargar los usuarios."
+            );
+
+
+            setHayError(
+                true
+            );
+
+        } finally {
+
+            setCargando(
+                false
+            );
+        }
+    };
+
+
+    useEffect(() => {
+
+        cargarDatos();
+
+    }, []);
+
 
     const usuariosFiltrados =
         listaUsuarios.filter(
-            (usuario) => {
+            (
+                usuario
+            ) => {
 
                 const texto =
                     busqueda
@@ -95,6 +224,7 @@ function Usuarios() {
 
 
                 return (
+
                     usuario.nombre
                         .toLowerCase()
                         .includes(
@@ -107,10 +237,7 @@ function Usuarios() {
                             texto
                         ) ||
 
-                    (
-                        usuario.direccion ||
-                        ""
-                    )
+                    usuario.direccion
                         .toLowerCase()
                         .includes(
                             texto
@@ -119,8 +246,6 @@ function Usuarios() {
             }
         );
 
-
-    // OBTENGO LAS COMPRAS DEL USUARIO
 
     const obtenerHistorialUsuario = (
         usuario
@@ -134,19 +259,15 @@ function Usuarios() {
         }
 
 
-        const pedidos =
-            obtenerPedidos();
-
-
         return pedidos.filter(
-            (pedido) =>
+            (
+                pedido
+            ) =>
                 pedido.usuarioId ===
                 usuario.id
         );
     };
 
-
-    // MUESTRO EL DETALLE DEL USUARIO
 
     const verUsuario = (
         id
@@ -154,40 +275,30 @@ function Usuarios() {
 
         const usuario =
             listaUsuarios.find(
-                (usuario) =>
+                (
+                    usuario
+                ) =>
                     usuario.id ===
                     id
             );
 
 
-        if (
-            !usuario
-        ) {
-
-            return;
-        }
-
-
         setUsuarioSeleccionado(
-            usuario
-        );
-
-
-        setMostrarDetalle(
-            true
+            usuario ||
+            null
         );
     };
 
 
-    // CARGO LOS DATOS PARA EDITAR
-
-    const editarUsuario = (
+    const abrirCambioRol = (
         id
     ) => {
 
         const usuario =
             listaUsuarios.find(
-                (usuario) =>
+                (
+                    usuario
+                ) =>
                     usuario.id ===
                     id
             );
@@ -201,48 +312,169 @@ function Usuarios() {
         }
 
 
-        setUsuarioEditando(
+        setUsuarioEditandoRol(
             usuario
         );
 
 
-        setDatosFormulario({
-
-            nombre:
-                usuario.nombre,
-
-            correo:
-                usuario.correo,
-
-            telefono:
-                usuario.telefono,
-
-            direccion:
-                usuario.direccion ||
-                "",
-
-            rol:
-                usuario.rol
-        });
-
-
-        setErrores({});
-
-
-        setMostrarDetalle(
-            false
+        setNuevoRol(
+            usuario.rol
         );
 
 
-        setMostrarFormulario(
-            true
+        setMensaje("");
+    };
+
+
+    const guardarCambioRol = async () => {
+
+        if (
+            !usuarioEditandoRol
+        ) {
+
+            return;
+        }
+
+
+        try {
+
+            await cambiarRolUsuarioApi(
+                usuarioEditandoRol.id,
+                nuevoRol
+            );
+
+
+            setMensaje(
+                "Rol actualizado correctamente."
+            );
+
+
+            setHayError(
+                false
+            );
+
+
+            setUsuarioEditandoRol(
+                null
+            );
+
+
+            await cargarDatos();
+
+        } catch (
+            error
+        ) {
+
+            setMensaje(
+                error.response
+                    ?.data
+                    ?.mensaje ||
+                "No fue posible cambiar el rol."
+            );
+
+
+            setHayError(
+                true
+            );
+        }
+    };
+
+
+    const prepararEliminarUsuario = (
+        id
+    ) => {
+
+        const usuario =
+            listaUsuarios.find(
+                (
+                    usuario
+                ) =>
+                    usuario.id ===
+                    id
+            );
+
+
+        if (
+            !usuario ||
+            usuario.administradorPrincipal ||
+            usuario.id ===
+            usuarioActualId
+        ) {
+
+            return;
+        }
+
+
+        setUsuarioAEliminar(
+            usuario
         );
     };
 
 
-    // ACTUALIZO LOS CAMPOS
+    const confirmarEliminarUsuario = async () => {
 
-    const handleChange = (
+        if (
+            !usuarioAEliminar
+        ) {
+
+            return;
+        }
+
+
+        try {
+
+            await eliminarUsuarioApi(
+                usuarioAEliminar.id
+            );
+
+
+            setMensaje(
+                "Usuario eliminado correctamente."
+            );
+
+
+            setHayError(
+                false
+            );
+
+
+            setUsuarioAEliminar(
+                null
+            );
+
+
+            setUsuarioSeleccionado(
+                null
+            );
+
+
+            await cargarDatos();
+
+        } catch (
+            error
+        ) {
+
+            setMensaje(
+                error.response
+                    ?.data
+                    ?.mensaje ||
+                "No fue posible eliminar el usuario."
+            );
+
+
+            setHayError(
+                true
+            );
+
+
+            setUsuarioAEliminar(
+                null
+            );
+        }
+    };
+
+
+    const handleNuevoUsuario = (
         e
     ) => {
 
@@ -252,167 +484,103 @@ function Usuarios() {
         } = e.target;
 
 
-        setDatosFormulario({
-            ...datosFormulario,
+        setDatosNuevoUsuario({
+
+            ...datosNuevoUsuario,
+
             [name]:
                 value
         });
 
 
         setErrores({
+
             ...errores,
+
             [name]:
                 ""
         });
     };
 
 
-    // VALIDO EL FORMULARIO
-
-    const validarFormulario = () => {
+    const validarNuevoUsuario = () => {
 
         const nuevosErrores = {};
 
 
-        const nombre =
-            datosFormulario.nombre.trim();
-
-
-        const correo =
-            datosFormulario.correo
-                .trim()
-                .toLowerCase();
-
-
-        const telefono =
-            datosFormulario.telefono.trim();
-
-
-        const direccion =
-            datosFormulario.direccion.trim();
-
-
-        // NOMBRE
-
         if (
-            nombre ===
-            ""
-        ) {
-
-            nuevosErrores.nombre =
-                "El nombre es obligatorio";
-
-        } else if (
-            nombre.length <
+            datosNuevoUsuario.nombre
+                .trim()
+                .length <
             3
         ) {
 
             nuevosErrores.nombre =
-                "El nombre debe tener al menos 3 caracteres";
-
-        } else if (
-            nombre.length >
-            50
-        ) {
-
-            nuevosErrores.nombre =
-                "El nombre no puede superar los 50 caracteres";
+                "El nombre debe tener al menos 3 caracteres.";
         }
 
-
-        // CORREO
 
         const correoValido =
-            /^[^\s@]+@(gmail\.com|duoc\.cl|duocuc\.cl)$/i;
+            /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 
         if (
-            correo ===
-            ""
-        ) {
-
-            nuevosErrores.correo =
-                "El correo es obligatorio";
-
-        } else if (
             !correoValido.test(
-                correo
+                datosNuevoUsuario.correo.trim()
             )
         ) {
 
             nuevosErrores.correo =
-                "El correo debe ser Gmail, Duoc o Duoc UC";
-
-        } else {
-
-            const correoRepetido =
-                listaUsuarios.some(
-                    (usuario) =>
-                        usuario.id !==
-                            usuarioEditando.id &&
-                        usuario.correo
-                            .toLowerCase()
-                            .trim() ===
-                            correo
-                );
-
-
-            if (
-                correoRepetido
-            ) {
-
-                nuevosErrores.correo =
-                    "Este correo ya está registrado";
-            }
+                "Ingresa un correo válido.";
         }
 
 
-        // TELEFONO
-
         if (
-            telefono ===
-            ""
+            datosNuevoUsuario.password.length <
+            6
         ) {
 
-            nuevosErrores.telefono =
-                "El teléfono es obligatorio";
+            nuevosErrores.password =
+                "La contraseña debe tener al menos 6 caracteres.";
+        }
 
-        } else if (
-            !/^\+569 \d{8}$/.test(
-                telefono
+
+        const telefonoValido =
+            /^\+569\s?\d{8}$/;
+
+
+        if (
+            !telefonoValido.test(
+                datosNuevoUsuario.telefono.trim()
             )
         ) {
 
             nuevosErrores.telefono =
-                "El teléfono debe tener formato +569 12345678";
+                "Usa el formato +569 12345678.";
         }
 
 
-        // DIRECCION
+        if (
+            datosNuevoUsuario.direccion
+                .trim()
+                .length <
+            5
+        ) {
+
+            nuevosErrores.direccion =
+                "Ingresa una dirección válida.";
+        }
+
 
         if (
-            direccion ===
-            ""
+            datosNuevoUsuario.rol !==
+                "Administrador" &&
+            datosNuevoUsuario.rol !==
+                "Vendedor"
         ) {
 
-            nuevosErrores.direccion =
-                "La dirección es obligatoria";
-
-        } else if (
-            direccion.length <
-            10
-        ) {
-
-            nuevosErrores.direccion =
-                "La dirección debe tener al menos 10 caracteres";
-
-        } else if (
-            direccion.length >
-            100
-        ) {
-
-            nuevosErrores.direccion =
-                "La dirección no puede superar los 100 caracteres";
+            nuevosErrores.rol =
+                "Solo puedes crear administradores o vendedores.";
         }
 
 
@@ -430,9 +598,7 @@ function Usuarios() {
     };
 
 
-    // GUARDO LOS CAMBIOS
-
-    const guardarUsuario = (
+    const crearUsuario = async (
         e
     ) => {
 
@@ -440,131 +606,61 @@ function Usuarios() {
 
 
         if (
-            !validarFormulario()
+            !validarNuevoUsuario()
         ) {
 
             return;
         }
 
 
-        const datosActualizados = {
+        try {
 
-            nombre:
-                datosFormulario.nombre.trim(),
-
-            correo:
-                datosFormulario.correo
-                    .trim()
-                    .toLowerCase(),
-
-            telefono:
-                datosFormulario.telefono.trim(),
-
-            direccion:
-                datosFormulario.direccion.trim(),
-
-            rol:
-                usuarioEditando.id ===
-                    0
-                    ? "Administrador"
-                    : datosFormulario.rol
-        };
-
-
-        actualizarUsuario(
-            usuarioEditando.id,
-            datosActualizados
-        );
-
-
-        setListaUsuarios(
-            obtenerUsuarios()
-        );
-
-
-        setMostrarFormulario(
-            false
-        );
-
-
-        setUsuarioEditando(
-            null
-        );
-
-
-        setErrores({});
-    };
-
-
-    // PREPARO LA ELIMINACION
-
-    const eliminarUsuario = (
-        id
-    ) => {
-
-        const usuario =
-            listaUsuarios.find(
-                (usuario) =>
-                    usuario.id ===
-                    id
+            await crearUsuarioAdministrativoApi(
+                datosNuevoUsuario
             );
 
 
-        if (
-            !usuario
+            setMensaje(
+                "Usuario administrativo creado correctamente."
+            );
+
+
+            setHayError(
+                false
+            );
+
+
+            setDatosNuevoUsuario({
+                ...usuarioNuevoVacio
+            });
+
+
+            setErrores({});
+
+
+            setMostrarFormulario(
+                false
+            );
+
+
+            await cargarDatos();
+
+        } catch (
+            error
         ) {
 
-            return;
+            setMensaje(
+                error.response
+                    ?.data
+                    ?.mensaje ||
+                "No fue posible crear el usuario."
+            );
+
+
+            setHayError(
+                true
+            );
         }
-
-
-        // EL ADMIN NO SE PUEDE ELIMINAR
-
-        if (
-            usuario.rol ===
-            "Administrador"
-        ) {
-
-            return;
-        }
-
-
-        setUsuarioAEliminar(
-            usuario
-        );
-    };
-
-
-    // CONFIRMO LA ELIMINACION
-
-    const confirmarEliminarUsuario = () => {
-
-        if (
-            !usuarioAEliminar
-        ) {
-
-            return;
-        }
-
-
-        eliminarUsuarioData(
-            usuarioAEliminar.id
-        );
-
-
-        setListaUsuarios(
-            obtenerUsuarios()
-        );
-
-
-        setUsuarioAEliminar(
-            null
-        );
-
-
-        setMostrarDetalle(
-            false
-        );
     };
 
 
@@ -591,16 +687,9 @@ function Usuarios() {
                     <p>
 
                         {
-                            listaUsuarios.length
-                        }
-
-                        {" "}
-
-                        {
-                            listaUsuarios.length ===
-                            1
-                                ? "usuario registrado"
-                                : "usuarios registrados"
+                            cargando
+                                ? "Cargando..."
+                                : `${listaUsuarios.length} usuarios registrados`
                         }
 
                     </p>
@@ -608,6 +697,23 @@ function Usuarios() {
                 </div>
 
             </header>
+
+
+            {mensaje && (
+
+                <div
+                    className={
+                        hayError
+                            ? "mensaje-menu error"
+                            : "mensaje-menu"
+                    }
+                >
+
+                    {mensaje}
+
+                </div>
+
+            )}
 
 
             <section className="filtros-usuarios">
@@ -628,6 +734,30 @@ function Usuarios() {
             </section>
 
 
+            <div className="contenedor-btn-agregar">
+
+                <button
+                    type="button"
+                    className="btn-agregar"
+                    onClick={() => {
+
+                        setDatosNuevoUsuario({
+                            ...usuarioNuevoVacio
+                        });
+
+                        setErrores({});
+
+                        setMostrarFormulario(
+                            true
+                        );
+                    }}
+                >
+                    + AGREGAR USUARIO ADMINISTRATIVO
+                </button>
+
+            </div>
+
+
             <section className="tabla-usuarios">
 
                 <table>
@@ -636,33 +766,13 @@ function Usuarios() {
 
                         <tr>
 
-                            <th>
-                                ID
-                            </th>
-
-                            <th>
-                                NOMBRE
-                            </th>
-
-                            <th>
-                                CORREO
-                            </th>
-
-                            <th>
-                                TELÉFONO
-                            </th>
-
-                            <th>
-                                DIRECCIÓN
-                            </th>
-
-                            <th>
-                                ROL
-                            </th>
-
-                            <th>
-                                ACCIONES
-                            </th>
+                            <th>ID</th>
+                            <th>NOMBRE</th>
+                            <th>CORREO</th>
+                            <th>TELÉFONO</th>
+                            <th>DIRECCIÓN</th>
+                            <th>ROL</th>
+                            <th>ACCIONES</th>
 
                         </tr>
 
@@ -671,49 +781,70 @@ function Usuarios() {
 
                     <tbody>
 
-                        {usuariosFiltrados.length >
+                        {!cargando &&
+                        usuariosFiltrados.length >
                         0 ? (
 
                             usuariosFiltrados.map(
-                                (usuario) => (
+                                (
+                                    usuario
+                                ) => (
 
                                     <UsuarioFila
                                         key={
                                             usuario.id
                                         }
+
                                         id={
                                             usuario.id
                                         }
+
                                         nombre={
                                             usuario.nombre
                                         }
+
                                         correo={
                                             usuario.correo
                                         }
+
                                         telefono={
                                             usuario.telefono
                                         }
+
                                         direccion={
                                             usuario.direccion
                                         }
+
                                         rol={
                                             usuario.rol
                                         }
+
+                                        administradorPrincipal={
+                                            usuario.administradorPrincipal
+                                        }
+
+                                        esUsuarioActual={
+                                            usuario.id ===
+                                            usuarioActualId
+                                        }
+
                                         onVer={
                                             verUsuario
                                         }
-                                        onEditar={
-                                            editarUsuario
+
+                                        onEditarRol={
+                                            abrirCambioRol
                                         }
+
                                         onEliminar={
-                                            eliminarUsuario
+                                            prepararEliminarUsuario
                                         }
                                     />
 
                                 )
                             )
 
-                        ) : (
+                        ) : !cargando && (
 
                             <tr>
 
@@ -732,8 +863,7 @@ function Usuarios() {
             </section>
 
 
-            {mostrarDetalle &&
-            usuarioSeleccionado && (
+            {usuarioSeleccionado && (
 
                 <div className="modal-usuario-fondo">
 
@@ -750,9 +880,11 @@ function Usuarios() {
 
 
                                 <h2>
+
                                     {
                                         usuarioSeleccionado.nombre
                                     }
+
                                 </h2>
 
                             </div>
@@ -761,7 +893,6 @@ function Usuarios() {
 
 
                         <section className="datos-usuario">
-
 
                             <div>
 
@@ -785,9 +916,12 @@ function Usuarios() {
                                 </span>
 
                                 <strong>
+
                                     {
-                                        usuarioSeleccionado.telefono
+                                        usuarioSeleccionado.telefono ||
+                                        "Sin teléfono registrado"
                                     }
+
                                 </strong>
 
                             </div>
@@ -800,10 +934,12 @@ function Usuarios() {
                                 </span>
 
                                 <strong>
+
                                     {
                                         usuarioSeleccionado.direccion ||
                                         "Sin dirección registrada"
                                     }
+
                                 </strong>
 
                             </div>
@@ -861,7 +997,9 @@ function Usuarios() {
                                 <div className="lista-historial">
 
                                     {historialUsuario.map(
-                                        (pedido) => (
+                                        (
+                                            pedido
+                                        ) => (
 
                                             <div
                                                 className="compra-historial"
@@ -873,11 +1011,14 @@ function Usuarios() {
                                                 <div>
 
                                                     <strong>
+
                                                         Pedido #
                                                         {
                                                             pedido.codigo
                                                         }
+
                                                     </strong>
+
 
                                                     <span>
                                                         {
@@ -908,7 +1049,7 @@ function Usuarios() {
 
                             ) : (
 
-                                <p className="sin-compras">
+                                <p>
                                     Este usuario no registra compras.
                                 </p>
 
@@ -917,27 +1058,14 @@ function Usuarios() {
                         </section>
 
 
-                        <div className="acciones-detalle-usuario">
+                        <div className="acciones-modal-usuario">
 
                             <button
                                 type="button"
-                                className="btn-editar-detalle"
+                                className="btn-cancelar-usuario"
                                 onClick={() =>
-                                    editarUsuario(
-                                        usuarioSeleccionado.id
-                                    )
-                                }
-                            >
-                                Editar usuario
-                            </button>
-
-
-                            <button
-                                type="button"
-                                className="btn-cerrar-usuario"
-                                onClick={() =>
-                                    setMostrarDetalle(
-                                        false
+                                    setUsuarioSeleccionado(
+                                        null
                                     )
                                 }
                             >
@@ -953,21 +1081,111 @@ function Usuarios() {
             )}
 
 
-            {mostrarFormulario &&
-            usuarioEditando && (
+            {usuarioEditandoRol && (
 
                 <div className="modal-usuario-fondo">
 
                     <div className="modal-usuario">
 
                         <h2>
-                            Editar usuario
+                            Cambiar rol
+                        </h2>
+
+
+                        <p>
+                            Usuario:{" "}
+                            <strong>
+                                {
+                                    usuarioEditandoRol.nombre
+                                }
+                            </strong>
+                        </p>
+
+
+                        <div className="campo-usuario">
+
+                            <label htmlFor="nuevoRol">
+                                Rol
+                            </label>
+
+
+                            <select
+                                id="nuevoRol"
+                                value={
+                                    nuevoRol
+                                }
+                                onChange={(e) =>
+                                    setNuevoRol(
+                                        e.target.value
+                                    )
+                                }
+                            >
+
+                                <option value="Cliente">
+                                    Cliente
+                                </option>
+
+                                <option value="Vendedor">
+                                    Vendedor
+                                </option>
+
+                                <option value="Administrador">
+                                    Administrador
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div className="acciones-modal-usuario">
+
+                            <button
+                                type="button"
+                                className="btn-cancelar-usuario"
+                                onClick={() =>
+                                    setUsuarioEditandoRol(
+                                        null
+                                    )
+                                }
+                            >
+                                Cancelar
+                            </button>
+
+
+                            <button
+                                type="button"
+                                className="btn-guardar-usuario"
+                                onClick={
+                                    guardarCambioRol
+                                }
+                            >
+                                Guardar rol
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            )}
+
+
+            {mostrarFormulario && (
+
+                <div className="modal-usuario-fondo">
+
+                    <div className="modal-usuario">
+
+                        <h2>
+                            Crear usuario administrativo
                         </h2>
 
 
                         <form
                             onSubmit={
-                                guardarUsuario
+                                crearUsuario
                             }
                         >
 
@@ -978,34 +1196,22 @@ function Usuarios() {
                                     Nombre
                                 </label>
 
-
                                 <input
                                     id="nombre"
-                                    type="text"
                                     name="nombre"
-                                    maxLength="50"
+                                    type="text"
                                     value={
-                                        datosFormulario.nombre
+                                        datosNuevoUsuario.nombre
                                     }
                                     onChange={
-                                        handleChange
-                                    }
-                                    className={
-                                        errores.nombre
-                                            ? "campo-error"
-                                            : ""
+                                        handleNuevoUsuario
                                     }
                                 />
 
-
                                 {errores.nombre && (
-
                                     <span className="mensaje-error">
-                                        {
-                                            errores.nombre
-                                        }
+                                        {errores.nombre}
                                     </span>
-
                                 )}
 
                             </div>
@@ -1017,33 +1223,49 @@ function Usuarios() {
                                     Correo
                                 </label>
 
-
                                 <input
                                     id="correo"
-                                    type="email"
                                     name="correo"
+                                    type="email"
                                     value={
-                                        datosFormulario.correo
+                                        datosNuevoUsuario.correo
                                     }
                                     onChange={
-                                        handleChange
-                                    }
-                                    className={
-                                        errores.correo
-                                            ? "campo-error"
-                                            : ""
+                                        handleNuevoUsuario
                                     }
                                 />
 
-
                                 {errores.correo && (
-
                                     <span className="mensaje-error">
-                                        {
-                                            errores.correo
-                                        }
+                                        {errores.correo}
                                     </span>
+                                )}
 
+                            </div>
+
+
+                            <div className="campo-usuario">
+
+                                <label htmlFor="password">
+                                    Contraseña
+                                </label>
+
+                                <input
+                                    id="password"
+                                    name="password"
+                                    type="password"
+                                    value={
+                                        datosNuevoUsuario.password
+                                    }
+                                    onChange={
+                                        handleNuevoUsuario
+                                    }
+                                />
+
+                                {errores.password && (
+                                    <span className="mensaje-error">
+                                        {errores.password}
+                                    </span>
                                 )}
 
                             </div>
@@ -1055,75 +1277,23 @@ function Usuarios() {
                                     Teléfono
                                 </label>
 
-
-                                <div className="telefono-input">
-
-                                    <span className="prefijo-telefono">
-                                        +569
-                                    </span>
-
-
-                                    <input
-                                        id="telefono"
-                                        type="text"
-                                        inputMode="numeric"
-                                        maxLength="8"
-                                        placeholder="12345678"
-                                        value={
-                                            datosFormulario.telefono
-                                                .replace(
-                                                    "+569 ",
-                                                    ""
-                                                )
-                                        }
-                                        onChange={(e) => {
-
-                                            const soloNumeros =
-                                                e.target.value
-                                                    .replace(
-                                                        /\D/g,
-                                                        ""
-                                                    )
-                                                    .slice(
-                                                        0,
-                                                        8
-                                                    );
-
-
-                                            setDatosFormulario({
-                                                ...datosFormulario,
-
-                                                telefono:
-                                                    soloNumeros.length >
-                                                    0
-                                                        ? `+569 ${soloNumeros}`
-                                                        : ""
-                                            });
-
-
-                                            setErrores({
-                                                ...errores,
-                                                telefono: ""
-                                            });
-                                        }}
-                                        className={
-                                            errores.telefono
-                                                ? "campo-error"
-                                                : ""
-                                        }
-                                    />
-
-                                </div>
-
+                                <input
+                                    id="telefono"
+                                    name="telefono"
+                                    type="text"
+                                    placeholder="+569 12345678"
+                                    value={
+                                        datosNuevoUsuario.telefono
+                                    }
+                                    onChange={
+                                        handleNuevoUsuario
+                                    }
+                                />
 
                                 {errores.telefono && (
-
                                     <span className="mensaje-error">
-                                        {
-                                            errores.telefono
-                                        }
+                                        {errores.telefono}
                                     </span>
-
                                 )}
 
                             </div>
@@ -1135,35 +1305,22 @@ function Usuarios() {
                                     Dirección
                                 </label>
 
-
                                 <input
                                     id="direccion"
-                                    type="text"
                                     name="direccion"
-                                    maxLength="100"
-                                    placeholder="Ej: Av. Principal 1234, Santiago"
+                                    type="text"
                                     value={
-                                        datosFormulario.direccion
+                                        datosNuevoUsuario.direccion
                                     }
                                     onChange={
-                                        handleChange
-                                    }
-                                    className={
-                                        errores.direccion
-                                            ? "campo-error"
-                                            : ""
+                                        handleNuevoUsuario
                                     }
                                 />
 
-
                                 {errores.direccion && (
-
                                     <span className="mensaje-error">
-                                        {
-                                            errores.direccion
-                                        }
+                                        {errores.direccion}
                                     </span>
-
                                 )}
 
                             </div>
@@ -1175,41 +1332,26 @@ function Usuarios() {
                                     Rol
                                 </label>
 
+                                <select
+                                    id="rol"
+                                    name="rol"
+                                    value={
+                                        datosNuevoUsuario.rol
+                                    }
+                                    onChange={
+                                        handleNuevoUsuario
+                                    }
+                                >
 
-                                {usuarioEditando.id ===
-                                0 ? (
+                                    <option value="Vendedor">
+                                        Vendedor
+                                    </option>
 
-                                    <input
-                                        id="rol"
-                                        type="text"
-                                        value="Administrador"
-                                        disabled
-                                    />
+                                    <option value="Administrador">
+                                        Administrador
+                                    </option>
 
-                                ) : (
-
-                                    <select
-                                        id="rol"
-                                        name="rol"
-                                        value={
-                                            datosFormulario.rol
-                                        }
-                                        onChange={
-                                            handleChange
-                                        }
-                                    >
-
-                                        <option value="Cliente">
-                                            Cliente
-                                        </option>
-
-                                        <option value="Administrador">
-                                            Administrador
-                                        </option>
-
-                                    </select>
-
-                                )}
+                                </select>
 
                             </div>
 
@@ -1225,10 +1367,6 @@ function Usuarios() {
                                             false
                                         );
 
-                                        setUsuarioEditando(
-                                            null
-                                        );
-
                                         setErrores({});
                                     }}
                                 >
@@ -1240,7 +1378,7 @@ function Usuarios() {
                                     type="submit"
                                     className="btn-guardar-usuario"
                                 >
-                                    Guardar cambios
+                                    Crear usuario
                                 </button>
 
                             </div>
@@ -1281,7 +1419,7 @@ function Usuarios() {
 
 
                         <p className="texto-advertencia">
-                            Esta acción eliminará el usuario del sistema.
+                            Sus pedidos históricos se conservarán.
                         </p>
 
 

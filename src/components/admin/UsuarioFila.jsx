@@ -5,8 +5,10 @@ function UsuarioFila({
     telefono,
     direccion,
     rol,
+    administradorPrincipal,
+    esUsuarioActual,
     onVer,
-    onEditar,
+    onEditarRol,
     onEliminar
 }) {
 
@@ -20,7 +22,15 @@ function UsuarioFila({
 
 
             <td>
+
                 {nombre}
+
+                {administradorPrincipal && (
+                    <strong>
+                        {" "}Principal
+                    </strong>
+                )}
+
             </td>
 
 
@@ -30,7 +40,7 @@ function UsuarioFila({
 
 
             <td>
-                {telefono}
+                {telefono || "Sin teléfono"}
             </td>
 
 
@@ -42,7 +52,9 @@ function UsuarioFila({
             <td>
 
                 <span className="usuario-rol">
+
                     {rol}
+
                 </span>
 
             </td>
@@ -63,21 +75,26 @@ function UsuarioFila({
                 </button>
 
 
-                <button
-                    type="button"
-                    className="btn-editar"
-                    onClick={() =>
-                        onEditar(
-                            id
-                        )
-                    }
-                >
-                    Editar
-                </button>
+                {!administradorPrincipal &&
+                !esUsuarioActual && (
+
+                    <button
+                        type="button"
+                        className="btn-editar"
+                        onClick={() =>
+                            onEditarRol(
+                                id
+                            )
+                        }
+                    >
+                        Cambiar rol
+                    </button>
+
+                )}
 
 
-                {rol !==
-                "Administrador" && (
+                {!administradorPrincipal &&
+                !esUsuarioActual && (
 
                     <button
                         type="button"

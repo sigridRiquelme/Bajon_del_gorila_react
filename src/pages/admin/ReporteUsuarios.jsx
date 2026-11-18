@@ -1,27 +1,108 @@
+import {
+    useEffect,
+    useState
+} from "react";
+
 import "../../styles/reportes.css";
 
 import {
-    obtenerUsuarios
-} from "../../data/usuarios.js";
+    obtenerUsuariosApi
+} from "../../api/usuarios.js";
 
 import {
-    obtenerPedidos
-} from "../../data/pedidos.js";
+    obtenerPedidosConDetallesApi
+} from "../../api/pedidos.js";
 
 
 function ReporteUsuarios() {
 
-    const usuarios =
-        obtenerUsuarios();
+    const [
+        usuarios,
+        setUsuarios
+    ] = useState([]);
 
 
-    const pedidos =
-        obtenerPedidos();
+    const [
+        pedidos,
+        setPedidos
+    ] = useState([]);
+
+
+    const [
+        cargando,
+        setCargando
+    ] = useState(true);
+
+
+    const [
+        error,
+        setError
+    ] = useState("");
+
+
+    useEffect(() => {
+
+        const cargarReporte = async () => {
+
+            try {
+
+                const [
+                    usuariosApi,
+                    pedidosApi
+                ] =
+                    await Promise.all([
+
+                        obtenerUsuariosApi(),
+                        obtenerPedidosConDetallesApi()
+                    ]);
+
+
+                setUsuarios(
+                    usuariosApi
+                );
+
+
+                setPedidos(
+                    pedidosApi
+                );
+
+
+                setError(
+                    ""
+                );
+
+            } catch (
+                error
+            ) {
+
+                console.error(
+                    error
+                );
+
+
+                setError(
+                    "No fue posible cargar el reporte de usuarios."
+                );
+
+            } finally {
+
+                setCargando(
+                    false
+                );
+            }
+        };
+
+
+        cargarReporte();
+
+    }, []);
 
 
     const clientes =
         usuarios.filter(
-            (usuario) =>
+            (
+                usuario
+            ) =>
                 usuario.rol ===
                 "Cliente"
         );
@@ -29,20 +110,32 @@ function ReporteUsuarios() {
 
     const administradores =
         usuarios.filter(
-            (usuario) =>
+            (
+                usuario
+            ) =>
                 usuario.rol ===
                 "Administrador"
         );
 
 
-    // OBTENGO LAS COMPRAS DEL USUARIO
+    const vendedores =
+        usuarios.filter(
+            (
+                usuario
+            ) =>
+                usuario.rol ===
+                "Vendedor"
+        );
+
 
     const obtenerComprasUsuario = (
         usuario
     ) => {
 
         return pedidos.filter(
-            (pedido) =>
+            (
+                pedido
+            ) =>
                 pedido.usuarioId ===
                 usuario.id
         );
@@ -51,7 +144,9 @@ function ReporteUsuarios() {
 
     const clientesConCompras =
         clientes.filter(
-            (usuario) =>
+            (
+                usuario
+            ) =>
                 obtenerComprasUsuario(
                     usuario
                 ).length >
@@ -64,19 +159,13 @@ function ReporteUsuarios() {
         clientesConCompras.length;
 
 
-    // CALCULO CUANTO HA GASTADO
-
     const obtenerTotalGastado = (
         usuario
     ) => {
 
-        const compras =
-            obtenerComprasUsuario(
-                usuario
-            );
-
-
-        return compras.reduce(
+        return obtenerComprasUsuario(
+            usuario
+        ).reduce(
             (
                 total,
                 pedido
@@ -110,273 +199,289 @@ function ReporteUsuarios() {
             </div>
 
 
-            <div className="row g-3 mb-4">
+            {error && (
+
+                <div className="alert alert-danger">
+
+                    {error}
+
+                </div>
+
+            )}
 
 
-                <div className="col-12 col-sm-6 col-xl-3">
+            {cargando ? (
 
-                    <div className="card reporte-card-bootstrap h-100">
+                <p>
+                    Cargando reporte...
+                </p>
 
-                        <div className="card-body">
+            ) : (
 
-                            <div className="reporte-icono">
-                                <i className="bi bi-people"></i>
+                <>
+
+                    <div className="row g-3 mb-4">
+
+
+                        <div className="col-12 col-sm-6 col-xl-3">
+
+                            <div className="card reporte-card-bootstrap h-100">
+
+                                <div className="card-body">
+
+                                    <div className="reporte-icono">
+                                        <i className="bi bi-people"></i>
+                                    </div>
+
+                                    <p className="card-text text-secondary">
+                                        Clientes registrados
+                                    </p>
+
+                                    <h3 className="fw-bold mb-0">
+                                        {clientes.length}
+                                    </h3>
+
+                                </div>
+
                             </div>
 
-                            <p className="card-text text-secondary">
-                                Clientes registrados
-                            </p>
+                        </div>
 
-                            <h3 className="fw-bold mb-0">
-                                {
-                                    clientes.length
-                                }
-                            </h3>
+
+                        <div className="col-12 col-sm-6 col-xl-3">
+
+                            <div className="card reporte-card-bootstrap h-100">
+
+                                <div className="card-body">
+
+                                    <div className="reporte-icono">
+                                        <i className="bi bi-cart-check"></i>
+                                    </div>
+
+                                    <p className="card-text text-secondary">
+                                        Clientes con compras
+                                    </p>
+
+                                    <h3 className="fw-bold mb-0">
+                                        {clientesConCompras.length}
+                                    </h3>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div className="col-12 col-sm-6 col-xl-3">
+
+                            <div className="card reporte-card-bootstrap h-100">
+
+                                <div className="card-body">
+
+                                    <div className="reporte-icono">
+                                        <i className="bi bi-cart-x"></i>
+                                    </div>
+
+                                    <p className="card-text text-secondary">
+                                        Clientes sin compras
+                                    </p>
+
+                                    <h3 className="fw-bold mb-0">
+                                        {clientesSinCompras}
+                                    </h3>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div className="col-12 col-sm-6 col-xl-3">
+
+                            <div className="card reporte-card-bootstrap h-100">
+
+                                <div className="card-body">
+
+                                    <div className="reporte-icono">
+                                        <i className="bi bi-shield-lock"></i>
+                                    </div>
+
+                                    <p className="card-text text-secondary">
+                                        Personal administrativo
+                                    </p>
+
+                                    <h3 className="fw-bold mb-0">
+
+                                        {
+                                            administradores.length +
+                                            vendedores.length
+                                        }
+
+                                    </h3>
+
+                                </div>
+
+                            </div>
 
                         </div>
 
                     </div>
 
-                </div>
 
-
-                <div className="col-12 col-sm-6 col-xl-3">
-
-                    <div className="card reporte-card-bootstrap h-100">
+                    <section className="card border-0 shadow-sm">
 
                         <div className="card-body">
 
-                            <div className="reporte-icono">
-                                <i className="bi bi-cart-check"></i>
-                            </div>
-
-                            <p className="card-text text-secondary">
-                                Clientes con compras
-                            </p>
-
-                            <h3 className="fw-bold mb-0">
-                                {
-                                    clientesConCompras.length
-                                }
-                            </h3>
-
-                        </div>
-
-                    </div>
-
-                </div>
+                            <h2 className="h5 mb-3">
+                                Detalle de usuarios
+                            </h2>
 
 
-                <div className="col-12 col-sm-6 col-xl-3">
+                            <div className="table-responsive">
 
-                    <div className="card reporte-card-bootstrap h-100">
+                                <table className="table table-striped table-hover align-middle">
 
-                        <div className="card-body">
+                                    <thead className="table-dark">
 
-                            <div className="reporte-icono">
-                                <i className="bi bi-cart-x"></i>
-                            </div>
+                                        <tr>
 
-                            <p className="card-text text-secondary">
-                                Clientes sin compras
-                            </p>
+                                            <th>USUARIO</th>
+                                            <th>CORREO</th>
+                                            <th>TELÉFONO</th>
+                                            <th>DIRECCIÓN</th>
+                                            <th>ROL</th>
+                                            <th>COMPRAS</th>
+                                            <th>TOTAL GASTADO</th>
 
-                            <h3 className="fw-bold mb-0">
-                                {
-                                    clientesSinCompras
-                                }
-                            </h3>
+                                        </tr>
 
-                        </div>
-
-                    </div>
-
-                </div>
+                                    </thead>
 
 
-                <div className="col-12 col-sm-6 col-xl-3">
+                                    <tbody>
 
-                    <div className="card reporte-card-bootstrap h-100">
-
-                        <div className="card-body">
-
-                            <div className="reporte-icono">
-                                <i className="bi bi-shield-lock"></i>
-                            </div>
-
-                            <p className="card-text text-secondary">
-                                Administradores
-                            </p>
-
-                            <h3 className="fw-bold mb-0">
-                                {
-                                    administradores.length
-                                }
-                            </h3>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <section className="card border-0 shadow-sm">
-
-                <div className="card-body">
-
-                    <h2 className="h5 mb-3">
-                        Detalle de usuarios
-                    </h2>
-
-
-                    <div className="table-responsive">
-
-                        <table className="table table-striped table-hover align-middle">
-
-                            <thead className="table-dark">
-
-                                <tr>
-
-                                    <th>
-                                        USUARIO
-                                    </th>
-
-                                    <th>
-                                        CORREO
-                                    </th>
-
-                                    <th>
-                                        TELÉFONO
-                                    </th>
-
-                                    <th>
-                                        DIRECCIÓN
-                                    </th>
-
-                                    <th>
-                                        ROL
-                                    </th>
-
-                                    <th>
-                                        COMPRAS
-                                    </th>
-
-                                    <th>
-                                        TOTAL GASTADO
-                                    </th>
-
-                                </tr>
-
-                            </thead>
-
-
-                            <tbody>
-
-                                {usuarios.map(
-                                    (usuario) => {
-
-                                        const compras =
-                                            obtenerComprasUsuario(
+                                        {usuarios.map(
+                                            (
                                                 usuario
-                                            );
+                                            ) => {
+
+                                                const compras =
+                                                    obtenerComprasUsuario(
+                                                        usuario
+                                                    );
 
 
-                                        const totalGastado =
-                                            obtenerTotalGastado(
-                                                usuario
-                                            );
+                                                const totalGastado =
+                                                    obtenerTotalGastado(
+                                                        usuario
+                                                    );
 
 
-                                        return (
+                                                return (
 
-                                            <tr
-                                                key={
-                                                    usuario.id
-                                                }
-                                            >
-
-                                                <td>
-                                                    #{usuario.id}{" "}
-                                                    {usuario.nombre}
-                                                </td>
-
-
-                                                <td>
-                                                    {
-                                                        usuario.correo
-                                                    }
-                                                </td>
-
-
-                                                <td>
-                                                    {
-                                                        usuario.telefono
-                                                    }
-                                                </td>
-
-
-                                                <td>
-                                                    {
-                                                        usuario.direccion ||
-                                                        "Sin dirección"
-                                                    }
-                                                </td>
-
-
-                                                <td>
-
-                                                    <span
-                                                        className={
-                                                            usuario.rol ===
-                                                            "Administrador"
-                                                                ? "badge text-bg-dark"
-                                                                : "badge text-bg-secondary"
+                                                    <tr
+                                                        key={
+                                                            usuario.id
                                                         }
                                                     >
-                                                        {
-                                                            usuario.rol
-                                                        }
-                                                    </span>
 
-                                                </td>
+                                                        <td>
 
+                                                            #{usuario.id}{" "}
 
-                                                <td>
-                                                    {
-                                                        compras.length
-                                                    }
-                                                </td>
+                                                            {
+                                                                usuario.nombre
+                                                            }
+
+                                                        </td>
 
 
-                                                <td className="fw-semibold">
+                                                        <td>
+                                                            {
+                                                                usuario.correo
+                                                            }
+                                                        </td>
 
-                                                    $
-                                                    {
-                                                        totalGastado.toLocaleString(
-                                                            "es-CL"
-                                                        )
-                                                    }
 
-                                                </td>
+                                                        <td>
 
-                                            </tr>
+                                                            {
+                                                                usuario.telefono ||
+                                                                "Sin teléfono"
+                                                            }
 
-                                        );
-                                    }
-                                )}
+                                                        </td>
 
-                            </tbody>
 
-                        </table>
+                                                        <td>
 
-                    </div>
+                                                            {
+                                                                usuario.direccion ||
+                                                                "Sin dirección"
+                                                            }
 
-                </div>
+                                                        </td>
 
-            </section>
+
+                                                        <td>
+
+                                                            <span
+                                                                className={
+                                                                    usuario.rol ===
+                                                                    "Administrador"
+                                                                        ? "badge text-bg-dark"
+                                                                        : "badge text-bg-secondary"
+                                                                }
+                                                            >
+
+                                                                {
+                                                                    usuario.rol
+                                                                }
+
+                                                            </span>
+
+                                                        </td>
+
+
+                                                        <td>
+                                                            {
+                                                                compras.length
+                                                            }
+                                                        </td>
+
+
+                                                        <td className="fw-semibold">
+
+                                                            $
+                                                            {
+                                                                totalGastado.toLocaleString(
+                                                                    "es-CL"
+                                                                )
+                                                            }
+
+                                                        </td>
+
+                                                    </tr>
+
+                                                );
+                                            }
+                                        )}
+
+                                    </tbody>
+
+                                </table>
+
+                            </div>
+
+                        </div>
+
+                    </section>
+
+                </>
+
+            )}
 
         </main>
     );
