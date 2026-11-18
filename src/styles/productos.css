@@ -99,6 +99,41 @@
 }
 
 
+/* AGREGAR CATEGORIA */
+
+.filtros-productos .btn-agregar {
+    width: auto;
+    height: auto;
+
+    padding: 13px 20px;
+
+    background-color: #ff6500;
+
+    color: white;
+
+    border: none;
+
+    border-radius: 8px;
+
+    font-size: 14px;
+    font-weight: bold;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+
+.filtros-productos .btn-agregar:hover {
+    background-color: #e95c00;
+}
+
+
+.filtros-categoria .mensaje-error {
+    width: 100%;
+}
+
+
 /* TABLA */
 
 .tabla-productos {
@@ -183,7 +218,7 @@
 }
 
 
-/* BOTON AGREGAR */
+/* BOTON AGREGAR PRODUCTO */
 
 .contenedor-btn-agregar {
     display: flex;
@@ -478,6 +513,38 @@
 }
 
 
+.formulario-producto input[type="file"] {
+    padding: 10px;
+
+    cursor: pointer;
+}
+
+
+.formulario-producto input[type="file"]::file-selector-button {
+    margin-right: 12px;
+
+    padding: 9px 14px;
+
+    background-color: #171717;
+
+    color: white;
+
+    border: none;
+
+    border-radius: 6px;
+
+    font-family: inherit;
+    font-weight: 700;
+
+    cursor: pointer;
+}
+
+
+.formulario-producto input[type="file"]::file-selector-button:hover {
+    background-color: #333333;
+}
+
+
 /* ERRORES */
 
 .mensaje-error {
@@ -542,7 +609,7 @@ input {
 }
 
 
-/* IMAGEN ACTUAL */
+/* IMAGEN */
 
 .imagen-actual-producto {
     display: flex;
@@ -568,8 +635,8 @@ input {
 .formulario-producto
 .imagen-actual-producto
 img {
-    width: 120px;
-    height: 120px;
+    width: 150px;
+    height: 150px;
 
     object-fit: cover;
 
@@ -579,8 +646,18 @@ img {
 }
 
 
-.label-nueva-imagen {
-    margin-top: 5px;
+.mensaje-subiendo-imagen {
+    color: #ff6500;
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+
+.ayuda-imagen-producto {
+    color: #777777;
+
+    font-size: 12px;
 }
 
 
@@ -619,7 +696,7 @@ img {
 
 
 .formulario-producto
-.btn-guardar:hover {
+.btn-guardar:hover:not(:disabled) {
     background-color: #e95c00;
 }
 
@@ -648,8 +725,18 @@ img {
 
 
 .formulario-producto
-.btn-cancelar:hover {
+.btn-cancelar:hover:not(:disabled) {
     background-color: #dddddd;
+}
+
+
+.formulario-producto
+.btn-guardar:disabled,
+.formulario-producto
+.btn-cancelar:disabled {
+    opacity: 0.6;
+
+    cursor: not-allowed;
 }
 
 
@@ -890,7 +977,8 @@ td[colspan="4"] {
 
 
     .filtros-productos input,
-    .filtros-productos select {
+    .filtros-productos select,
+    .filtros-productos .btn-agregar {
         width: 100%;
 
         box-sizing: border-box;

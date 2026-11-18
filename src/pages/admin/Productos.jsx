@@ -20,6 +20,10 @@ import {
     obtenerCategoriasApi
 } from "../../api/categorias.js";
 
+import {
+    subirImagenProductoApi
+} from "../../api/imagenes.js";
+
 
 const productoVacio = {
 
@@ -125,6 +129,18 @@ function Productos() {
     ] = useState("");
 
 
+    const [
+        subiendoImagen,
+        setSubiendoImagen
+    ] = useState(false);
+
+
+    const [
+        errorImagen,
+        setErrorImagen
+    ] = useState("");
+
+
     const rol =
         localStorage.getItem(
             "usuarioRol"
@@ -166,7 +182,6 @@ function Productos() {
                 false
             );
 
-
         } catch (
             error
         ) {
@@ -184,7 +199,6 @@ function Productos() {
             setHayError(
                 true
             );
-
 
         } finally {
 
@@ -340,7 +354,6 @@ function Productos() {
                 false
             );
 
-
         } catch (
             error
         ) {
@@ -351,6 +364,121 @@ function Productos() {
                     ?.mensaje ||
                 "No fue posible crear la categoría."
             );
+        }
+    };
+
+
+    // SELECCIONO Y SUBO IMAGEN
+
+    const seleccionarImagen = async (
+        e
+    ) => {
+
+        const archivo =
+            e.target.files?.[0];
+
+
+        setErrorImagen("");
+
+
+        if (
+            !archivo
+        ) {
+
+            return;
+        }
+
+
+        const tiposPermitidos = [
+            "image/jpeg",
+            "image/png",
+            "image/webp"
+        ];
+
+
+        if (
+            !tiposPermitidos.includes(
+                archivo.type
+            )
+        ) {
+
+            setErrorImagen(
+                "Solo puedes seleccionar imágenes JPG, PNG o WEBP."
+            );
+
+
+            e.target.value = "";
+
+            return;
+        }
+
+
+        if (
+            archivo.size >
+            5 * 1024 * 1024
+        ) {
+
+            setErrorImagen(
+                "La imagen no puede superar los 5 MB."
+            );
+
+
+            e.target.value = "";
+
+            return;
+        }
+
+
+        try {
+
+            setSubiendoImagen(
+                true
+            );
+
+
+            const url =
+                await subirImagenProductoApi(
+                    archivo
+                );
+
+
+            setNuevoProducto(
+                (
+                    productoActual
+                ) => ({
+
+                    ...productoActual,
+
+                    imagen:
+                        url
+                })
+            );
+
+
+        } catch (
+            error
+        ) {
+
+            console.error(
+                error
+            );
+
+
+            setErrorImagen(
+                error.response
+                    ?.data
+                    ?.mensaje ||
+                "No fue posible subir la imagen."
+            );
+
+        } finally {
+
+            setSubiendoImagen(
+                false
+            );
+
+
+            e.target.value = "";
         }
     };
 
@@ -499,6 +627,23 @@ function Productos() {
 
 
         if (
+            subiendoImagen
+        ) {
+
+            setMensaje(
+                "Espera a que termine de subir la imagen."
+            );
+
+
+            setHayError(
+                true
+            );
+
+            return;
+        }
+
+
+        if (
             !validarProducto()
         ) {
 
@@ -619,6 +764,8 @@ function Productos() {
 
             setErrores({});
 
+            setErrorImagen("");
+
 
             setProductoEditando(
                 null
@@ -628,7 +775,6 @@ function Productos() {
             setMostrarFormulario(
                 false
             );
-
 
         } catch (
             error
@@ -681,7 +827,6 @@ function Productos() {
 
 
             await cargarDatos();
-
 
         } catch (
             error
@@ -755,6 +900,7 @@ function Productos() {
 
         setErrores({});
 
+        setErrorImagen("");
 
         setMensaje("");
 
@@ -781,6 +927,7 @@ function Productos() {
 
         setErrores({});
 
+        setErrorImagen("");
 
         setMensaje("");
 
@@ -795,6 +942,14 @@ function Productos() {
 
     const cerrarFormulario = () => {
 
+        if (
+            subiendoImagen
+        ) {
+
+            return;
+        }
+
+
         setMostrarFormulario(
             false
         );
@@ -806,6 +961,8 @@ function Productos() {
 
 
         setErrores({});
+
+        setErrorImagen("");
 
 
         setNuevoProducto({
@@ -892,11 +1049,9 @@ function Productos() {
             )}
 
 
-            {/* CATEGORIAS SOLO ADMIN */}
-
             {esAdministrador && (
 
-                <section className="filtros-productos">
+                <section className="filtros-productos filtros-categoria">
 
                     <input
                         type="text"
@@ -909,6 +1064,7 @@ function Productos() {
                             setNuevaCategoria(
                                 e.target.value
                             );
+
 
                             setErrorCategoria(
                                 ""
@@ -1133,9 +1289,7 @@ function Productos() {
                             <tr>
 
                                 <td colSpan="9">
-
                                     No se encontraron productos.
-
                                 </td>
 
                             </tr>
@@ -1216,11 +1370,9 @@ function Productos() {
                             {errores.nombre && (
 
                                 <small className="mensaje-error">
-
                                     {
                                         errores.nombre
                                     }
-
                                 </small>
 
                             )}
@@ -1281,11 +1433,9 @@ function Productos() {
                             {errores.categoriaId && (
 
                                 <small className="mensaje-error">
-
                                     {
                                         errores.categoriaId
                                     }
-
                                 </small>
 
                             )}
@@ -1322,11 +1472,9 @@ function Productos() {
                             {errores.descripcion && (
 
                                 <small className="mensaje-error">
-
                                     {
                                         errores.descripcion
                                     }
-
                                 </small>
 
                             )}
@@ -1363,11 +1511,9 @@ function Productos() {
                             {errores.precio && (
 
                                 <small className="mensaje-error">
-
                                     {
                                         errores.precio
                                     }
-
                                 </small>
 
                             )}
@@ -1404,11 +1550,9 @@ function Productos() {
                             {errores.stock && (
 
                                 <small className="mensaje-error">
-
                                     {
                                         errores.stock
                                     }
-
                                 </small>
 
                             )}
@@ -1470,11 +1614,9 @@ function Productos() {
                                     {errores.descuento && (
 
                                         <small className="mensaje-error">
-
                                             {
                                                 errores.descuento
                                             }
-
                                         </small>
 
                                     )}
@@ -1520,26 +1662,66 @@ function Productos() {
                         <div className="campo-formulario">
 
                             <label htmlFor="imagen">
-                                Ruta de imagen
+                                Imagen del producto
                             </label>
+
+
+                            {nuevoProducto.imagen && (
+
+                                <div className="imagen-actual-producto">
+
+                                    <span>
+                                        Vista previa
+                                    </span>
+
+
+                                    <img
+                                        src={
+                                            nuevoProducto.imagen
+                                        }
+                                        alt="Vista previa del producto"
+                                    />
+
+                                </div>
+
+                            )}
 
 
                             <input
                                 id="imagen"
-                                type="text"
-                                name="imagen"
-                                placeholder="Opcional. Ej: /img/hamburguesa.png"
-                                value={
-                                    nuevoProducto.imagen
-                                }
+                                type="file"
+                                accept="image/jpeg,image/png,image/webp"
                                 onChange={
-                                    handleChange
+                                    seleccionarImagen
+                                }
+                                disabled={
+                                    subiendoImagen
                                 }
                             />
 
 
-                            <small>
-                                Por ahora la imagen es opcional.
+                            {subiendoImagen && (
+
+                                <small className="mensaje-subiendo-imagen">
+                                    Subiendo imagen...
+                                </small>
+
+                            )}
+
+
+                            {errorImagen && (
+
+                                <small className="mensaje-error">
+                                    {
+                                        errorImagen
+                                    }
+                                </small>
+
+                            )}
+
+
+                            <small className="ayuda-imagen-producto">
+                                Formatos permitidos: JPG, PNG o WEBP. Máximo 5 MB.
                             </small>
 
                         </div>
@@ -1553,6 +1735,9 @@ function Productos() {
                                 onClick={
                                     cerrarFormulario
                                 }
+                                disabled={
+                                    subiendoImagen
+                                }
                             >
                                 CANCELAR
                             </button>
@@ -1564,12 +1749,17 @@ function Productos() {
                                 onClick={
                                     guardarProducto
                                 }
+                                disabled={
+                                    subiendoImagen
+                                }
                             >
 
                                 {
-                                    productoEditando
-                                        ? "GUARDAR CAMBIOS"
-                                        : "AGREGAR PRODUCTO"
+                                    subiendoImagen
+                                        ? "SUBIENDO IMAGEN..."
+                                        : productoEditando
+                                            ? "GUARDAR CAMBIOS"
+                                            : "AGREGAR PRODUCTO"
                                 }
 
                             </button>

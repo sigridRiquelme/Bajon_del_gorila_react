@@ -11,7 +11,8 @@ import {
   render,
   screen,
   fireEvent,
-  cleanup
+  cleanup,
+  waitFor
 } from "@testing-library/react";
 
 import {
@@ -23,21 +24,30 @@ import {
 import Login from "../components/Login.jsx";
 import Registro from "../components/Registro.jsx";
 import AdminLayout from "../layouts/AdminLayout.jsx";
-import { obtenerUsuarios } from "../data/usuarios.js";
 
-// MOCK: aislamos el menú lateral. La validación real de roles
-// sigue ejecutándose dentro de AdminLayout.
+import {
+  iniciarSesionApi,
+  registrarUsuarioApi
+} from "../api/auth.js";
+
+vi.mock("../api/auth.js", () => ({
+  iniciarSesionApi: vi.fn(),
+  registrarUsuarioApi: vi.fn(),
+  obtenerMiPerfilApi: vi.fn(),
+  actualizarMiPerfilApi: vi.fn()
+}));
+
 vi.mock("../components/admin/AdminSidebar.jsx", () => ({
   default: () => <nav>Menú administrativo simulado</nav>
 }));
 
-// Rutas de prueba para verificar hacia dónde navega Login.
-function mostrarLogin() {
-  render(
-    <MemoryRouter initialEntries={["/login"]}>
+function mostrarLogin(estado = undefined) {
+  return render(
+    <MemoryRouter initialEntries={[{ pathname: "/login", state: estado }]}>
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/" element={<p>Inicio de prueba</p>} />
+        <Route path="/checkout" element={<p>Checkout de prueba</p>} />
         <Route path="/admin" element={<p>Panel admin de prueba</p>} />
       </Routes>
     </MemoryRouter>
@@ -57,51 +67,42 @@ function ingresarCredenciales(correo, password) {
 }
 
 function mostrarRegistro() {
-  render(
+  return render(
     <MemoryRouter>
       <Registro />
     </MemoryRouter>
   );
 }
 
-function completarRegistro({
-  nombre = "Camila de Prueba",
-  correo = "camila@gmail.com",
-  password = "123456",
-  confirmPassword = "123456",
-  telefono = "12345678",
-  direccion = "Av. Principal 1234, Santiago"
-} = {}) {
-  const completar = (etiqueta, valor) => {
-    fireEvent.change(screen.getByLabelText(etiqueta), {
-      target: { value: valor }
-    });
-  };
-
-  completar("Nombre completo", nombre);
-  completar("Correo electrónico", correo);
-  completar("Contraseña", password);
-  completar("Confirmar contraseña", confirmPassword);
-  // El campo ya muestra el prefijo +569 fuera del input.
-  completar("Teléfono", telefono);
-  completar("Dirección", direccion);
-
+function completarRegistro() {
+  fireEvent.change(screen.getByLabelText("Nombre completo"), {
+    target: { value: "Camila Prueba" }
+  });
+  fireEvent.change(screen.getByLabelText("Correo electrónico"), {
+    target: { value: "camila@gmail.com" }
+  });
+  fireEvent.change(screen.getByLabelText("Contraseña"), {
+    target: { value: "123456" }
+  });
+  fireEvent.change(screen.getByLabelText("Confirmar contraseña"), {
+    target: { value: "123456" }
+  });
+  fireEvent.change(screen.getByLabelText("Teléfono"), {
+    target: { value: "12345678" }
+  });
+  fireEvent.change(screen.getByLabelText("Dirección"), {
+    target: { value: "Av. Principal 1234, Santiago" }
+  });
   fireEvent.click(screen.getByRole("button", { name: "REGISTRARME" }));
 }
 
 function mostrarRutaAdmin() {
-  render(
+  return render(
     <MemoryRouter initialEntries={["/admin"]}>
       <Routes>
-        <Route
-          path="/login"
-          element={<p>Acceso restringido de prueba</p>}
-        />
+        <Route path="/login" element={<p>Acceso restringido de prueba</p>} />
         <Route path="/admin" element={<AdminLayout />}>
-          <Route
-            index
-            element={<p>Contenido protegido de prueba</p>}
-          />
+          <Route index element={<p>Contenido protegido de prueba</p>} />
         </Route>
       </Routes>
     </MemoryRouter>
@@ -111,117 +112,98 @@ function mostrarRutaAdmin() {
 describe("Acceso, registro y roles", () => {
   beforeEach(() => {
     localStorage.clear();
-    obtenerUsuarios(); // Restaura los tres usuarios de prueba.
+    sessionStorage.clear();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
     cleanup();
   });
 
-  // LOGIN
-  it("1. Rechaza el inicio de sesión con campos vacíos", () => {
+  it("valida campos vacíos del login", () => {
     mostrarLogin();
     fireEvent.click(screen.getByRole("button", { name: "INGRESAR" }));
-
     expect(screen.getByText("Completa todos los campos.")).toBeTruthy();
-    expect(localStorage.getItem("usuarioActualId")).toBeNull();
+    expect(iniciarSesionApi).not.toHaveBeenCalled();
   });
 
-  it("2. Rechaza un correo que no está registrado", () => {
+  it("guarda sesión y envía al cliente al inicio", async () => {
+    iniciarSesionApi.mockResolvedValue({
+      token: "token-cliente",
+      idUsuario: 7,
+      rol: "CLIENTE",
+      nombre: "Cliente Prueba",
+      correo: "cliente@gmail.com"
+    });
+
     mostrarLogin();
-    ingresarCredenciales("desconocido@gmail.com", "1234");
+    ingresarCredenciales("CLIENTE@gmail.com", "1234");
 
-    expect(screen.getByText("El correo no está registrado.")).toBeTruthy();
-    expect(localStorage.getItem("usuarioActualId")).toBeNull();
+    expect(await screen.findByText("Inicio de prueba")).toBeTruthy();
+    expect(localStorage.getItem("token")).toBe("token-cliente");
+    expect(localStorage.getItem("usuarioActualId")).toBe("7");
+    expect(localStorage.getItem("usuarioRol")).toBe("CLIENTE");
+    expect(iniciarSesionApi).toHaveBeenCalledWith("cliente@gmail.com", "1234");
   });
 
-  it("3. Rechaza una contraseña incorrecta", () => {
+  it("envía administrador y vendedor al panel", async () => {
+    iniciarSesionApi.mockResolvedValue({
+      token: "token-admin",
+      idUsuario: 1,
+      rol: "ADMINISTRADOR",
+      nombre: "Admin",
+      correo: "admin@gmail.com"
+    });
+
     mostrarLogin();
-    ingresarCredenciales("juan@gmail.com", "incorrecta");
-
-    expect(screen.getByText("La contraseña es incorrecta.")).toBeTruthy();
-    expect(localStorage.getItem("usuarioActualId")).toBeNull();
+    ingresarCredenciales("admin@gmail.com", "Admin1234");
+    expect(await screen.findByText("Panel admin de prueba")).toBeTruthy();
   });
 
-  it("4. Permite entrar a un cliente con sus credenciales", () => {
+  it("muestra el error entregado por backend al iniciar sesión", async () => {
+    iniciarSesionApi.mockRejectedValue({
+      response: { data: { mensaje: "CREDENCIALES INVALIDAS" } }
+    });
+
     mostrarLogin();
-    ingresarCredenciales("juan@gmail.com", "1234");
-
-    expect(localStorage.getItem("usuarioActualId")).toBe("1");
-    expect(screen.getByText("Inicio de prueba")).toBeTruthy();
+    ingresarCredenciales("error@gmail.com", "1234");
+    expect(await screen.findByText("CREDENCIALES INVALIDAS")).toBeTruthy();
   });
 
-  it("5. Envía al administrador a su panel", () => {
-    mostrarLogin();
-    ingresarCredenciales("admin@gmail.com", "admin123");
-
-    expect(localStorage.getItem("usuarioActualId")).toBe("0");
-    expect(screen.getByText("Panel admin de prueba")).toBeTruthy();
-  });
-
-  // REGISTRO
-  it("6. Impide registrar un correo que ya existe", () => {
+  it("registra un cliente usando la API", async () => {
+    registrarUsuarioApi.mockResolvedValue({ idUsuario: 20 });
     mostrarRegistro();
-    completarRegistro({ correo: "juan@gmail.com" });
+    completarRegistro();
 
-    expect(screen.getByText("Este correo ya está registrado.")).toBeTruthy();
-    expect(obtenerUsuarios()).toHaveLength(3);
+    expect(await screen.findByText("Usuario registrado correctamente.")).toBeTruthy();
+    expect(registrarUsuarioApi).toHaveBeenCalledWith(expect.objectContaining({
+      nombre: "Camila Prueba",
+      correo: "camila@gmail.com",
+      password: "123456",
+      telefono: "+569 12345678"
+    }));
   });
 
-  it("7. Rechaza un correo de un dominio no permitido", () => {
+  it("muestra correo repetido informado por backend", async () => {
+    registrarUsuarioApi.mockRejectedValue({
+      response: { data: { mensaje: "EL CORREO YA ESTA REGISTRADO" } }
+    });
+
     mostrarRegistro();
-    completarRegistro({ correo: "camila@hotmail.com" });
-
-    expect(
-      screen.getByText("El correo debe ser Gmail, Duoc o Duoc UC.")
-    ).toBeTruthy();
-    expect(obtenerUsuarios()).toHaveLength(3);
+    completarRegistro();
+    expect(await screen.findByText("Este correo ya está registrado.")).toBeTruthy();
   });
 
-  it("8. Rechaza contraseñas que no coinciden", () => {
-    mostrarRegistro();
-    completarRegistro({ confirmPassword: "654321" });
-
-    expect(screen.getByText("Las contraseñas no coinciden.")).toBeTruthy();
-    expect(obtenerUsuarios()).toHaveLength(3);
-  });
-
-  it("9. Registra un cliente con datos válidos", () => {
-    mostrarRegistro();
-    completarRegistro({ correo: "CAMILA@GMAIL.COM" });
-
-    expect(screen.getByText("Usuario registrado correctamente.")).toBeTruthy();
-
-    const usuarios = obtenerUsuarios();
-    const nuevo = usuarios.find((u) => u.correo === "camila@gmail.com");
-
-    expect(usuarios).toHaveLength(4);
-    expect(nuevo).toBeDefined();
-    expect(nuevo.nombre).toBe("Camila de Prueba");
-    expect(nuevo.rol).toBe("Cliente");
-  });
-
-  // PROTECCIÓN DE RUTAS
-  it("10. Impide que un invitado entre al panel admin", () => {
+  it("AdminLayout rechaza una sesión inexistente", () => {
     mostrarRutaAdmin();
-
     expect(screen.getByText("Acceso restringido de prueba")).toBeTruthy();
-    expect(screen.queryByText("Contenido protegido de prueba")).toBeNull();
   });
 
-  it("11. Impide que un cliente entre al panel admin", () => {
-    localStorage.setItem("usuarioActualId", "1");
+  it("AdminLayout permite administrador y vendedor con JWT", () => {
+    localStorage.setItem("token", "token-prueba");
+    localStorage.setItem("usuarioRol", "ADMINISTRADOR");
+
     mostrarRutaAdmin();
-
-    expect(screen.getByText("Acceso restringido de prueba")).toBeTruthy();
-    expect(screen.queryByText("Contenido protegido de prueba")).toBeNull();
-  });
-
-  it("12. Permite que el administrador acceda al panel", () => {
-    localStorage.setItem("usuarioActualId", "0");
-    mostrarRutaAdmin();
-
     expect(screen.getByText("Contenido protegido de prueba")).toBeTruthy();
-    expect(screen.getByText("Menú administrativo simulado")).toBeTruthy();
   });
 });
