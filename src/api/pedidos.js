@@ -39,7 +39,10 @@ const transformarPedidoCliente = (
             pedido.hora,
 
         tipoEntrega:
-            pedido.tipoEntrega,
+            pedido.tipoEntrega ===
+            "DELIVERY"
+                ? "Delivery"
+                : "Retiro en local",
 
         direccion:
             pedido.direccion,
@@ -109,4 +112,88 @@ export const obtenerMisPedidosApi = async () => {
     return respuesta.data.map(
         transformarPedidoCliente
     );
+};
+
+
+export const crearPedidoApi = async (
+    datosPedido,
+    carrito
+) => {
+
+    const tipoEntregaBackend =
+        datosPedido.tipoEntrega ===
+        "Delivery"
+            ? "DELIVERY"
+            : "RETIRO";
+
+
+    const cuerpo = {
+
+        pedido: {
+
+            cliente:
+                datosPedido.cliente,
+
+            correo:
+                datosPedido.correo,
+
+            telefono:
+                datosPedido.telefono,
+
+            fecha:
+                datosPedido.fecha,
+
+            hora:
+                datosPedido.hora,
+
+            tipoEntrega:
+                tipoEntregaBackend,
+
+            direccion:
+                datosPedido.tipoEntrega ===
+                "Delivery"
+                    ? datosPedido.direccion
+                    : "Retiro en local",
+
+            comuna:
+                datosPedido.tipoEntrega ===
+                "Delivery"
+                    ? datosPedido.comuna
+                    : "",
+
+            referencia:
+                datosPedido.tipoEntrega ===
+                "Delivery"
+                    ? datosPedido.referencia
+                    : "",
+
+            medioPago:
+                datosPedido.medioPago
+        },
+
+
+        detalles:
+            carrito.map(
+                (item) => ({
+
+                    producto: {
+                        idProducto:
+                            item.codigo
+                    },
+
+                    cantidad:
+                        item.cantidad
+                })
+            )
+    };
+
+
+    const respuesta =
+        await api.post(
+            "/pedidos",
+            cuerpo
+        );
+
+
+    return respuesta.data;
 };

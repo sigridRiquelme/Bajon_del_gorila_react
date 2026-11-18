@@ -1,4 +1,5 @@
 import {
+    useEffect,
     useState
 } from "react";
 
@@ -8,13 +9,9 @@ import {
 } from "react-router-dom";
 
 import {
-    obtenerProductoPorCodigo,
-    obtenerPrecioFinal
-} from "../data/productos.js";
-
-import {
-    obtenerUsuarioPorId
-} from "../data/usuarios.js";
+    obtenerPrecioFinal,
+    obtenerProductoPorIdApi
+} from "../api/productos.js";
 
 import {
     agregarAlCarrito,
@@ -31,12 +28,22 @@ function DetalleProducto() {
     } = useParams();
 
 
-    const producto =
-        obtenerProductoPorCodigo(
-            Number(
-                codigo
-            )
-        );
+    const [
+        producto,
+        setProducto
+    ] = useState(null);
+
+
+    const [
+        cargando,
+        setCargando
+    ] = useState(true);
+
+
+    const [
+        errorCarga,
+        setErrorCarga
+    ] = useState("");
 
 
     const [
@@ -65,33 +72,124 @@ function DetalleProducto() {
     ] = useState(false);
 
 
-    const usuarioActualId =
+    const rol =
         localStorage.getItem(
-            "usuarioActualId"
+            "usuarioRol"
         );
 
 
-    const usuarioActual =
-        usuarioActualId !== null
-            ? obtenerUsuarioPorId(
-                Number(
-                    usuarioActualId
-                )
-            )
-            : null;
-
-
     const esAdministrador =
-        usuarioActual?.rol ===
-        "Administrador";
+        rol ===
+        "ADMINISTRADOR";
 
 
-    // SI EL PRODUCTO NO EXISTE NO LO MUESTRO
+    const esVendedor =
+        rol ===
+        "VENDEDOR";
+
+
+    const puedeComprar =
+        !esAdministrador &&
+        !esVendedor;
+
+
+    useEffect(() => {
+
+        const cargarProducto = async () => {
+
+            try {
+
+                const datos =
+                    await obtenerProductoPorIdApi(
+                        Number(
+                            codigo
+                        )
+                    );
+
+
+                if (
+                    datos.estado ===
+                    "Oculto"
+                ) {
+
+                    setProducto(
+                        null
+                    );
+
+                    setErrorCarga(
+                        "Producto no disponible"
+                    );
+
+                    return;
+                }
+
+
+                setProducto(
+                    datos
+                );
+
+
+                setErrorCarga(
+                    ""
+                );
+
+            } catch (
+                error
+            ) {
+
+                console.error(
+                    error
+                );
+
+
+                setProducto(
+                    null
+                );
+
+
+                setErrorCarga(
+                    "Producto no disponible"
+                );
+
+            } finally {
+
+                setCargando(
+                    false
+                );
+            }
+        };
+
+
+        cargarProducto();
+
+    }, [
+        codigo
+    ]);
+
 
     if (
-        !producto ||
-        producto.estado ===
-        "Oculto"
+        cargando
+    ) {
+
+        return (
+
+            <main className="detalle-producto-pagina">
+
+                <div className="detalle-producto-no-disponible">
+
+                    <p>
+                        Cargando producto...
+                    </p>
+
+                </div>
+
+            </main>
+        );
+    }
+
+
+    if (
+        !producto
     ) {
 
         return (
@@ -106,7 +204,10 @@ function DetalleProducto() {
 
 
                     <h1>
-                        Producto no disponible
+                        {
+                            errorCarga ||
+                            "Producto no disponible"
+                        }
                     </h1>
 
 
@@ -198,20 +299,21 @@ function DetalleProducto() {
     };
 
 
-    // AGREGO EL PRODUCTO CON EL PRECIO FINAL
-
     const agregarProducto = () => {
 
         setMensaje("");
-        setHayError(false);
+
+        setHayError(
+            false
+        );
 
 
         if (
-            esAdministrador
+            !puedeComprar
         ) {
 
             setMensaje(
-                "La cuenta de administrador no puede realizar compras."
+                "Esta cuenta no puede realizar compras."
             );
 
             setHayError(
@@ -341,23 +443,29 @@ function DetalleProducto() {
 
 
                         <span className="detalle-producto-categoria">
+
                             {
                                 producto.categoria
                             }
+
                         </span>
 
 
                         <h1>
+
                             {
                                 producto.nombre
                             }
+
                         </h1>
 
 
                         <p className="detalle-producto-descripcion">
+
                             {
                                 producto.descripcion
                             }
+
                         </p>
 
 
@@ -438,15 +546,17 @@ function DetalleProducto() {
                                         : "detalle-mensaje"
                                 }
                             >
+
                                 {
                                     mensaje
                                 }
+
                             </div>
 
                         )}
 
 
-                        {!esAdministrador && (
+                        {puedeComprar && (
 
                             <div className="detalle-compra">
 
@@ -476,11 +586,13 @@ function DetalleProducto() {
 
 
                                         <strong>
+
                                             {
                                                 sinStock
                                                     ? 0
                                                     : cantidad
                                             }
+
                                         </strong>
 
 
@@ -527,10 +639,12 @@ function DetalleProducto() {
                         )}
 
 
-                        {esAdministrador && (
+                        {!puedeComprar && (
 
                             <div className="detalle-aviso-admin">
-                                La cuenta de administrador no puede realizar compras.
+
+                                Esta cuenta no puede realizar compras.
+
                             </div>
 
                         )}

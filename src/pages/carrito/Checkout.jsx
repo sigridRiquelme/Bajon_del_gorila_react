@@ -1,4 +1,5 @@
 import {
+    useEffect,
     useState
 } from "react";
 
@@ -14,17 +15,12 @@ import {
 } from "../../data/carrito.js";
 
 import {
-    obtenerProductos,
-    actualizarProducto
-} from "../../data/productos.js";
+    obtenerMiPerfilApi
+} from "../../api/auth.js";
 
 import {
-    obtenerUsuarioPorId
-} from "../../data/usuarios.js";
-
-import {
-    crearPedido
-} from "../../data/pedidos.js";
+    crearPedidoApi
+} from "../../api/pedidos.js";
 
 import "../../styles/checkout.css";
 
@@ -35,7 +31,17 @@ function Checkout() {
         useNavigate();
 
 
-    // OBTENGO EL USUARIO SI HAY SESION
+    const token =
+        localStorage.getItem(
+            "token"
+        );
+
+
+    const rol =
+        localStorage.getItem(
+            "usuarioRol"
+        );
+
 
     const usuarioActualId =
         localStorage.getItem(
@@ -43,17 +49,21 @@ function Checkout() {
         );
 
 
-    const usuarioActual =
-        usuarioActualId !== null
-            ? obtenerUsuarioPorId(
-                Number(
-                    usuarioActualId
-                )
-            )
-            : null;
+    const esCliente =
+        token &&
+        rol ===
+        "CLIENTE";
 
 
-    // GUARDO EL CARRITO AL ENTRAR
+    const esAdministrador =
+        rol ===
+        "ADMINISTRADOR";
+
+
+    const esVendedor =
+        rol ===
+        "VENDEDOR";
+
 
     const [
         carrito
@@ -62,14 +72,13 @@ function Checkout() {
     );
 
 
-    // SI HAY USUARIO CARGO SUS DATOS
-
     const [
         nombre,
         setNombre
     ] = useState(
-        usuarioActual?.nombre ||
-        ""
+        localStorage.getItem(
+            "usuarioNombre"
+        ) || ""
     );
 
 
@@ -77,18 +86,16 @@ function Checkout() {
         correo,
         setCorreo
     ] = useState(
-        usuarioActual?.correo ||
-        ""
+        localStorage.getItem(
+            "usuarioCorreo"
+        ) || ""
     );
 
 
     const [
         telefono,
         setTelefono
-    ] = useState(
-        usuarioActual?.telefono ||
-        ""
-    );
+    ] = useState("");
 
 
     const [
@@ -102,10 +109,7 @@ function Checkout() {
     const [
         direccion,
         setDireccion
-    ] = useState(
-        usuarioActual?.direccion ||
-        ""
-    );
+    ] = useState("");
 
 
     const [
@@ -134,11 +138,78 @@ function Checkout() {
     ] = useState({});
 
 
-    // EL ADMIN NO PUEDE COMPRAR
+    const [
+        enviando,
+        setEnviando
+    ] = useState(false);
+
+
+    // CARGO LOS DATOS DEL CLIENTE DESDE MYSQL
+
+    useEffect(() => {
+
+        const cargarPerfil = async () => {
+
+            if (
+                !esCliente
+            ) {
+
+                return;
+            }
+
+
+            try {
+
+                const usuario =
+                    await obtenerMiPerfilApi();
+
+
+                setNombre(
+                    usuario.nombre ||
+                    ""
+                );
+
+
+                setCorreo(
+                    usuario.correo ||
+                    ""
+                );
+
+
+                setTelefono(
+                    usuario.telefono ||
+                    ""
+                );
+
+
+                setDireccion(
+                    usuario.direccion ||
+                    ""
+                );
+
+            } catch (
+                error
+            ) {
+
+                console.error(
+                    error
+                );
+            }
+        };
+
+
+        cargarPerfil();
+
+    }, [
+        esCliente
+    ]);
+
+
+    // ADMIN Y VENDEDOR NO PUEDEN COMPRAR
 
     if (
-        usuarioActual?.rol ===
-        "Administrador"
+        esAdministrador ||
+        esVendedor
     ) {
 
         return (
@@ -166,7 +237,8 @@ function Checkout() {
     }
 
 
-    // CALCULO LOS TOTALES
+    // ESTOS TOTALES SON SOLO PARA MOSTRAR
+    // EL BACKEND LOS CALCULA NUEVAMENTE
 
     const subtotal =
         carrito.reduce(
@@ -231,7 +303,7 @@ function Checkout() {
     };
 
 
-    // VALIDO LOS DATOS
+    // VALIDO FORMULARIO
 
     const validarFormulario = () => {
 
@@ -286,8 +358,6 @@ function Checkout() {
         }
 
 
-        // SI ES DELIVERY PIDO DIRECCION Y COMUNA
-
         if (
             tipoEntrega ===
             "Delivery"
@@ -330,12 +400,13 @@ function Checkout() {
         return (
             Object.keys(
                 nuevosErrores
-            ).length === 0
+            ).length ===
+            0
         );
     };
 
 
-    // GUARDO EL ERROR Y VOY A LA PAGINA DE ERROR
+    // GUARDO ERROR Y VOY A PAGINA DE ERROR
 
     const irAError = (
         mensaje
@@ -353,9 +424,9 @@ function Checkout() {
     };
 
 
-    // CONFIRMO EL PEDIDO
+    // CONFIRMO PEDIDO REAL EN BACKEND
 
-    const confirmarPedido = (
+    const confirmarPedido = async (
         e
     ) => {
 
@@ -370,66 +441,20 @@ function Checkout() {
         }
 
 
-        // REVISO EL STOCK ANTES DE COMPRAR
-
-        const productosActuales =
-            obtenerProductos();
-
-
-        for (
-            const item of carrito
+        if (
+            enviando
         ) {
 
-            const productoActual =
-                productosActuales.find(
-                    (producto) =>
-                        producto.codigo ===
-                        item.codigo
-                );
-
-
-            if (
-                !productoActual
-            ) {
-
-                irAError(
-                    `${item.nombre} ya no está disponible.`
-                );
-
-                return;
-            }
-
-
-            if (
-                productoActual.estado ===
-                "Oculto"
-            ) {
-
-                irAError(
-                    `${item.nombre} ya no está disponible.`
-                );
-
-                return;
-            }
-
-
-            if (
-                productoActual.stock <
-                item.cantidad
-            ) {
-
-                irAError(
-                    `No hay suficiente stock de ${item.nombre}. Actualmente quedan ${productoActual.stock}.`
-                );
-
-                return;
-            }
+            return;
         }
 
 
-        try {
+        setEnviando(
+            true
+        );
 
-            // OBTENGO FECHA Y HORA
+
+        try {
 
             const fechaActual =
                 new Date();
@@ -464,141 +489,146 @@ function Checkout() {
                 )}`;
 
 
-            // CREO EL PEDIDO
+            const pedidoGuardado =
+                await crearPedidoApi(
+                    {
 
-            const nuevoPedido =
-                crearPedido({
+                        cliente:
+                            nombre.trim(),
 
-                    usuarioId:
-                        usuarioActual
-                            ? usuarioActual.id
-                            : null,
+                        correo:
+                            correo
+                                .trim()
+                                .toLowerCase(),
 
-                    cliente:
-                        nombre.trim(),
+                        telefono:
+                            telefono.trim(),
 
-                    correo:
-                        correo.trim(),
+                        fecha:
+                            fecha,
 
-                    telefono:
-                        telefono.trim(),
+                        hora:
+                            hora,
 
-                    fecha:
-                        fecha,
+                        tipoEntrega:
+                            tipoEntrega,
 
-                    hora:
-                        hora,
+                        direccion:
+                            direccion.trim(),
 
-                    tipoEntrega:
-                        tipoEntrega,
+                        comuna:
+                            comuna,
 
-                    direccion:
-                        tipoEntrega ===
-                            "Delivery"
-                            ? direccion.trim()
-                            : "Retiro en local",
+                        referencia:
+                            referencia.trim(),
 
-                    comuna:
-                        tipoEntrega ===
-                            "Delivery"
-                            ? comuna
-                            : "",
-
-                    referencia:
-                        tipoEntrega ===
-                            "Delivery"
-                            ? referencia.trim()
-                            : "",
-
-                    medioPago:
-                        medioPago,
-
-                    subtotal:
-                        subtotal,
-
-                    costoDelivery:
-                        costoDelivery,
-
-                    neto:
-                        neto,
-
-                    iva:
-                        iva,
-
-                    total:
-                        total,
-
-                    productos:
-                        carrito.map(
-                            (item) => ({
-
-                                codigoProducto:
-                                    item.codigo,
-
-                                nombre:
-                                    item.nombre,
-
-                                cantidad:
-                                    item.cantidad,
-
-                                precio:
-                                    item.precio,
-
-                                imagen:
-                                    item.imagen
-                            })
-                        )
-                });
+                        medioPago:
+                            medioPago
+                    },
+                    carrito
+                );
 
 
-            // DESCUENTO EL STOCK
+            // ADAPTO RESPUESTA PARA COMPRA EXITOSA
 
-            carrito.forEach(
-                (item) => {
+            const compraConfirmada = {
 
-                    const productoActual =
-                        productosActuales.find(
-                            (producto) =>
-                                producto.codigo ===
-                                item.codigo
-                        );
+                codigo:
+                    pedidoGuardado.idPedido,
 
+                usuarioId:
+                    pedidoGuardado.usuario
+                        ?.idUsuario ??
+                    (
+                        usuarioActualId
+                            ? Number(
+                                usuarioActualId
+                            )
+                            : null
+                    ),
 
-                    const nuevoStock =
-                        productoActual.stock -
-                        item.cantidad;
+                cliente:
+                    pedidoGuardado.cliente,
 
+                correo:
+                    pedidoGuardado.correo,
 
-                    actualizarProducto(
-                        item.codigo,
-                        {
-                            stock:
-                                nuevoStock,
+                telefono:
+                    pedidoGuardado.telefono,
 
-                            estado:
-                                nuevoStock ===
-                                    0
-                                    ? "Sin stock"
-                                    : productoActual.estado
-                        }
-                    );
-                }
-            );
+                fecha:
+                    pedidoGuardado.fecha,
 
+                hora:
+                    pedidoGuardado.hora,
 
-            // GUARDO LA COMPRA PARA LA CONFIRMACION
+                tipoEntrega:
+                    pedidoGuardado.tipoEntrega ===
+                    "DELIVERY"
+                        ? "Delivery"
+                        : "Retiro en local",
+
+                direccion:
+                    pedidoGuardado.direccion,
+
+                comuna:
+                    pedidoGuardado.comuna,
+
+                referencia:
+                    pedidoGuardado.referencia,
+
+                medioPago:
+                    pedidoGuardado.medioPago,
+
+                subtotal:
+                    pedidoGuardado.subtotal,
+
+                costoDelivery:
+                    pedidoGuardado.costoDelivery,
+
+                neto:
+                    pedidoGuardado.neto,
+
+                iva:
+                    pedidoGuardado.iva,
+
+                total:
+                    pedidoGuardado.total,
+
+                productos:
+                    carrito.map(
+                        (item) => ({
+
+                            codigoProducto:
+                                item.codigo,
+
+                            nombre:
+                                item.nombre,
+
+                            cantidad:
+                                item.cantidad,
+
+                            precio:
+                                item.precio,
+
+                            imagen:
+                                item.imagen
+                        })
+                    )
+            };
+
 
             sessionStorage.setItem(
                 "ultimaCompra",
                 JSON.stringify(
-                    nuevoPedido
+                    compraConfirmada
                 )
             );
 
 
             sessionStorage.setItem(
                 "compraFueInvitado",
-                usuarioActual
+                esCliente
                     ? "false"
                     : "true"
             );
@@ -609,7 +639,7 @@ function Checkout() {
             );
 
 
-            // VACIO EL CARRITO
+            // EL BACKEND YA DESCONTO EL STOCK
 
             vaciarCarrito();
 
@@ -618,10 +648,30 @@ function Checkout() {
                 "/compra-exitosa"
             );
 
-        } catch {
+        } catch (
+            error
+        ) {
+
+            console.error(
+                error
+            );
+
+
+            const mensajeBackend =
+                error.response
+                    ?.data
+                    ?.mensaje;
+
 
             irAError(
+                mensajeBackend ||
                 "Ocurrió un problema al registrar tu pedido. Tu carrito sigue guardado."
+            );
+
+        } finally {
+
+            setEnviando(
+                false
             );
         }
     };
@@ -698,9 +748,7 @@ function Checkout() {
                         </h1>
 
 
-                        {/* AVISO PARA INVITADO */}
-
-                        {!usuarioActual && (
+                        {!esCliente && (
 
                             <div className="checkout-aviso-invitado">
 
@@ -771,9 +819,11 @@ function Checkout() {
                                 {errores.nombre && (
 
                                     <small className="checkout-error">
+
                                         {
                                             errores.nombre
                                         }
+
                                     </small>
 
                                 )}
@@ -819,9 +869,11 @@ function Checkout() {
                                     {errores.telefono && (
 
                                         <small className="checkout-error">
+
                                             {
                                                 errores.telefono
                                             }
+
                                         </small>
 
                                     )}
@@ -864,9 +916,11 @@ function Checkout() {
                                     {errores.correo && (
 
                                         <small className="checkout-error">
+
                                             {
                                                 errores.correo
                                             }
+
                                         </small>
 
                                     )}
@@ -1001,9 +1055,11 @@ function Checkout() {
                                         {errores.direccion && (
 
                                             <small className="checkout-error">
+
                                                 {
                                                     errores.direccion
                                                 }
+
                                             </small>
 
                                         )}
@@ -1070,9 +1126,11 @@ function Checkout() {
                                         {errores.comuna && (
 
                                             <small className="checkout-error">
+
                                                 {
                                                     errores.comuna
                                                 }
+
                                             </small>
 
                                         )}
@@ -1253,12 +1311,14 @@ function Checkout() {
                             </span>
 
                             <strong>
+
                                 $
                                 {
                                     subtotal.toLocaleString(
                                         "es-CL"
                                     )
                                 }
+
                             </strong>
 
                         </div>
@@ -1274,12 +1334,14 @@ function Checkout() {
                                 </span>
 
                                 <strong>
+
                                     $
                                     {
                                         costoDelivery.toLocaleString(
                                             "es-CL"
                                         )
                                     }
+
                                 </strong>
 
                             </div>
@@ -1312,12 +1374,14 @@ function Checkout() {
                             </span>
 
                             <span>
+
                                 $
                                 {
                                     neto.toLocaleString(
                                         "es-CL"
                                     )
                                 }
+
                             </span>
 
                         </div>
@@ -1330,12 +1394,14 @@ function Checkout() {
                             </span>
 
                             <span>
+
                                 $
                                 {
                                     iva.toLocaleString(
                                         "es-CL"
                                     )
                                 }
+
                             </span>
 
                         </div>
@@ -1348,12 +1414,14 @@ function Checkout() {
                             </span>
 
                             <strong>
+
                                 $
                                 {
                                     total.toLocaleString(
                                         "es-CL"
                                     )
                                 }
+
                             </strong>
 
                         </div>
@@ -1363,8 +1431,17 @@ function Checkout() {
                             type="submit"
                             form="formCheckout"
                             className="btn-confirmar-pedido"
+                            disabled={
+                                enviando
+                            }
                         >
-                            CONFIRMAR PEDIDO →
+
+                            {
+                                enviando
+                                    ? "REGISTRANDO PEDIDO..."
+                                    : "CONFIRMAR PEDIDO →"
+                            }
+
                         </button>
 
 
